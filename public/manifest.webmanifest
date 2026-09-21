@@ -1,0 +1,20 @@
+{
+  "name": "LOLO – Profe IA de Reparación",
+  "short_name": "LOLO",
+  "description": "Profesor IA para reparación de celulares y notebooks.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#06111e",
+  "theme_color": "#06111e",
+  "lang": "es-AR",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
