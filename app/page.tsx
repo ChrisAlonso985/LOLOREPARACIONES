@@ -81,10 +81,10 @@ const WORKSHOP_STEPS = [
 ] as const;
 
 export default function Page() {
-  const [tab,setTab]=useState("home");
+  const [tab,setTab]=useState("talk");
   const [speaking,setSpeaking]=useState(false);
   const [caption,setCaption]=useState("Hola, soy LOLO. Subime una foto de tu placa y te ayudo a medir sin adivinar.");
-  const [messages,setMessages]=useState<ChatMessage[]>([{role:"assistant",content:"Hola. Soy LOLO. Si querés saber dónde poner el tester, entrá en “Tu placa”, sacá una foto y la analizo."}]);
+  const [messages,setMessages]=useState<ChatMessage[]>([{role:"assistant",content:"Hola, soy LOLO. Hablame como a tu profe del taller: contame qué equipo tenés, qué falla hace y qué querés aprender. Vamos paso a paso."}]);
   const [input,setInput]=useState("");
   const [busy,setBusy]=useState(false);
   const [micError,setMicError]=useState("");
@@ -107,9 +107,13 @@ export default function Page() {
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const greetingAudioRef=useRef<HTMLAudioElement|null>(null);
   const [recording,setRecording]=useState(false);
+  const [conversationMode,setConversationMode]=useState(true);
   const recorderRef=useRef<MediaRecorder|null>(null);
   const micStreamRef=useRef<MediaStream|null>(null);
   const micChunksRef=useRef<Blob[]>([]);
+  const micRafRef=useRef<number|null>(null);
+  const micAudioCtxRef=useRef<AudioContext|null>(null);
+  const chatRef=useRef<HTMLDivElement|null>(null);
 
   useEffect(()=>{
     const saved=localStorage.getItem("lolo.progress");
@@ -155,6 +159,11 @@ export default function Page() {
   },[deviceVoice]);
 
   useEffect(()=>{
+    const el=chatRef.current;
+    if(el) el.scrollTo({top:el.scrollHeight,behavior:"smooth"});
+  },[messages,busy]);
+
+  useEffect(()=>{
     const recalc=()=>{
       const img=imageRef.current,stage=stageRef.current;if(!img||!stage||!image)return;
       const a=img.getBoundingClientRect(),b=stage.getBoundingClientRect();
@@ -181,7 +190,7 @@ export default function Page() {
   };
 
   const speak=async(text:string)=>{
-    setCaption(text.slice(0,170)+(text.length>170?"…":""));
+    setCaption(text.slice(0,190)+(text.length>190?"…":""));
     audioRef.current?.pause();
     audioRef.current=null;
     setSpeaking(true);
@@ -193,111 +202,152 @@ export default function Page() {
       audio.preload="auto";
       audio.src=`data:${j.mime||"audio/mpeg"};base64,${j.audio}`;
       audioRef.current=audio;
-      audio.onended=()=>setSpeaking(false);
-      audio.onerror=()=>{setSpeaking(false);setMicError("La voz IA no pudo reproducirse. Tocá de nuevo Escuchar.")};
-      await new Promise<void>((resolve)=>{
-        if(audio.readyState>=3){resolve();return}
-        const done=()=>{audio.removeEventListener("canplaythrough",done);resolve()};
-        audio.addEventListener("canplaythrough",done);
-        setTimeout(done,1200);
-        audio.load();
+      await new Promise<void>((resolve,reject)=>{
+        let settled=false;
+        const finish=()=>{if(settled)return;settled=true;setSpeaking(false);resolve()};
+        audio.onended=finish;
+        audio.onerror=()=>{if(settled)return;settled=true;setSpeaking(false);reject(new Error("La voz IA no pudo reproducirse."))};
+        const play=async()=>{try{await audio.play()}catch(e){reject(e)}};
+        if(audio.readyState>=3) void play();
+        else{
+          audio.addEventListener("canplay",{once:true});
+          audio.oncanplay=()=>void play();
+          audio.load();
+        }
       });
-      await audio.play();
-    }catch(e:any){
-      setSpeaking(false);
-      setMicError(e?.message||"No se pudo reproducir la voz masculina de LOLO.");
-    }
-  };
-
-  const playFastGreeting=async()=>{
+    }catch(e:any){  const playFastGreeting=async()=>{
     setCaption(FAST_GREETING_REPLY);
     const prepared=greetingAudioRef.current;
-    if(!prepared){speak(FAST_GREETING_REPLY);return}
+    if(!prepared){await speak(FAST_GREETING_REPLY);return}
     audioRef.current?.pause();
     const audio=prepared.cloneNode(true) as HTMLAudioElement;
     audioRef.current=audio;
     setSpeaking(true);
-    audio.onended=()=>setSpeaking(false);
-    audio.onerror=()=>{setSpeaking(false);speak(FAST_GREETING_REPLY)};
-    try{await audio.play()}catch{setSpeaking(false);speak(FAST_GREETING_REPLY)}
+    await new Promise<void>((resolve)=>{
+      audio.onended=()=>{setSpeaking(false);resolve()};
+      audio.onerror=()=>{setSpeaking(false);resolve()};
+      audio.play().catch(()=>{setSpeaking(false);resolve()});
+    });
   };
 
-  const sendChat=async(text=input)=>{
+  const sendChat=async(text=input,fromVoice=false)=>{
     const q=text.trim();if(!q||busy)return;
     const next=[...messages,{role:"user",content:q} as ChatMessage];
     setMessages(next);setInput("");
     if(isFastGreeting(q)){
       const answered=[...next,{role:"assistant",content:FAST_GREETING_REPLY} as ChatMessage];
       setMessages(answered);
-      void playFastGreeting();
+      await playFastGreeting();
+      if(fromVoice&&conversationMode) window.setTimeout(()=>void startMic(),450);
       return;
     }
     setBusy(true);
+    setCaption("Estoy pensando cómo explicártelo…");
     try{
       const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:next})});
       const j=await r.json();if(!r.ok)throw new Error(j.error||"Error");
       const ans=j.text||"No pude responder.";
-      setMessages([...next,{role:"assistant",content:ans}]);speak(ans);
+      setMessages([...next,{role:"assistant",content:ans}]);
+      setBusy(false);
+      await speak(ans);
+      if(fromVoice&&conversationMode) window.setTimeout(()=>void startMic(),450);
     }catch(e:any){
       const ans="No pude conectar con la IA en este momento. "+(e?.message||"");
       setMessages([...next,{role:"assistant",content:ans}]);
-    }finally{setBusy(false)}
+      setBusy(false);
+    }
+  };
+
+  const cleanupMicMonitor=()=>{
+    if(micRafRef.current!==null){cancelAnimationFrame(micRafRef.current);micRafRef.current=null}
+    if(micAudioCtxRef.current){micAudioCtxRef.current.close().catch(()=>{});micAudioCtxRef.current=null}
   };
 
   const startMic=async()=>{
     setMicError("");
-
     if(recording){
-      if(recorderRef.current?.state === "recording") recorderRef.current.stop();
+      if(recorderRef.current?.state==="recording") recorderRef.current.stop();
       return;
     }
-
-    if(!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined"){
+    if(speaking){
+      audioRef.current?.pause();audioRef.current=null;setSpeaking(false);
+    }
+    if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined"){
       setMicError("Este navegador no permite grabar audio. Probá Chrome actualizado en Android.");
       return;
     }
-
     try{
-      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
       micStreamRef.current=stream;
-      const preferred=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
-      const rec=preferred ? new MediaRecorder(stream,{mimeType:preferred}) : new MediaRecorder(stream);
+      const preferred=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")?"audio/webm;codecs=opus":MediaRecorder.isTypeSupported("audio/webm")?"audio/webm":"";
+      const rec=preferred?new MediaRecorder(stream,{mimeType:preferred}):new MediaRecorder(stream);
       recorderRef.current=rec;
       micChunksRef.current=[];
+      let heardVoice=false;
+      let lastVoice=Date.now();
+      const startedAt=Date.now();
 
       rec.ondataavailable=(e:BlobEvent)=>{if(e.data.size>0)micChunksRef.current.push(e.data)};
       rec.onstop=async()=>{
+        cleanupMicMonitor();
         setRecording(false);
         micStreamRef.current?.getTracks().forEach(t=>t.stop());
         const blob=new Blob(micChunksRef.current,{type:rec.mimeType||"audio/webm"});
-        if(blob.size<800){
-          setMicError("No escuché suficiente audio. Tocá el micrófono, hablá y volvé a tocar para enviar.");
+        if(blob.size<800||!heardVoice){
+          setCaption("No llegué a escucharte. Tocá el micrófono y hablame de nuevo.");
+          setMicError("No escuché una frase completa.");
           return;
         }
-        setCaption("Estoy escuchando lo que dijiste…");
+        setCaption("Entendiendo lo que me dijiste…");
+        setBusy(true);
         try{
           const fd=new FormData();
-          fd.append("audio",new File([blob],"voz-lolo.webm",{type:blob.type}));
+          fd.append("audio",new File([blob],"voz-lolo.webm",{type:blob.type||"audio/webm"}));
           const r=await fetch("/api/transcribe",{method:"POST",body:fd});
-          const j=await r.json();
-          if(!r.ok)throw new Error(j.error||"No pude transcribir");
-          const text=String(j.text||"").trim();
-          if(!text)throw new Error("No pude reconocer lo que dijiste");
-          setInput(text);
-          await sendChat(text);
+          const j=await r.json();if(!r.ok)throw new Error(j.error||"No pude transcribir");
+          const text=(j.text||"").trim();
+          setBusy(false);
+          if(!text){setMicError("No pude entender lo que dijiste.");return}
+          await sendChat(text,true);
         }catch(e:any){
-          setMicError(e?.message||"No pude procesar el audio.");
-          setCaption("No pude entender el audio. Probá de nuevo.");
+          setBusy(false);
+          setMicError(e?.message||"No pude procesar tu voz.");
         }
       };
 
-      rec.start();
+      rec.start(250);
       setRecording(true);
-      setCaption("Te escucho. Hablá y tocá de nuevo el micrófono para enviar.");
-      window.setTimeout(()=>{if(rec.state==="recording")rec.stop()},20000);
+      setCaption("Te escucho… hablame normal. Cuando termines, LOLO lo detecta solo.");
+
+      const AC=(window as any).AudioContext||(window as any).webkitAudioContext;
+      if(AC){
+        const ctx:AudioContext=new AC();
+        micAudioCtxRef.current=ctx;
+        const src=ctx.createMediaStreamSource(stream);
+        const analyser=ctx.createAnalyser();
+        analyser.fftSize=512;
+        src.connect(analyser);
+        const data=new Uint8Array(analyser.fftSize);
+        const monitor=()=>{
+          if(rec.state!=="recording")return;
+          analyser.getByteTimeDomainData(data);
+          let sum=0;
+          for(const v of data){const n=(v-128)/128;sum+=n*n}
+          const rms=Math.sqrt(sum/data.length);
+          const now=Date.now();
+          if(rms>.035){heardVoice=true;lastVoice=now}
+          if(heardVoice&&now-lastVoice>1150&&now-startedAt>1400){rec.stop();return}
+          if(!heardVoice&&now-startedAt>7000){rec.stop();return}
+          if(now-startedAt>18000){rec.stop();return}
+          micRafRef.current=requestAnimationFrame(monitor);
+        };
+        micRafRef.current=requestAnimationFrame(monitor);
+      }else{
+        window.setTimeout(()=>{if(rec.state==="recording")rec.stop()},15000);
+      }
     }catch{
+      cleanupMicMonitor();
+      setRecording(false);
       setMicError("El micrófono está bloqueado. Permitilo desde la configuración del sitio.");
     }
   };
@@ -366,20 +416,16 @@ export default function Page() {
       <div className="status"><span className={"dot "+(busy?"":"on")}></span>{busy?"Procesando…":"Listo"}</div>
     </header>
 
-    <div className={"hero "+(speaking?"speaking":"")}>
-      <div className="heroActor" aria-label="LOLO animado">
-        <div className="heroHead">
-          <img className="avatar" src={LOLO_FACE} alt="LOLO"/>
-          <span className="mouthAnim" aria-hidden="true"></span>
-        </div>
-        <div className="heroTorso">LOLO</div>
-        <div className="heroArm heroArmLeft"></div>
-        <div className="heroArm heroArmRight"></div>
-        <div className="heroHand heroHandLeft">✋</div>
-        <div className="heroHand heroHandRight">🛠️</div>
-        <span className="liveBadge">{speaking?"HABLANDO":"LOLO"}</span>
+    <div className={"hero tutorHero "+(speaking?"speaking ":"")+(recording?"listening":"")}>
+      <div className="avatarWrap">
+        <img className="avatar" src={LOLO_FACE} alt="LOLO"/>
+        <span className="mouthAnim" aria-hidden="true"></span>
+        <span className="liveBadge">{recording?"ESCUCHANDO":speaking?"HABLANDO":busy?"PENSANDO":"LOLO"}</span>
       </div>
-      <div><div className="caption">{caption}</div><div className="wave"><i></i><i></i><i></i><i></i></div></div>
+      <div className="heroWords">
+        <div className="caption">{caption}</div>
+        <div className="wave"><i></i><i></i><i></i><i></i></div>
+      </div>
     </div>
 
     <section className={"section "+(tab==="home"?"active":"")}>
@@ -387,7 +433,7 @@ export default function Page() {
         <div className="grid">
           <button className="card" onClick={()=>nav("plate")}><b>📷 Analizar tu placa</b><span className="muted small">Visión IA + marcas automáticas</span></button>
           <button className="card" onClick={()=>nav("talk")}><b>🎤 Hablar con LOLO</b><span className="muted small">Chat + micrófono + voz</span></button>
-          <button className="card workshopCard" onClick={()=>{setTab("workshop");void runWorkshopStep(workshopStep)}}><b>🧰 Taller interactivo</b><span className="muted small">LOLO se mueve y te muestra la reparación</span></button>
+          <button className="card workshopCard" onClick={()=>nav("learn")}><b>📘 Aprender con LOLO</b><span className="muted small">Clases conversadas, paso a paso</span></button>
           <button className="card" onClick={()=>nav("settings")}><b>🔊 Voz de LOLO</b><span className="muted small">IA masculina + respaldo del teléfono</span></button>
         </div>
       </div>
@@ -396,16 +442,49 @@ export default function Page() {
     </section>
 
     <section className={"section "+(tab==="talk"?"active":"")}>
-      <div className="panel"><h2>Hablá con LOLO</h2>
+      <div className="panel interactiveTutor">
+        <div className="interactiveTitle">
+          <div>
+            <h2>Hablá con LOLO</h2>
+            <p className="muted">Como si estuvieras en el taller con tu profesor. Preguntá, respondé y seguí el diagnóstico conversando.</p>
+          </div>
+          <span className={"talkState "+(recording?"listen":speaking?"speak":busy?"think":"ready")}>{recording?"Te escucho":speaking?"Te respondo":busy?"Pensando":"Listo para hablar"}</span>
+        </div>
+
         {micError&&<div className="notice">{micError}</div>}
-        <div className="chat">{messages.map((m,i)=><div key={i} className={"msg "+(m.role==="user"?"user":"bot")}>{m.content}</div>)}{busy&&<div className="msg sys">LOLO está pensando…</div>}</div>
+
+        <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy}>
+          <span>{recording?"■":"🎤"}</span>
+          <b>{recording?"Terminar ahora":"Hablar con LOLO"}</b>
+          <small>{recording?"Podés tocar para cortar antes":"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
+        </button>
+
+        <label className="conversationToggle">
+          <input type="checkbox" checked={conversationMode} onChange={e=>setConversationMode(e.target.checked)}/>
+          <span><b>Conversación continua</b><small>{conversationMode?"Después de responder, LOLO vuelve a escucharte.":"LOLO espera que vuelvas a tocar el micrófono."}</small></span>
+        </label>
+
+        <div className="quickPrompts">
+          {["Mi celular no carga","Mi celular no enciende","Quiero aprender a usar el tester","Quiero cambiar un pin de carga"].map(q=>
+            <button className="quickChip" key={q} onClick={()=>void sendChat(q)} disabled={busy}>{q}</button>
+          )}
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="chatHeader"><b>Conversación con LOLO</b><span className="muted small">{messages.length} mensajes</span></div>
+        <div className="chat tutorChat" ref={chatRef}>
+          {messages.map((m,i)=><div key={i} className={"msg "+(m.role==="assistant"?"bot":"user")}>{m.content}</div>)}
+          {busy&&<div className="msg bot thinkingMsg"><span></span><span></span><span></span></div>}
+        </div>
         <div className="composer">
-          <button className={"circle "+(recording?"on":"")} onClick={startMic} title={recording?"Detener y enviar":"Hablar con LOLO"}>{recording?"⏹️":"🎤"}</button>
-          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")sendChat()}} placeholder="Preguntale algo a LOLO"/>
+          <button className={"circle "+(recording?"on":"")} onClick={()=>void startMic()} title="Hablar">{recording?"■":"🎤"}</button>
+          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")void sendChat()}} placeholder="También podés escribirle a LOLO"/>
           <label className="circle photoButton" style={{display:"grid",placeItems:"center"}} title="Sacar foto">📷<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <label className="circle galleryButton" style={{display:"grid",placeItems:"center"}} title="Subir imagen">🖼️<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
-          <button className="circle" onClick={()=>sendChat()} disabled={busy}>➤</button>
+          <button className="circle" onClick={()=>void sendChat()} disabled={busy}>➤</button>
         </div>
+        <div className="talkHint">Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.</div>
       </div>
     </section>
 
@@ -495,6 +574,23 @@ export default function Page() {
       <div className="panel"><h3>Práctica</h3>{QUIZ.map((q,qi)=><Quiz key={qi} q={q}/>)}</div>
     </section>
 
+    <section className={"section "+(tab==="learn"?"active":"")}>
+      <div className="panel">
+        <h2>Aprender con LOLO</h2>
+        <p className="muted">Elegí un tema. LOLO te lo explica conversando y adapta la explicación según lo que vos le preguntes.</p>
+        <div className="learnList">
+          {COURSE.map((s,i)=><div className="learnCard" key={i}>
+            <div><b>{i+1}. {s[0]}</b><span>{s[1]}</span></div>
+            <button className="btn" onClick={()=>{setTab("talk");void sendChat(`LOLO, enseñame ${s[0]} como si fuera una clase práctica. Explicame una cosa por vez y haceme una pregunta para comprobar si entendí.`)}}>Preguntarle a LOLO</button>
+          </div>)}
+        </div>
+      </div>
+      <div className="panel">
+        <h3>Práctica rápida</h3>
+        <div className="quizArea">{QUIZ.map((q,qi)=><Quiz key={qi} q={q}/>)}</div>
+      </div>
+    </section>
+
     <section className={"section "+(tab==="settings"?"active":"")}>
       <div className="panel settings"><h2>Voz de LOLO</h2>
         <div className="tip good">LOLO usa por defecto su <b>voz IA masculina</b>. Ya no cambia automáticamente a una voz femenina del teléfono.</div>
@@ -514,7 +610,7 @@ export default function Page() {
       <button className={tab==="home"?"on":""} onClick={()=>nav("home")}><b>⌂</b>Inicio</button>
       <button className={tab==="talk"?"on":""} onClick={()=>nav("talk")}><b>🎤</b>Hablar</button>
       <button className={tab==="plate"?"on":""} onClick={()=>nav("plate")}><b>📷</b>Tu placa</button>
-      <button className={tab==="workshop"?"on":""} onClick={()=>{setTab("workshop");void runWorkshopStep(workshopStep)}}><b>🧰</b>Taller</button>
+      <button className={tab==="learn"?"on":""} onClick={()=>nav("learn")}><b>📘</b>Aprender</button>
       <button className={tab==="settings"?"on":""} onClick={()=>nav("settings")}><b>⚙️</b>Ajustes</button>
     </nav>
   </main>
