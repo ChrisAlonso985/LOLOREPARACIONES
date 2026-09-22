@@ -163,3 +163,15 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .price{font-size:28px;font-weight:950;margin:4px 0}.price small{font-size:13px;color:var(--muted);font-weight:700}
 .payBtn{width:100%;margin-top:10px;min-height:46px}
 @media(max-width:600px){.plans{grid-template-columns:1fr}.accountHead{align-items:center}.paymentState{max-width:130px;text-align:center}}
+
+/* LOLO joven / moderno */
+.avatarTechArc{opacity:.7;stroke-dasharray:7 8;animation:techArc 4s linear infinite}
+.avatarTechArc.arc2{animation-direction:reverse}
+.loloAvatar.idle .avatarSmile{opacity:1}
+.loloAvatar.speaking .avatarBrows{animation:friendlyBrows .9s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.loloAvatar.speaking .avatarSmile{opacity:.75}
+.loloAvatar.listening .avatarEyes{animation:softBlink 3.8s ease-in-out infinite}
+.loloAvatar.pointing .avatarSmile{opacity:1}
+@keyframes techArc{to{stroke-dashoffset:-30}}
+@keyframes friendlyBrows{to{transform:translateY(-1.3px)}}
+@keyframes softBlink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.12)}}

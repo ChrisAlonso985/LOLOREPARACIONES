@@ -89,16 +89,16 @@ function LoloAvatar({mode="idle",compact=false}:{mode?:AvatarMode;compact?:boole
     <svg viewBox="0 0 180 180" role="img" aria-hidden="true">
       <defs>
         <linearGradient id="loloHalo" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#45d8ff"/>
-          <stop offset="100%" stopColor="#176cf5"/>
+          <stop offset="0%" stopColor="#67ecff"/>
+          <stop offset="100%" stopColor="#4c75ff"/>
         </linearGradient>
-        <linearGradient id="loloJacket" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#173c5a"/>
-          <stop offset="100%" stopColor="#071927"/>
+        <linearGradient id="loloHoodie" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#1d5680"/>
+          <stop offset="100%" stopColor="#0a1d31"/>
         </linearGradient>
         <linearGradient id="loloFace" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#f3c8a8"/>
-          <stop offset="100%" stopColor="#d99f7a"/>
+          <stop offset="0%" stopColor="#ffd7b9"/>
+          <stop offset="100%" stopColor="#eeb08b"/>
         </linearGradient>
         <filter id="loloGlow">
           <feGaussianBlur stdDeviation="3.2" result="b"/>
@@ -107,60 +107,69 @@ function LoloAvatar({mode="idle",compact=false}:{mode?:AvatarMode;compact?:boole
       </defs>
 
       <circle className="avatarHalo" cx="90" cy="87" r="73" fill="none" stroke="url(#loloHalo)" strokeWidth="3"/>
-      <circle className="avatarHaloInner" cx="90" cy="87" r="63" fill="#0b2438" opacity=".8"/>
+      <circle className="avatarHaloInner" cx="90" cy="87" r="63" fill="#0a2134" opacity=".92"/>
+      <path className="avatarTechArc" d="M33 86 A58 58 0 0 1 56 39" fill="none" stroke="#6fe8ff" strokeWidth="2" strokeLinecap="round"/>
+      <path className="avatarTechArc arc2" d="M124 38 A58 58 0 0 1 148 86" fill="none" stroke="#6fe8ff" strokeWidth="2" strokeLinecap="round"/>
 
       <g className="avatarBody">
-        <path d="M39 168 C43 135 58 121 78 117 L102 117 C122 121 137 135 141 168 Z" fill="url(#loloJacket)" stroke="#3ebeff" strokeWidth="2"/>
-        <path d="M81 117 L90 134 L99 117" fill="#0d2639" stroke="#6bd5ff" strokeWidth="1.6"/>
-        <rect x="77" y="139" width="26" height="15" rx="7.5" fill="#0b1f31" stroke="#2fbaff"/>
-        <text x="90" y="150" textAnchor="middle" fontSize="9" fontWeight="900" fill="#7bdcff">LOLO</text>
+        <path d="M38 169 C42 136 58 123 76 118 L104 118 C122 123 138 136 142 169 Z" fill="url(#loloHoodie)" stroke="#58d6ff" strokeWidth="2"/>
+        <path d="M73 121 Q90 138 107 121" fill="none" stroke="#7ce7ff" strokeWidth="2.2"/>
+        <path d="M77 129 L90 140 L103 129" fill="#0b2135" stroke="#79dfff" strokeWidth="1.4"/>
+        <rect x="75" y="143" width="30" height="14" rx="7" fill="#0a2034" stroke="#40c8ff"/>
+        <text x="90" y="153" textAnchor="middle" fontSize="9" fontWeight="900" fill="#9cecff">LOLO</text>
       </g>
 
       <g className="avatarHead">
-        <path d="M60 69 C60 43 72 28 91 28 C112 28 122 44 121 69 L118 91 C116 108 105 119 90 119 C74 119 64 108 62 91 Z" fill="url(#loloFace)" stroke="#7dd9ff" strokeWidth="1.8"/>
-        <path d="M59 65 C60 41 73 27 92 27 C106 27 118 34 123 48 C112 44 103 43 94 44 C82 46 71 52 59 65 Z" fill="#18222c"/>
-        <path d="M66 49 C75 37 91 32 105 37" fill="none" stroke="#293947" strokeWidth="5" strokeLinecap="round"/>
+        <ellipse cx="90" cy="78" rx="31" ry="41" fill="url(#loloFace)" stroke="#8de7ff" strokeWidth="1.7"/>
+        <path d="M59 66 C61 41 76 27 94 28 C110 29 121 39 123 55 C116 48 107 45 98 45 C83 44 70 50 59 66 Z" fill="#25394a"/>
+        <path d="M64 55 C73 39 92 33 109 40" fill="none" stroke="#334e61" strokeWidth="6" strokeLinecap="round"/>
+
+        <g className="avatarBrows">
+          <path d="M69 72 Q77 68 84 71" fill="none" stroke="#6c4f43" strokeWidth="1.7" strokeLinecap="round"/>
+          <path d="M96 71 Q103 68 111 72" fill="none" stroke="#6c4f43" strokeWidth="1.7" strokeLinecap="round"/>
+        </g>
 
         <g className="avatarEyes">
-          <path d="M70 76 Q77 72 84 76" fill="none" stroke="#2b2f33" strokeWidth="2.2" strokeLinecap="round"/>
-          <path d="M97 76 Q104 72 111 76" fill="none" stroke="#2b2f33" strokeWidth="2.2" strokeLinecap="round"/>
-          <ellipse className="avatarEye avatarEyeL" cx="78" cy="79" rx="3.2" ry="4.3" fill="#101820"/>
-          <ellipse className="avatarEye avatarEyeR" cx="104" cy="79" rx="3.2" ry="4.3" fill="#101820"/>
-          <circle cx="79" cy="78" r="1" fill="#8ce7ff"/>
-          <circle cx="105" cy="78" r="1" fill="#8ce7ff"/>
+          <ellipse cx="77" cy="79" rx="6.7" ry="5.3" fill="#fff7ef"/>
+          <ellipse cx="103" cy="79" rx="6.7" ry="5.3" fill="#fff7ef"/>
+          <ellipse className="avatarEye avatarEyeL" cx="78" cy="79" rx="3.1" ry="3.8" fill="#1c2b33"/>
+          <ellipse className="avatarEye avatarEyeR" cx="102" cy="79" rx="3.1" ry="3.8" fill="#1c2b33"/>
+          <circle cx="79" cy="78" r="1.1" fill="#89e9ff"/>
+          <circle cx="103" cy="78" r="1.1" fill="#89e9ff"/>
         </g>
 
-        <path d="M90 80 L87 91 Q90 94 94 91" fill="none" stroke="#b8795e" strokeWidth="1.6" strokeLinecap="round"/>
+        <path d="M90 81 L88 91 Q90 93 94 91" fill="none" stroke="#be8166" strokeWidth="1.4" strokeLinecap="round"/>
         <g className="avatarMouthGroup">
-          <rect className="avatarMouth" x="80" y="99" width="20" height="4" rx="2" fill="#7e3c40"/>
-          <rect className="avatarSmile" x="83" y="99" width="14" height="1.6" rx=".8" fill="#f6d7cc" opacity=".9"/>
+          <path className="avatarMouth" d="M79 99 Q90 108 101 99 Q90 112 79 99 Z" fill="#8a4348"/>
+          <path className="avatarSmile" d="M82 100 Q90 105 98 100" fill="none" stroke="#fff2ea" strokeWidth="2" strokeLinecap="round"/>
         </g>
-        <path d="M72 96 Q90 111 108 96" fill="none" stroke="#c4876c" strokeWidth="1.2" opacity=".35"/>
+        <circle cx="67" cy="92" r="4" fill="#f3a892" opacity=".25"/>
+        <circle cx="113" cy="92" r="4" fill="#f3a892" opacity=".25"/>
       </g>
 
       <g className="avatarLeftArm">
-        <path d="M60 133 C48 133 40 143 38 158" fill="none" stroke="#173c5a" strokeWidth="17" strokeLinecap="round"/>
-        <circle cx="37" cy="160" r="9" fill="#e2ad88" stroke="#74d9ff" strokeWidth="1.4"/>
+        <path d="M59 135 C48 136 40 145 38 158" fill="none" stroke="#1b527c" strokeWidth="16" strokeLinecap="round"/>
+        <circle cx="37" cy="160" r="8.7" fill="#efb18c" stroke="#83e8ff" strokeWidth="1.3"/>
       </g>
 
       <g className="avatarRightArm">
-        <path d="M120 133 C132 134 141 144 145 157" fill="none" stroke="#173c5a" strokeWidth="17" strokeLinecap="round"/>
+        <path d="M121 135 C132 136 141 145 145 157" fill="none" stroke="#1b527c" strokeWidth="16" strokeLinecap="round"/>
         <g className="avatarRightHand">
-          <circle cx="147" cy="160" r="9" fill="#e2ad88" stroke="#74d9ff" strokeWidth="1.4"/>
-          <path d="M151 158 L165 151" stroke="#e2ad88" strokeWidth="5" strokeLinecap="round"/>
-          <path d="M151 158 L164 157" stroke="#e2ad88" strokeWidth="4" strokeLinecap="round"/>
+          <circle cx="147" cy="160" r="8.7" fill="#efb18c" stroke="#83e8ff" strokeWidth="1.3"/>
+          <path d="M151 158 L165 151" stroke="#efb18c" strokeWidth="5" strokeLinecap="round"/>
+          <path d="M151 158 L164 157" stroke="#efb18c" strokeWidth="4" strokeLinecap="round"/>
         </g>
       </g>
 
       <g className="avatarListenFx" filter="url(#loloGlow)">
-        <path d="M50 67 Q39 77 49 88" fill="none" stroke="#51e0a8" strokeWidth="3" strokeLinecap="round"/>
-        <path d="M130 67 Q141 77 131 88" fill="none" stroke="#51e0a8" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M50 67 Q39 77 49 88" fill="none" stroke="#52efb1" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M130 67 Q141 77 131 88" fill="none" stroke="#52efb1" strokeWidth="3" strokeLinecap="round"/>
       </g>
 
       <g className="avatarThinkFx">
-        <circle cx="136" cy="43" r="4" fill="#ffd36f"/>
-        <circle cx="146" cy="34" r="3" fill="#ffd36f"/>
-        <circle cx="154" cy="24" r="2.2" fill="#ffd36f"/>
+        <circle cx="136" cy="43" r="4" fill="#ffd66e"/>
+        <circle cx="146" cy="34" r="3" fill="#ffd66e"/>
+        <circle cx="154" cy="24" r="2.2" fill="#ffd66e"/>
       </g>
     </svg>
     <span className="avatarStatus">{label}</span>
@@ -194,6 +203,7 @@ export default function Page() {
   const [imageBox,setImageBox]=useState({left:0,top:0,width:0,height:0});
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const greetingAudioRef=useRef<HTMLAudioElement|null>(null);
+  const speechSeqRef=useRef(0);
   const [recording,setRecording]=useState(false);
   const [conversationMode,setConversationMode]=useState(true);
   const [paymentEmail,setPaymentEmail]=useState("");
@@ -276,62 +286,119 @@ export default function Page() {
 
   const nav=(id:string)=>setTab(id);
 
-  const browserSpeak=(text:string)=>{
-    if(!("speechSynthesis" in window))return;
+  const stopVoice=()=>{
+    speechSeqRef.current++;
+    if("speechSynthesis" in window) window.speechSynthesis.cancel();
+    if(audioRef.current){
+      audioRef.current.oncanplay=null;
+      audioRef.current.onended=null;
+      audioRef.current.onerror=null;
+      audioRef.current.pause();
+      try{audioRef.current.currentTime=0}catch{}
+      audioRef.current=null;
+    }
+    setSpeaking(false);
+  };
+
+  const browserSpeak=(text:string)=>new Promise<void>((resolve)=>{
+    if(!("speechSynthesis" in window)){resolve();return}
+    window.speechSynthesis.cancel();
     const maleHints=["Pablo","Jorge","Diego","Carlos","Miguel","Juan","Antonio","Mario","Javier","Sergio","Male"];
     const male=voices.find(v=>v.lang.toLowerCase().startsWith("es")&&maleHints.some(h=>v.name.toLowerCase().includes(h.toLowerCase())));
-    if(!male){setMicError("No encontré una voz masculina en este dispositivo. Usá la voz IA de LOLO.");return}
-    window.speechSynthesis.cancel();
+    if(!male){setMicError("No encontré una voz masculina del dispositivo.");resolve();return}
     const u=new SpeechSynthesisUtterance(text);
-    u.voice=male;u.lang=male.lang;u.rate=.96;u.pitch=.82;
+    u.voice=male;u.lang=male.lang;u.rate=1.12;u.pitch=.9;u.volume=1;
     setSpeaking(true);
-    u.onend=()=>setSpeaking(false);
-    u.onerror=()=>setSpeaking(false);
+    u.onend=()=>{setSpeaking(false);resolve()};
+    u.onerror=()=>{setSpeaking(false);resolve()};
     window.speechSynthesis.speak(u);
-  };
+  });
 
   const speak=async(text:string)=>{
     setCaption(text.slice(0,190)+(text.length>190?"…":""));
-    audioRef.current?.pause();
-    audioRef.current=null;
+    stopVoice();
+    const seq=++speechSeqRef.current;
+
+    if(voiceMode==="device"){
+      await browserSpeak(text);
+      return;
+    }
+
     setSpeaking(true);
     try{
       const r=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});
       const j=await r.json();
+      if(seq!==speechSeqRef.current) return;
       if(!r.ok||!j.audio) throw new Error(j.error||"No se pudo generar la voz de LOLO");
+
+      if("speechSynthesis" in window) window.speechSynthesis.cancel();
+      audioRef.current?.pause();
+
       const audio=new Audio();
       audio.preload="auto";
+      audio.playbackRate=1.1;
+      audio.volume=1;
       audio.src=`data:${j.mime||"audio/mpeg"};base64,${j.audio}`;
       audioRef.current=audio;
+
       await new Promise<void>((resolve,reject)=>{
         let settled=false;
-        const done=()=>{if(settled)return;settled=true;setSpeaking(false);resolve()};
-        const fail=()=>{if(settled)return;settled=true;setSpeaking(false);reject(new Error("La voz IA no pudo reproducirse."))};
+        const done=()=>{
+          if(settled)return;
+          settled=true;
+          if(seq===speechSeqRef.current){setSpeaking(false);audioRef.current=null}
+          resolve();
+        };
+        const fail=()=>{
+          if(settled)return;
+          settled=true;
+          if(seq===speechSeqRef.current){setSpeaking(false);audioRef.current=null}
+          reject(new Error("La voz IA no pudo reproducirse."));
+        };
         audio.onended=done;
         audio.onerror=fail;
-        const begin=()=>{audio.play().catch(fail)};
+        const begin=()=>{
+          if(seq!==speechSeqRef.current){done();return}
+          audio.play().catch(fail);
+        };
         if(audio.readyState>=3) begin();
-        else audio.oncanplay=begin;
+        else audio.addEventListener("canplay",begin,{once:true});
         audio.load();
       });
     }catch(e:any){
-      setSpeaking(false);
-      setMicError(e?.message||"No se pudo reproducir la voz masculina de LOLO.");
+      if(seq===speechSeqRef.current){
+        setSpeaking(false);
+        setMicError(e?.message||"No se pudo reproducir la voz de LOLO.");
+      }
     }
   };
 
   const playFastGreeting=async()=>{
     setCaption(FAST_GREETING_REPLY);
+    stopVoice();
+    const seq=++speechSeqRef.current;
+
+    if(voiceMode==="device"){
+      await browserSpeak(FAST_GREETING_REPLY);
+      return;
+    }
+
     const prepared=greetingAudioRef.current;
     if(!prepared){await speak(FAST_GREETING_REPLY);return}
-    audioRef.current?.pause();
+
     const audio=prepared.cloneNode(true) as HTMLAudioElement;
+    audio.playbackRate=1.1;
+    audio.volume=1;
     audioRef.current=audio;
     setSpeaking(true);
     await new Promise<void>((resolve)=>{
-      audio.onended=()=>{setSpeaking(false);resolve()};
-      audio.onerror=()=>{setSpeaking(false);resolve()};
-      audio.play().catch(()=>{setSpeaking(false);resolve()});
+      const done=()=>{
+        if(seq===speechSeqRef.current){setSpeaking(false);audioRef.current=null}
+        resolve();
+      };
+      audio.onended=done;
+      audio.onerror=done;
+      audio.play().catch(done);
     });
   };
 
@@ -376,8 +443,8 @@ export default function Page() {
       if(recorderRef.current?.state==="recording") recorderRef.current.stop();
       return;
     }
-    if(speaking){
-      audioRef.current?.pause();audioRef.current=null;setSpeaking(false);
+    if(speaking||audioRef.current){
+      stopVoice();
     }
     if(!navigator.mediaDevices?.getUserMedia||typeof MediaRecorder==="undefined"){
       setMicError("Este navegador no permite grabar audio. Probá Chrome actualizado en Android.");
