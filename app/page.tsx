@@ -312,8 +312,9 @@ export default function Page() {
         cleanupMicMonitor();
         setRecording(false);
         micStreamRef.current?.getTracks().forEach(t=>t.stop());
-        const blob=new Blob(micChunksRef.current,{type:rec.mimeType||"audio/webm"});
-        if(blob.size<800||!heardVoice){
+        const rawType=(rec.mimeType||preferred||"audio/webm").split(";")[0].toLowerCase();
+        const blob=new Blob(micChunksRef.current,{type:rawType});
+        if(blob.size<1200||!heardVoice){
           setCaption("No llegué a escucharte. Tocá el micrófono y hablame de nuevo.");
           setMicError("No escuché una frase completa.");
           return;
@@ -321,8 +322,9 @@ export default function Page() {
         setCaption("Entendiendo lo que me dijiste…");
         setBusy(true);
         try{
+          const ext=rawType.includes("mp4")?"m4a":rawType.includes("mpeg")?"mp3":rawType.includes("ogg")?"ogg":"webm";
           const fd=new FormData();
-          fd.append("audio",new File([blob],"voz-lolo.webm",{type:blob.type||"audio/webm"}));
+          fd.append("audio",new File([blob],`voz-lolo.${ext}`,{type:rawType||"audio/webm"}));
           const r=await fetch("/api/transcribe",{method:"POST",body:fd});
           const j=await r.json();if(!r.ok)throw new Error(j.error||"No pude transcribir");
           const text=(j.text||"").trim();
@@ -331,11 +333,11 @@ export default function Page() {
           await sendChat(text,true);
         }catch(e:any){
           setBusy(false);
-          setMicError(e?.message||"No pude procesar tu voz.");
+          setMicError(e?.message||"No pude procesar tu voz. Tocá el micrófono y probá de nuevo.");
         }
       };
 
-      rec.start(250);
+      rec.start();
       setRecording(true);
       setCaption("Te escucho… hablame normal. Cuando termines, LOLO lo detecta solo.");
 
@@ -363,6 +365,7 @@ export default function Page() {
         };
         micRafRef.current=requestAnimationFrame(monitor);
       }else{
+        heardVoice=true;
         window.setTimeout(()=>{if(rec.state==="recording")rec.stop()},15000);
       }
     }catch{
