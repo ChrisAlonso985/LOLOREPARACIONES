@@ -85,6 +85,7 @@ export default function Page() {
   const [speaking,setSpeaking]=useState(false);
   const [caption,setCaption]=useState("Hola, soy LOLO. Subime una foto de tu placa y te ayudo a medir sin adivinar.");
   const [messages,setMessages]=useState<ChatMessage[]>([{role:"assistant",content:"Hola, soy LOLO. Hablame como a tu profe del taller: contame qué equipo tenés, qué falla hace y qué querés aprender. Vamos paso a paso."}]);
+  const messagesRef=useRef<ChatMessage[]>([{role:"assistant",content:"Hola, soy LOLO. Hablame como a tu profe del taller: contame qué equipo tenés, qué falla hace y qué querés aprender. Vamos paso a paso."}]);
   const [input,setInput]=useState("");
   const [busy,setBusy]=useState(false);
   const [micError,setMicError]=useState("");
@@ -158,6 +159,8 @@ export default function Page() {
     load();window.speechSynthesis.onvoiceschanged=load;
   },[deviceVoice]);
 
+  useEffect(()=>{messagesRef.current=messages},[messages]);
+
   useEffect(()=>{
     const el=chatRef.current;
     if(el) el.scrollTo({top:el.scrollHeight,behavior:"smooth"});
@@ -204,18 +207,22 @@ export default function Page() {
       audioRef.current=audio;
       await new Promise<void>((resolve,reject)=>{
         let settled=false;
-        const finish=()=>{if(settled)return;settled=true;setSpeaking(false);resolve()};
-        audio.onended=finish;
-        audio.onerror=()=>{if(settled)return;settled=true;setSpeaking(false);reject(new Error("La voz IA no pudo reproducirse."))};
-        const play=async()=>{try{await audio.play()}catch(e){reject(e)}};
-        if(audio.readyState>=3) void play();
-        else{
-          audio.addEventListener("canplay",{once:true});
-          audio.oncanplay=()=>void play();
-          audio.load();
-        }
+        const done=()=>{if(settled)return;settled=true;setSpeaking(false);resolve()};
+        const fail=()=>{if(settled)return;settled=true;setSpeaking(false);reject(new Error("La voz IA no pudo reproducirse."))};
+        audio.onended=done;
+        audio.onerror=fail;
+        const begin=()=>{audio.play().catch(fail)};
+        if(audio.readyState>=3) begin();
+        else audio.oncanplay=begin;
+        audio.load();
       });
-    }catch(e:any){  const playFastGreeting=async()=>{
+    }catch(e:any){
+      setSpeaking(false);
+      setMicError(e?.message||"No se pudo reproducir la voz masculina de LOLO.");
+    }
+  };
+
+  const playFastGreeting=async()=>{
     setCaption(FAST_GREETING_REPLY);
     const prepared=greetingAudioRef.current;
     if(!prepared){await speak(FAST_GREETING_REPLY);return}
@@ -232,11 +239,11 @@ export default function Page() {
 
   const sendChat=async(text=input,fromVoice=false)=>{
     const q=text.trim();if(!q||busy)return;
-    const next=[...messages,{role:"user",content:q} as ChatMessage];
-    setMessages(next);setInput("");
+    const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
+    messagesRef.current=next;setMessages(next);setInput("");
     if(isFastGreeting(q)){
       const answered=[...next,{role:"assistant",content:FAST_GREETING_REPLY} as ChatMessage];
-      setMessages(answered);
+      messagesRef.current=answered;setMessages(answered);
       await playFastGreeting();
       if(fromVoice&&conversationMode) window.setTimeout(()=>void startMic(),450);
       return;
@@ -247,13 +254,15 @@ export default function Page() {
       const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:next})});
       const j=await r.json();if(!r.ok)throw new Error(j.error||"Error");
       const ans=j.text||"No pude responder.";
-      setMessages([...next,{role:"assistant",content:ans}]);
+      const answered=[...next,{role:"assistant",content:ans} as ChatMessage];
+      messagesRef.current=answered;setMessages(answered);
       setBusy(false);
       await speak(ans);
       if(fromVoice&&conversationMode) window.setTimeout(()=>void startMic(),450);
     }catch(e:any){
       const ans="No pude conectar con la IA en este momento. "+(e?.message||"");
-      setMessages([...next,{role:"assistant",content:ans}]);
+      const failed=[...next,{role:"assistant",content:ans} as ChatMessage];
+      messagesRef.current=failed;setMessages(failed);
       setBusy(false);
     }
   };
