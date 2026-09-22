@@ -19,7 +19,7 @@ REGLAS:
 - Nunca aconsejes perforar, calentar directamente o puentear una batería de litio dañada.
 - Si el alumno pregunta dónde poner el tester, indicá que suba la imagen en la sección "Tu placa" para que LOLO la analice visualmente.
 - No afirmes que un punto es VBUS o GND si no hay evidencia suficiente.
-- Terminá las explicaciones prácticas pidiendo el valor medido para continuar el diagnóstico.`;
+- Terminá las explicaciones prácticas pidiendo el valor medido para continuar el diagnóstico.\n- Para saludos y preguntas simples, respondé breve: 1 a 3 frases.\n- Para consultas técnicas comunes, sé concreto y evitá introducciones largas.`;
 
 export async function POST(req: Request) {
   try {
@@ -31,12 +31,13 @@ export async function POST(req: Request) {
     const client = new OpenAI({ apiKey: token });
     const input = [
       { role: "system", content: SYSTEM },
-      ...(Array.isArray(messages) ? messages.slice(-16) : []),
+      ...(Array.isArray(messages) ? messages.slice(-10) : []),
     ] as any;
 
     const response = await client.responses.create({
-      model: process.env.LOLO_CHAT_MODEL || "gpt-5.6-sol",
+      model: process.env.LOLO_CHAT_MODEL || "gpt-5.6-luna",
       input,
+      max_output_tokens: 420,
     } as any);
 
     return NextResponse.json({ text: response.output_text || "No pude generar una respuesta." });

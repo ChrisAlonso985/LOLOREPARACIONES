@@ -4,12 +4,25 @@ import { NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+const ttsCache = new Map<string,{audio:string;mime:string}>();
+const rememberTts = (key:string,value:{audio:string;mime:string}) => {
+  if(ttsCache.size>=32){
+    const first=ttsCache.keys().next().value;
+    if(first) ttsCache.delete(first);
+  }
+  ttsCache.set(key,value);
+};
+
 export async function POST(req: Request) {
   try {
     const { text } = await req.json();
     if (!text || typeof text !== "string") {
       return NextResponse.json({ error: "Falta texto." }, { status: 400 });
     }
+
+    const cacheKey=text.trim().slice(0,3500);
+    const cached=ttsCache.get(cacheKey);
+    if(cached) return NextResponse.json(cached,{headers:{"X-LOLO-TTS-Cache":"HIT"}});
 
     const token = process.env.OPENAI_API_KEY;
     if (!token) {
@@ -25,7 +38,9 @@ export async function POST(req: Request) {
     });
 
     const buffer = Buffer.from(await speech.arrayBuffer());
-    return NextResponse.json({ audio: buffer.toString("base64"), mime: "audio/mpeg" });
+    const payload={ audio: buffer.toString("base64"), mime: "audio/mpeg" };
+    rememberTts(cacheKey,payload);
+    return NextResponse.json(payload,{headers:{"X-LOLO-TTS-Cache":"MISS"}});
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ error: error?.message || "Error de voz" }, { status: 500 });
