@@ -106,19 +106,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "La imagen es demasiado grande. Sacá una foto más liviana o dejá que la app la comprima." }, { status: 413 });
     }
 
-    const token = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+    const token = process.env.OPENAI_API_KEY;
     if (!token) {
-      return NextResponse.json({
-        can_mark:false, need_better_photo:false, confidence:0, connector_type:"unknown", image_quality:"usable",
-        summary:"La foto se cargó correctamente, pero la visión IA todavía no tiene una credencial de modelo configurada en el servidor.",
-        explanation:"LOLO no va a inventar GND o VBUS sin análisis real.",
-        safety_warning: measurement === "voltage" ? "Para voltaje, evitá tocar dos contactos a la vez con la punta del tester." : "Para continuidad o resistencia, trabajá con cargador y batería desconectados.",
-        follow_up_question:"Podés seguir usando el curso y el chat. Para habilitar el marcado automático falta configurar AI_GATEWAY_API_KEY en Railway.",
-        expected_reading:"", black_probe:null, red_probe:null, cautions:[]
-      });
+      return NextResponse.json({ error: "LOLO todavía no tiene OPENAI_API_KEY configurada en Railway." }, { status: 503 });
     }
 
-    const client = new OpenAI({ apiKey: token, baseURL: "https://ai-gateway.vercel.sh/v1" });
+    const client = new OpenAI({ apiKey: token });
 
     const context = `
 DATOS DEL ALUMNO:
@@ -132,7 +125,7 @@ ${measurement === "continuity" || measurement === "resistance"
 `;
 
     const response = await client.responses.create({
-      model: process.env.LOLO_VISION_MODEL || "openai/gpt-5.6-sol",
+      model: process.env.LOLO_VISION_MODEL || "gpt-5.6-sol",
       input: [{
         role: "user",
         content: [
