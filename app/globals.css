@@ -12,8 +12,8 @@ body{padding-bottom:82px}
 header{position:sticky;top:0;z-index:30;background:#06111eef;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between;padding:9px 4px;border-bottom:1px solid #0e2b42}
 .logo{font-size:30px;font-weight:900;letter-spacing:2px}.logo span{color:var(--blue)}
 .muted{color:var(--muted)}.small{font-size:12px}
-.hero{display:grid;grid-template-columns:132px minmax(0,1fr);gap:16px;align-items:center;background:linear-gradient(145deg,#0d2a42,#071726);border:1px solid #1f628f;border-radius:22px;padding:14px;margin:10px 0;box-shadow:0 20px 65px #0008;min-height:154px}
-.loloAvatar{position:relative;width:126px;height:126px;display:grid;place-items:center;filter:drop-shadow(0 8px 18px #0008)}
+.hero{display:grid;grid-template-columns:178px minmax(0,1fr);gap:16px;align-items:center;background:linear-gradient(145deg,#0d2a42,#071726);border:1px solid #1f628f;border-radius:22px;padding:14px;margin:10px 0;box-shadow:0 20px 65px #0008;min-height:154px}
+.loloAvatar{position:relative;width:172px;height:120px;display:grid;place-items:center;filter:drop-shadow(0 8px 18px #0008)}
 .loloAvatar svg{width:100%;height:100%;overflow:visible}
 .avatarStatus{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);font-size:9px;font-weight:950;letter-spacing:.7px;background:#06111ef2;border:1px solid #3db9ff;color:#7ad0ff;border-radius:999px;padding:4px 8px;white-space:nowrap;z-index:8}
 .avatarHalo{opacity:.8;transform-origin:center;transform-box:fill-box}
@@ -175,3 +175,15 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 @keyframes techArc{to{stroke-dashoffset:-30}}
 @keyframes friendlyBrows{to{transform:translateY(-1.3px)}}
 @keyframes softBlink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.12)}}
+
+.benchAvatar .avatarMicroscope{animation:microscopeFloat 4s ease-in-out infinite}
+.benchAvatar.idle .avatarHead{animation:avatarBreathe 3.2s ease-in-out infinite}
+.benchAvatar.speaking .avatarHead{animation:avatarNod .62s ease-in-out infinite alternate}
+.benchAvatar.speaking .avatarMouth{animation:avatarTalk .17s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.benchAvatar.speaking .avatarPhoneHand{animation:phoneExplain .8s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
+.benchAvatar.listening .avatarListenFx{opacity:1;animation:avatarListenPulse .7s ease-in-out infinite alternate}
+.benchAvatar.thinking .avatarThinkFx{opacity:1;animation:avatarThinkDots 1s ease-in-out infinite alternate}
+.benchAvatar.pointing .avatarPhoneHand{transform:translate(8px,-4px) rotate(-8deg);transform-box:fill-box;transform-origin:center}
+@keyframes phoneExplain{to{transform:translate(4px,-4px) rotate(-4deg)}}
+@keyframes microscopeFloat{50%{transform:translateY(-1.5px)}}
+@media(max-width:600px){.hero{grid-template-columns:126px minmax(0,1fr);min-height:132px;padding:10px}.loloAvatar{width:122px;height:92px}.loloAvatar.compact{width:88px;height:68px}}

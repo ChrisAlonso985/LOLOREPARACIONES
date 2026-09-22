@@ -85,91 +85,117 @@ type AvatarMode = "idle"|"listening"|"thinking"|"speaking"|"pointing";
 
 function LoloAvatar({mode="idle",compact=false}:{mode?:AvatarMode;compact?:boolean}){
   const label=mode==="listening"?"ESCUCHANDO":mode==="thinking"?"PENSANDO":mode==="speaking"?"HABLANDO":mode==="pointing"?"TE MUESTRO":"LOLO";
-  return <div className={"loloAvatar "+mode+(compact?" compact":"")} aria-label={"LOLO "+label.toLowerCase()}>
-    <svg viewBox="0 0 180 180" role="img" aria-hidden="true">
+  return <div className={"loloAvatar benchAvatar "+mode+(compact?" compact":"")} aria-label={"LOLO "+label.toLowerCase()}>
+    <svg viewBox="0 0 260 180" role="img" aria-hidden="true">
       <defs>
-        <linearGradient id="loloHalo" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#67ecff"/>
-          <stop offset="100%" stopColor="#4c75ff"/>
+        <linearGradient id="benchBg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#113a59"/>
+          <stop offset="100%" stopColor="#061522"/>
         </linearGradient>
-        <linearGradient id="loloHoodie" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#1d5680"/>
-          <stop offset="100%" stopColor="#0a1d31"/>
+        <linearGradient id="shirt" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#194f79"/>
+          <stop offset="100%" stopColor="#0a2439"/>
         </linearGradient>
-        <linearGradient id="loloFace" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#ffd7b9"/>
-          <stop offset="100%" stopColor="#eeb08b"/>
+          <stop offset="100%" stopColor="#e9aa86"/>
         </linearGradient>
-        <filter id="loloGlow">
-          <feGaussianBlur stdDeviation="3.2" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
+        <filter id="avatarGlow"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
       </defs>
 
-      <circle className="avatarHalo" cx="90" cy="87" r="73" fill="none" stroke="url(#loloHalo)" strokeWidth="3"/>
-      <circle className="avatarHaloInner" cx="90" cy="87" r="63" fill="#0a2134" opacity=".92"/>
-      <path className="avatarTechArc" d="M33 86 A58 58 0 0 1 56 39" fill="none" stroke="#6fe8ff" strokeWidth="2" strokeLinecap="round"/>
-      <path className="avatarTechArc arc2" d="M124 38 A58 58 0 0 1 148 86" fill="none" stroke="#6fe8ff" strokeWidth="2" strokeLinecap="round"/>
+      <rect x="3" y="3" width="254" height="174" rx="24" fill="url(#benchBg)" stroke="#37bfff" strokeWidth="2"/>
+      <path d="M12 145 H248" stroke="#2d6e93" strokeWidth="2"/>
+      <path d="M18 147 H240 L231 176 H28 Z" fill="#0b2235"/>
+      <rect x="30" y="144" width="110" height="5" rx="2.5" fill="#37c9ff" opacity=".55"/>
 
-      <g className="avatarBody">
-        <path d="M38 169 C42 136 58 123 76 118 L104 118 C122 123 138 136 142 169 Z" fill="url(#loloHoodie)" stroke="#58d6ff" strokeWidth="2"/>
-        <path d="M73 121 Q90 138 107 121" fill="none" stroke="#7ce7ff" strokeWidth="2.2"/>
-        <path d="M77 129 L90 140 L103 129" fill="#0b2135" stroke="#79dfff" strokeWidth="1.4"/>
-        <rect x="75" y="143" width="30" height="14" rx="7" fill="#0a2034" stroke="#40c8ff"/>
-        <text x="90" y="153" textAnchor="middle" fontSize="9" fontWeight="900" fill="#9cecff">LOLO</text>
+      {/* microscopio */}
+      <g className="avatarMicroscope" transform="translate(176 47)">
+        <rect x="36" y="65" width="7" height="55" rx="3" fill="#9eb7c5"/>
+        <rect x="15" y="114" width="50" height="7" rx="3" fill="#8ba9b8"/>
+        <rect x="20" y="34" width="45" height="28" rx="8" fill="#dce8ee" stroke="#7ea0b0" strokeWidth="2"/>
+        <rect x="27" y="22" width="12" height="23" rx="5" fill="#1f2c36" transform="rotate(-25 33 33)"/>
+        <rect x="43" y="22" width="12" height="23" rx="5" fill="#1f2c36" transform="rotate(-25 49 33)"/>
+        <rect x="38" y="60" width="12" height="36" rx="5" fill="#bfcfd7"/>
+        <circle cx="59" cy="50" r="8" fill="#23333f"/>
+        <circle cx="59" cy="50" r="4" fill="#4dbce9"/>
       </g>
 
-      <g className="avatarHead">
-        <ellipse cx="90" cy="78" rx="31" ry="41" fill="url(#loloFace)" stroke="#8de7ff" strokeWidth="1.7"/>
-        <path d="M59 66 C61 41 76 27 94 28 C110 29 121 39 123 55 C116 48 107 45 98 45 C83 44 70 50 59 66 Z" fill="#25394a"/>
-        <path d="M64 55 C73 39 92 33 109 40" fill="none" stroke="#334e61" strokeWidth="6" strokeLinecap="round"/>
-
-        <g className="avatarBrows">
-          <path d="M69 72 Q77 68 84 71" fill="none" stroke="#6c4f43" strokeWidth="1.7" strokeLinecap="round"/>
-          <path d="M96 71 Q103 68 111 72" fill="none" stroke="#6c4f43" strokeWidth="1.7" strokeLinecap="round"/>
-        </g>
-
-        <g className="avatarEyes">
-          <ellipse cx="77" cy="79" rx="6.7" ry="5.3" fill="#fff7ef"/>
-          <ellipse cx="103" cy="79" rx="6.7" ry="5.3" fill="#fff7ef"/>
-          <ellipse className="avatarEye avatarEyeL" cx="78" cy="79" rx="3.1" ry="3.8" fill="#1c2b33"/>
-          <ellipse className="avatarEye avatarEyeR" cx="102" cy="79" rx="3.1" ry="3.8" fill="#1c2b33"/>
-          <circle cx="79" cy="78" r="1.1" fill="#89e9ff"/>
-          <circle cx="103" cy="78" r="1.1" fill="#89e9ff"/>
-        </g>
-
-        <path d="M90 81 L88 91 Q90 93 94 91" fill="none" stroke="#be8166" strokeWidth="1.4" strokeLinecap="round"/>
-        <g className="avatarMouthGroup">
-          <path className="avatarMouth" d="M79 99 Q90 108 101 99 Q90 112 79 99 Z" fill="#8a4348"/>
-          <path className="avatarSmile" d="M82 100 Q90 105 98 100" fill="none" stroke="#fff2ea" strokeWidth="2" strokeLinecap="round"/>
-        </g>
-        <circle cx="67" cy="92" r="4" fill="#f3a892" opacity=".25"/>
-        <circle cx="113" cy="92" r="4" fill="#f3a892" opacity=".25"/>
-      </g>
-
-      <g className="avatarLeftArm">
-        <path d="M59 135 C48 136 40 145 38 158" fill="none" stroke="#1b527c" strokeWidth="16" strokeLinecap="round"/>
-        <circle cx="37" cy="160" r="8.7" fill="#efb18c" stroke="#83e8ff" strokeWidth="1.3"/>
-      </g>
-
-      <g className="avatarRightArm">
-        <path d="M121 135 C132 136 141 145 145 157" fill="none" stroke="#1b527c" strokeWidth="16" strokeLinecap="round"/>
-        <g className="avatarRightHand">
-          <circle cx="147" cy="160" r="8.7" fill="#efb18c" stroke="#83e8ff" strokeWidth="1.3"/>
-          <path d="M151 158 L165 151" stroke="#efb18c" strokeWidth="5" strokeLinecap="round"/>
-          <path d="M151 158 L164 157" stroke="#efb18c" strokeWidth="4" strokeLinecap="round"/>
+      {/* fuente y multímetro */}
+      <g className="avatarMeters">
+        <rect x="202" y="113" width="31" height="35" rx="5" fill="#dbe6ea" stroke="#7495a6"/>
+        <rect x="207" y="119" width="21" height="11" rx="2" fill="#071a22"/>
+        <text x="217.5" y="127" textAnchor="middle" fontSize="6" fontWeight="900" fill="#46ff9e">4.20</text>
+        <circle cx="211" cy="137" r="3" fill="#718a96"/><circle cx="224" cy="137" r="3" fill="#718a96"/>
+        <path d="M205 144 C196 157 191 161 182 160" fill="none" stroke="#ff4757" strokeWidth="2"/>
+        <path d="M230 144 C239 154 242 158 248 159" fill="none" stroke="#151b20" strokeWidth="2"/>
+        <g transform="translate(225 117) rotate(8)">
+          <rect x="0" y="0" width="24" height="43" rx="6" fill="#ff9d2e" stroke="#ffbf6b"/>
+          <rect x="4" y="5" width="16" height="10" rx="2" fill="#111b20"/>
+          <circle cx="12" cy="26" r="7" fill="#252f35" stroke="#d6dce0"/>
+          <path d="M12 20 L15 28" stroke="#f5f5f5" strokeWidth="1.5"/>
         </g>
       </g>
 
-      <g className="avatarListenFx" filter="url(#loloGlow)">
-        <path d="M50 67 Q39 77 49 88" fill="none" stroke="#52efb1" strokeWidth="3" strokeLinecap="round"/>
-        <path d="M130 67 Q141 77 131 88" fill="none" stroke="#52efb1" strokeWidth="3" strokeLinecap="round"/>
+      {/* técnico sentado */}
+      <g className="avatarPerson">
+        <path d="M56 171 C58 135 75 117 102 113 H126 C151 117 164 136 166 171 Z" fill="url(#shirt)" stroke="#48cbff" strokeWidth="2"/>
+        <path d="M70 151 C58 153 49 162 48 174" fill="none" stroke="#164a71" strokeWidth="18" strokeLinecap="round"/>
+        <path d="M151 147 C166 147 178 151 188 159" fill="none" stroke="#164a71" strokeWidth="18" strokeLinecap="round"/>
+
+        <g className="avatarHead">
+          <ellipse cx="113" cy="78" rx="34" ry="42" fill="url(#skin)" stroke="#83e6ff" strokeWidth="1.6"/>
+          <path d="M79 67 C81 39 97 24 116 25 C136 26 147 40 148 58 C139 50 128 47 117 47 C102 47 90 54 79 67 Z" fill="#283a49"/>
+          <path d="M84 53 C94 37 114 31 133 38" fill="none" stroke="#344f62" strokeWidth="7" strokeLinecap="round"/>
+
+          <g className="avatarBrows">
+            <path d="M91 72 Q99 68 106 71" fill="none" stroke="#755446" strokeWidth="1.6" strokeLinecap="round"/>
+            <path d="M120 71 Q128 68 136 72" fill="none" stroke="#755446" strokeWidth="1.6" strokeLinecap="round"/>
+          </g>
+          <g className="avatarEyes">
+            <ellipse cx="99" cy="79" rx="7" ry="5.4" fill="#fff8f2"/>
+            <ellipse cx="128" cy="79" rx="7" ry="5.4" fill="#fff8f2"/>
+            <ellipse className="avatarEye avatarEyeL" cx="100" cy="79" rx="3.2" ry="3.9" fill="#1b2a32"/>
+            <ellipse className="avatarEye avatarEyeR" cx="127" cy="79" rx="3.2" ry="3.9" fill="#1b2a32"/>
+            <circle cx="101" cy="78" r="1.1" fill="#87eaff"/>
+            <circle cx="128" cy="78" r="1.1" fill="#87eaff"/>
+          </g>
+
+          <path d="M113 81 L111 92 Q114 95 118 92" fill="none" stroke="#bd8064" strokeWidth="1.4" strokeLinecap="round"/>
+          <g className="avatarMouthGroup">
+            <path className="avatarMouth" d="M101 100 Q113 109 125 100 Q113 114 101 100 Z" fill="#94484c"/>
+            <path className="avatarSmile" d="M104 101 Q113 106 122 101" fill="none" stroke="#fff1e8" strokeWidth="2" strokeLinecap="round"/>
+          </g>
+          <path d="M91 96 Q87 90 88 85 M135 96 Q139 90 138 85" fill="none" stroke="#a77c6d" strokeWidth="1" opacity=".35"/>
+        </g>
+
+        {/* celular en mano */}
+        <g className="avatarPhoneHand">
+          <rect x="148" y="121" width="28" height="45" rx="5" fill="#8f9ba4" stroke="#dbe3e7" strokeWidth="2" transform="rotate(-10 162 143)"/>
+          <circle cx="155" cy="128" r="2.5" fill="#18242a"/>
+          <circle cx="157" cy="161" r="9" fill="#efb08a" stroke="#89e9ff" strokeWidth="1.2"/>
+        </g>
+
+        {/* mano izquierda sobre mesa */}
+        <circle cx="69" cy="166" r="9" fill="#efb08a" stroke="#89e9ff" strokeWidth="1.2"/>
+        <rect x="92" y="136" width="40" height="14" rx="7" fill="#0b1f31" stroke="#42c9ff"/>
+        <text x="112" y="146" textAnchor="middle" fontSize="9" fontWeight="900" fill="#9aeaff">LOLO</text>
       </g>
 
+      {/* placa sobre la mesa */}
+      <g className="avatarBoard">
+        <rect x="105" y="151" width="68" height="17" rx="5" fill="#184f43" stroke="#4bf0ba"/>
+        <rect x="113" y="155" width="14" height="9" rx="2" fill="#1d2a2d"/>
+        <rect x="132" y="154" width="8" height="11" rx="2" fill="#d1c18a"/>
+        <circle cx="149" cy="159" r="3" fill="#c9b87d"/>
+        <path d="M106 159 H173" stroke="#6be1be" strokeWidth=".7" opacity=".7"/>
+      </g>
+
+      <g className="avatarListenFx" filter="url(#avatarGlow)">
+        <path d="M70 62 Q59 73 68 86" fill="none" stroke="#51efb2" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M155 62 Q166 73 157 86" fill="none" stroke="#51efb2" strokeWidth="3" strokeLinecap="round"/>
+      </g>
       <g className="avatarThinkFx">
-        <circle cx="136" cy="43" r="4" fill="#ffd66e"/>
-        <circle cx="146" cy="34" r="3" fill="#ffd66e"/>
-        <circle cx="154" cy="24" r="2.2" fill="#ffd66e"/>
+        <circle cx="157" cy="38" r="4" fill="#ffd66e"/><circle cx="168" cy="29" r="3" fill="#ffd66e"/><circle cx="177" cy="19" r="2.2" fill="#ffd66e"/>
       </g>
     </svg>
     <span className="avatarStatus">{label}</span>
