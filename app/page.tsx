@@ -362,7 +362,18 @@ export default function Page() {
     </header>
 
     <div className={"hero "+(speaking?"speaking":"")}>
-      <div className="avatarWrap"><img className="avatar" src={LOLO_FACE} alt="LOLO"/><span className="mouthAnim" aria-hidden="true"></span><span className="liveBadge">{speaking?"HABLANDO":"LOLO"}</span></div>
+      <div className="heroActor" aria-label="LOLO animado">
+        <div className="heroHead">
+          <img className="avatar" src={LOLO_FACE} alt="LOLO"/>
+          <span className="mouthAnim" aria-hidden="true"></span>
+        </div>
+        <div className="heroTorso">LOLO</div>
+        <div className="heroArm heroArmLeft"></div>
+        <div className="heroArm heroArmRight"></div>
+        <div className="heroHand heroHandLeft">✋</div>
+        <div className="heroHand heroHandRight">🛠️</div>
+        <span className="liveBadge">{speaking?"HABLANDO":"LOLO"}</span>
+      </div>
       <div><div className="caption">{caption}</div><div className="wave"><i></i><i></i><i></i><i></i></div></div>
     </div>
 
@@ -371,7 +382,7 @@ export default function Page() {
         <div className="grid">
           <button className="card" onClick={()=>nav("plate")}><b>📷 Analizar tu placa</b><span className="muted small">Visión IA + marcas automáticas</span></button>
           <button className="card" onClick={()=>nav("talk")}><b>🎤 Hablar con LOLO</b><span className="muted small">Chat + micrófono + voz</span></button>
-          <button className="card workshopCard" onClick={()=>nav("workshop")}><b>🧰 Taller interactivo</b><span className="muted small">LOLO se mueve y te muestra la reparación</span></button>
+          <button className="card workshopCard" onClick={()=>{setTab("workshop");void runWorkshopStep(workshopStep)}}><b>🧰 Taller interactivo</b><span className="muted small">LOLO se mueve y te muestra la reparación</span></button>
           <button className="card" onClick={()=>nav("settings")}><b>🔊 Voz de LOLO</b><span className="muted small">IA masculina + respaldo del teléfono</span></button>
         </div>
       </div>
@@ -497,7 +508,7 @@ export default function Page() {
       <button className={tab==="home"?"on":""} onClick={()=>nav("home")}><b>⌂</b>Inicio</button>
       <button className={tab==="talk"?"on":""} onClick={()=>nav("talk")}><b>🎤</b>Hablar</button>
       <button className={tab==="plate"?"on":""} onClick={()=>nav("plate")}><b>📷</b>Tu placa</button>
-      <button className={tab==="workshop"?"on":""} onClick={()=>nav("workshop")}><b>🧰</b>Taller</button>
+      <button className={tab==="workshop"?"on":""} onClick={()=>{setTab("workshop");void runWorkshopStep(workshopStep)}}><b>🧰</b>Taller</button>
       <button className={tab==="settings"?"on":""} onClick={()=>nav("settings")}><b>⚙️</b>Ajustes</button>
     </nav>
   </main>
