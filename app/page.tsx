@@ -80,6 +80,93 @@ const WORKSHOP_STEPS = [
   }
 ] as const;
 
+
+type AvatarMode = "idle"|"listening"|"thinking"|"speaking"|"pointing";
+
+function LoloAvatar({mode="idle",compact=false}:{mode?:AvatarMode;compact?:boolean}){
+  const label=mode==="listening"?"ESCUCHANDO":mode==="thinking"?"PENSANDO":mode==="speaking"?"HABLANDO":mode==="pointing"?"TE MUESTRO":"LOLO";
+  return <div className={"loloAvatar "+mode+(compact?" compact":"")} aria-label={"LOLO "+label.toLowerCase()}>
+    <svg viewBox="0 0 180 180" role="img" aria-hidden="true">
+      <defs>
+        <linearGradient id="loloHalo" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#45d8ff"/>
+          <stop offset="100%" stopColor="#176cf5"/>
+        </linearGradient>
+        <linearGradient id="loloJacket" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#173c5a"/>
+          <stop offset="100%" stopColor="#071927"/>
+        </linearGradient>
+        <linearGradient id="loloFace" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f3c8a8"/>
+          <stop offset="100%" stopColor="#d99f7a"/>
+        </linearGradient>
+        <filter id="loloGlow">
+          <feGaussianBlur stdDeviation="3.2" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <circle className="avatarHalo" cx="90" cy="87" r="73" fill="none" stroke="url(#loloHalo)" strokeWidth="3"/>
+      <circle className="avatarHaloInner" cx="90" cy="87" r="63" fill="#0b2438" opacity=".8"/>
+
+      <g className="avatarBody">
+        <path d="M39 168 C43 135 58 121 78 117 L102 117 C122 121 137 135 141 168 Z" fill="url(#loloJacket)" stroke="#3ebeff" strokeWidth="2"/>
+        <path d="M81 117 L90 134 L99 117" fill="#0d2639" stroke="#6bd5ff" strokeWidth="1.6"/>
+        <rect x="77" y="139" width="26" height="15" rx="7.5" fill="#0b1f31" stroke="#2fbaff"/>
+        <text x="90" y="150" textAnchor="middle" fontSize="9" fontWeight="900" fill="#7bdcff">LOLO</text>
+      </g>
+
+      <g className="avatarHead">
+        <path d="M60 69 C60 43 72 28 91 28 C112 28 122 44 121 69 L118 91 C116 108 105 119 90 119 C74 119 64 108 62 91 Z" fill="url(#loloFace)" stroke="#7dd9ff" strokeWidth="1.8"/>
+        <path d="M59 65 C60 41 73 27 92 27 C106 27 118 34 123 48 C112 44 103 43 94 44 C82 46 71 52 59 65 Z" fill="#18222c"/>
+        <path d="M66 49 C75 37 91 32 105 37" fill="none" stroke="#293947" strokeWidth="5" strokeLinecap="round"/>
+
+        <g className="avatarEyes">
+          <path d="M70 76 Q77 72 84 76" fill="none" stroke="#2b2f33" strokeWidth="2.2" strokeLinecap="round"/>
+          <path d="M97 76 Q104 72 111 76" fill="none" stroke="#2b2f33" strokeWidth="2.2" strokeLinecap="round"/>
+          <ellipse className="avatarEye avatarEyeL" cx="78" cy="79" rx="3.2" ry="4.3" fill="#101820"/>
+          <ellipse className="avatarEye avatarEyeR" cx="104" cy="79" rx="3.2" ry="4.3" fill="#101820"/>
+          <circle cx="79" cy="78" r="1" fill="#8ce7ff"/>
+          <circle cx="105" cy="78" r="1" fill="#8ce7ff"/>
+        </g>
+
+        <path d="M90 80 L87 91 Q90 94 94 91" fill="none" stroke="#b8795e" strokeWidth="1.6" strokeLinecap="round"/>
+        <g className="avatarMouthGroup">
+          <rect className="avatarMouth" x="80" y="99" width="20" height="4" rx="2" fill="#7e3c40"/>
+          <rect className="avatarSmile" x="83" y="99" width="14" height="1.6" rx=".8" fill="#f6d7cc" opacity=".9"/>
+        </g>
+        <path d="M72 96 Q90 111 108 96" fill="none" stroke="#c4876c" strokeWidth="1.2" opacity=".35"/>
+      </g>
+
+      <g className="avatarLeftArm">
+        <path d="M60 133 C48 133 40 143 38 158" fill="none" stroke="#173c5a" strokeWidth="17" strokeLinecap="round"/>
+        <circle cx="37" cy="160" r="9" fill="#e2ad88" stroke="#74d9ff" strokeWidth="1.4"/>
+      </g>
+
+      <g className="avatarRightArm">
+        <path d="M120 133 C132 134 141 144 145 157" fill="none" stroke="#173c5a" strokeWidth="17" strokeLinecap="round"/>
+        <g className="avatarRightHand">
+          <circle cx="147" cy="160" r="9" fill="#e2ad88" stroke="#74d9ff" strokeWidth="1.4"/>
+          <path d="M151 158 L165 151" stroke="#e2ad88" strokeWidth="5" strokeLinecap="round"/>
+          <path d="M151 158 L164 157" stroke="#e2ad88" strokeWidth="4" strokeLinecap="round"/>
+        </g>
+      </g>
+
+      <g className="avatarListenFx" filter="url(#loloGlow)">
+        <path d="M50 67 Q39 77 49 88" fill="none" stroke="#51e0a8" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M130 67 Q141 77 131 88" fill="none" stroke="#51e0a8" strokeWidth="3" strokeLinecap="round"/>
+      </g>
+
+      <g className="avatarThinkFx">
+        <circle cx="136" cy="43" r="4" fill="#ffd36f"/>
+        <circle cx="146" cy="34" r="3" fill="#ffd36f"/>
+        <circle cx="154" cy="24" r="2.2" fill="#ffd36f"/>
+      </g>
+    </svg>
+    <span className="avatarStatus">{label}</span>
+  </div>
+}
+
 export default function Page() {
   const [tab,setTab]=useState("talk");
   const [speaking,setSpeaking]=useState(false);
@@ -463,12 +550,8 @@ export default function Page() {
       <div className="status"><span className={"dot "+(busy?"":"on")}></span>{busy?"Procesando…":"Listo"}</div>
     </header>
 
-    <div className={"hero tutorHero "+(speaking?"speaking ":"")+(recording?"listening":"")}>
-      <div className="avatarWrap">
-        <img className="avatar" src={LOLO_FACE} alt="LOLO"/>
-        <span className="mouthAnim" aria-hidden="true"></span>
-        <span className="liveBadge">{recording?"ESCUCHANDO":speaking?"HABLANDO":busy?"PENSANDO":"LOLO"}</span>
-      </div>
+    <div className={"hero tutorHero "+(speaking?"speaking ":"")+(recording?"listening ":"")+(busy?"thinking ":"")}>
+      <LoloAvatar mode={recording?"listening":busy?"thinking":speaking?"speaking":(tab==="plate"&&vision?.can_mark)?"pointing":"idle"}/>
       <div className="heroWords">
         <div className="caption">{caption}</div>
         <div className="wave"><i></i><i></i><i></i><i></i></div>
@@ -727,7 +810,7 @@ function WorkshopScene({step,active,image,vision}:{step:number;active:boolean;im
       <div className="photoShade"></div>
 
       <div className="loloCoach">
-        <div className="coachFace"><img src={LOLO_FACE} alt="LOLO"/></div>
+        <LoloAvatar mode={active?"pointing":"idle"} compact/>
         <div className="coachBubble">{active?"Te muestro este paso":"LOLO"}</div>
       </div>
 
