@@ -43,7 +43,6 @@ header{position:sticky;top:0;z-index:30;background:#06111eef;backdrop-filter:blu
 .settings label{display:block;margin:8px 0 4px}.settings select,.settings input[type=range]{width:100%}.settings select{background:#081927;color:white;border:1px solid #245579;border-radius:11px;padding:10px}
 .status{display:inline-flex;align-items:center;gap:6px;border:1px solid #245579;background:#0b2438;border-radius:999px;padding:7px 10px;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#8495a2}.dot.on{background:var(--ok);box-shadow:0 0 10px var(--ok)}
 nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px solid #183c56;display:grid;grid-template-columns:repeat(5,1fr);z-index:30}nav button{background:none;border:0;color:#8fa7b8;padding:9px 2px 11px;font-size:11px}nav b{display:block;font-size:20px}nav button.on{color:#4fc1ff}
-.formGrid{grid-template-columns:1fr}.composer{grid-template-columns:auto 1fr auto}.composer .photoButton{grid-column:1/2}}
 
 
 /* Taller interactivo LOLO — sobre foto real */
