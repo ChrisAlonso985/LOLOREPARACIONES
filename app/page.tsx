@@ -37,6 +37,49 @@ const QUIZ = [
   ["Un pitido entre VBUS y GND…",["Siempre confirma corto","Nunca importa","Debe interpretarse junto con resistencia y circuito"],2],
 ] as const;
 
+const WORKSHOP_STEPS = [
+  {
+    title:"1. Diagnóstico visual",
+    scene:"inspect",
+    text:"Primero observamos. Revisá suciedad, corrosión, golpes, patas flojas y el estado del conector. Todavía no aplicamos calor ni cambiamos nada."
+  },
+  {
+    title:"2. Desconectar batería",
+    scene:"battery",
+    text:"Antes de soldar o aplicar calor, desconectamos la batería. Este paso reduce el riesgo de cortos y daños durante el trabajo."
+  },
+  {
+    title:"3. Preparar y proteger",
+    scene:"protect",
+    text:"Sujetamos la placa y protegemos flex, plásticos y componentes cercanos. Usamos flux de forma controlada y preparamos la zona de trabajo."
+  },
+  {
+    title:"4. Retirar el pin de carga",
+    scene:"remove",
+    text:"Calentamos de manera controlada hasta que la soldadura esté realmente fundida. Recién entonces retiramos el conector sin hacer palanca. La temperatura exacta depende de la estación, aleación y masa térmica."
+  },
+  {
+    title:"5. Limpiar pads",
+    scene:"clean",
+    text:"Limpiamos la zona, retiramos exceso de soldadura y observamos si hay pads o pistas levantadas. No colocamos el repuesto hasta confirmar que la base está sana."
+  },
+  {
+    title:"6. Colocar y soldar",
+    scene:"install",
+    text:"Alineamos el conector nuevo, fijamos anclajes y soldamos los contactos. Después inspeccionamos que no haya puentes entre pines."
+  },
+  {
+    title:"7. Medir con tester",
+    scene:"measure",
+    text:"Antes de energizar, verificamos continuidad o resistencia con batería y cargador desconectados. Para medir voltaje, LOLO necesita confirmar visualmente un punto seguro de masa y el punto de alimentación."
+  },
+  {
+    title:"8. Prueba final",
+    scene:"test",
+    text:"Terminamos con inspección, prueba de carga y, si corresponde, datos. Si algo no responde como esperamos, volvemos al diagnóstico en vez de cambiar piezas al azar."
+  }
+] as const;
+
 export default function Page() {
   const [tab,setTab]=useState("home");
   const [speaking,setSpeaking]=useState(false);
@@ -52,6 +95,8 @@ export default function Page() {
   const [vision,setVision]=useState<VisionResult|null>(null);
   const [visionError,setVisionError]=useState("");
   const [progress,setProgress]=useState<number[]>([]);
+  const [workshopStep,setWorkshopStep]=useState(0);
+  const [workshopRunning,setWorkshopRunning]=useState(false);
   const [voiceMode,setVoiceMode]=useState<"ai"|"device">("ai");
   const [deviceVoice,setDeviceVoice]=useState("");
   const [voices,setVoices]=useState<SpeechSynthesisVoice[]>([]);
@@ -295,6 +340,16 @@ export default function Page() {
     width:Math.max(45,c.radius*2*imageBox.width),height:Math.max(45,c.radius*2*imageBox.width)
   });
 
+  const runWorkshopStep=async(i:number)=>{
+    const n=Math.max(0,Math.min(WORKSHOP_STEPS.length-1,i));
+    setWorkshopStep(n);
+    setWorkshopRunning(true);
+    const step=WORKSHOP_STEPS[n];
+    setCaption(step.title+" — "+step.text);
+    await speak(step.text);
+    window.setTimeout(()=>setWorkshopRunning(false),Math.max(2800,step.text.length*38));
+  };
+
   const toggleStep=(i:number)=>{
     const n=progress.includes(i)?progress.filter(x=>x!==i):[...progress,i];
     setProgress(n);localStorage.setItem("lolo.progress",JSON.stringify(n));
@@ -316,7 +371,7 @@ export default function Page() {
         <div className="grid">
           <button className="card" onClick={()=>nav("plate")}><b>📷 Analizar tu placa</b><span className="muted small">Visión IA + marcas automáticas</span></button>
           <button className="card" onClick={()=>nav("talk")}><b>🎤 Hablar con LOLO</b><span className="muted small">Chat + micrófono + voz</span></button>
-          <button className="card" onClick={()=>nav("course")}><b>🔌 Curso pin de carga</b><span className="muted small">7 pasos prácticos</span></button>
+          <button className="card workshopCard" onClick={()=>nav("workshop")}><b>🧰 Taller interactivo</b><span className="muted small">LOLO se mueve y te muestra la reparación</span></button>
           <button className="card" onClick={()=>nav("settings")}><b>🔊 Voz de LOLO</b><span className="muted small">IA masculina + respaldo del teléfono</span></button>
         </div>
       </div>
@@ -331,7 +386,8 @@ export default function Page() {
         <div className="composer">
           <button className={"circle "+(recording?"on":"")} onClick={startMic} title={recording?"Detener y enviar":"Hablar con LOLO"}>{recording?"⏹️":"🎤"}</button>
           <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")sendChat()}} placeholder="Preguntale algo a LOLO"/>
-          <label className="circle photoButton" style={{display:"grid",placeItems:"center"}}>📷<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
+          <label className="circle photoButton" style={{display:"grid",placeItems:"center"}} title="Sacar foto">📷<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
+          <label className="circle galleryButton" style={{display:"grid",placeItems:"center"}} title="Subir imagen">🖼️<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <button className="circle" onClick={()=>sendChat()} disabled={busy}>➤</button>
         </div>
       </div>
@@ -339,8 +395,11 @@ export default function Page() {
 
     <section className={"section "+(tab==="plate"?"active":"")}>
       <div className="panel"><h2>Tu placa + visión IA</h2>
-        <p className="muted">Sacá una foto enfocada de la subplaca completa y del pin de carga. Cuanta más zona alrededor se vea, mejor puede seguir pistas y test points.</p>
-        <input type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/>
+        <p className="muted">Sacá una foto enfocada o subí una imagen guardada de la subplaca completa y del pin de carga. Cuanta más zona alrededor se vea, mejor puede seguir pistas y test points.</p>
+        <div className="uploadActions">
+          <label className="btn primary">📷 Sacar foto<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
+          <label className="btn">🖼️ Subir imagen<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
+        </div>
         <div ref={stageRef} className="photoStage" style={{marginTop:10}}>
           {!image&&<span className="muted">Todavía no cargaste una foto.</span>}
           {image&&<img ref={imageRef} onLoad={()=>window.dispatchEvent(new Event("resize"))} src={image} alt="Placa a analizar"/>}
@@ -376,9 +435,47 @@ export default function Page() {
       </div>
     </section>
 
-    <section className={"section "+(tab==="course"?"active":"")}>
-      <div className="panel"><h2>Curso: pin de carga</h2><div className="steps">{COURSE.map((s,i)=><div className="step" key={i} onClick={()=>toggleStep(i)}><b>{progress.includes(i)?"✅":"⬜"} {i+1}. {s[0]}</b><span className="muted small">{s[1]}</span></div>)}</div></div>
-      <div className="panel"><h2>Práctica</h2>{QUIZ.map((q,qi)=><Quiz key={qi} q={q}/>)}</div>
+    <section className={"section "+(tab==="workshop"?"active":"")}>
+      <div className="panel workshopPanel">
+        <div className="workshopHead">
+          <div>
+            <h2>🧰 Taller interactivo: cambio de pin de carga</h2>
+            <p className="muted">LOLO te muestra cada etapa con movimiento y voz. Es una simulación didáctica: sobre una placa real, LOLO primero analiza la foto antes de marcar puntos de medición.</p>
+          </div>
+          <span className="workshopCounter">{workshopStep+1}/{WORKSHOP_STEPS.length}</span>
+        </div>
+
+        <WorkshopScene step={workshopStep} active={workshopRunning||speaking}/>
+
+        <div className="workshopInfo">
+          <div className="workshopStepTitle">{WORKSHOP_STEPS[workshopStep].title}</div>
+          <p>{WORKSHOP_STEPS[workshopStep].text}</p>
+          <div className="stepDots">
+            {WORKSHOP_STEPS.map((_,i)=><button key={i} className={i===workshopStep?"on":""} onClick={()=>runWorkshopStep(i)} aria-label={"Paso "+(i+1)}>{i+1}</button>)}
+          </div>
+          <div className="actions">
+            <button className="btn" disabled={workshopStep===0} onClick={()=>runWorkshopStep(workshopStep-1)}>← Anterior</button>
+            <button className="btn primary" onClick={()=>runWorkshopStep(workshopStep)}>▶️ Mostrar y explicar</button>
+            <button className="btn" disabled={workshopStep===WORKSHOP_STEPS.length-1} onClick={()=>runWorkshopStep(workshopStep+1)}>Siguiente →</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="panel">
+        <h3>📷 Pasar de la simulación a tu placa real</h3>
+        <p className="muted">Después de ver el paso, sacá una foto o subí una imagen. LOLO analiza la placa y, si tiene suficiente evidencia, marca dónde medir.</p>
+        <div className="uploadActions">
+          <label className="btn primary">📷 Sacar foto<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
+          <label className="btn">🖼️ Subir imagen<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
+          <button className="btn" onClick={()=>nav("plate")}>Ir a Tu placa →</button>
+        </div>
+      </div>
+
+      <div className="panel">
+        <h3>Contenido del curso</h3>
+        <div className="steps">{COURSE.map((s,i)=><div className="step" key={i} onClick={()=>toggleStep(i)}><b>{progress.includes(i)?"✅":"⬜"} {i+1}. {s[0]}</b><span className="muted small">{s[1]}</span></div>)}</div>
+      </div>
+      <div className="panel"><h3>Práctica</h3>{QUIZ.map((q,qi)=><Quiz key={qi} q={q}/>)}</div>
     </section>
 
     <section className={"section "+(tab==="settings"?"active":"")}>
@@ -400,10 +497,48 @@ export default function Page() {
       <button className={tab==="home"?"on":""} onClick={()=>nav("home")}><b>⌂</b>Inicio</button>
       <button className={tab==="talk"?"on":""} onClick={()=>nav("talk")}><b>🎤</b>Hablar</button>
       <button className={tab==="plate"?"on":""} onClick={()=>nav("plate")}><b>📷</b>Tu placa</button>
-      <button className={tab==="course"?"on":""} onClick={()=>nav("course")}><b>🔌</b>Curso</button>
+      <button className={tab==="workshop"?"on":""} onClick={()=>nav("workshop")}><b>🧰</b>Taller</button>
       <button className={tab==="settings"?"on":""} onClick={()=>nav("settings")}><b>⚙️</b>Ajustes</button>
     </nav>
   </main>
+}
+
+
+function WorkshopScene({step,active}:{step:number;active:boolean}){
+  const scene=WORKSHOP_STEPS[step].scene;
+  return <div className={"workshopStage scene-"+scene+" "+(active?"running":"")}>
+    <div className="techCharacter">
+      <div className="techHead"><img src={LOLO_FACE} alt="LOLO"/></div>
+      <div className="techBody">LOLO</div>
+      <div className="techArm armA"></div>
+      <div className="techArm armB"></div>
+    </div>
+
+    <div className="workbench">
+      <div className="demoBoard">
+        <div className="trace t1"></div><div className="trace t2"></div>
+        <div className="demoChip chip1"></div><div className="demoChip chip2"></div>
+        <div className="demoPort"><span></span></div>
+        <div className="batterySocket"></div>
+        <div className="demoPads"><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div className="batteryPlug">🔋</div>
+      <div className="tool magnifier">🔍</div>
+      <div className="tool shield">🛡️</div>
+      <div className="tool flux">💧</div>
+      <div className="tool hotair">♨️</div>
+      <div className="tool tweezers">✂️</div>
+      <div className="tool braid">▰▰▰</div>
+      <div className="tool newPort">▣</div>
+      <div className="tool iron">🖊️</div>
+      <div className="probe probeBlack"><b>−</b></div>
+      <div className="probe probeRed"><b>+</b></div>
+      <div className="tool cable">🔌</div>
+      <div className="chargeBadge">⚡ CARGA OK</div>
+    </div>
+
+    <div className="sceneCaption">{WORKSHOP_STEPS[step].title}</div>
+  </div>
 }
 
 function Quiz({q}:{q:readonly [string,readonly string[],number]}){
