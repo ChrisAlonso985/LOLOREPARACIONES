@@ -52,6 +52,10 @@ export default function Page() {
   const stageRef=useRef<HTMLDivElement|null>(null);
   const [imageBox,setImageBox]=useState({left:0,top:0,width:0,height:0});
   const audioRef=useRef<HTMLAudioElement|null>(null);
+  const [recording,setRecording]=useState(false);
+  const recorderRef=useRef<MediaRecorder|null>(null);
+  const micStreamRef=useRef<MediaStream|null>(null);
+  const micChunksRef=useRef<Blob[]>([]);
 
   useEffect(()=>{
     const saved=localStorage.getItem("lolo.progress");
@@ -138,15 +142,60 @@ export default function Page() {
 
   const startMic=async()=>{
     setMicError("");
-    const SR=(window as any).SpeechRecognition||(window as any).webkitSpeechRecognition;
-    if(!SR){setMicError("Este navegador no ofrece reconocimiento de voz. Probá Chrome en Android.");return}
+
+    if(recording){
+      if(recorderRef.current?.state === "recording") recorderRef.current.stop();
+      return;
+    }
+
+    if(!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined"){
+      setMicError("Este navegador no permite grabar audio. Probá Chrome actualizado en Android.");
+      return;
+    }
+
     try{
-      const st=await navigator.mediaDevices.getUserMedia({audio:true});st.getTracks().forEach(t=>t.stop());
-      const r=new SR();r.lang="es-AR";r.continuous=false;r.interimResults=false;
-      r.onresult=(e:any)=>{const t=e.results[0][0].transcript;setInput(t);sendChat(t)};
-      r.onerror=()=>setMicError("No pude usar el micrófono. Revisá el permiso del sitio.");
-      r.start();
-    }catch{setMicError("El micrófono está bloqueado. Permitilo desde la configuración del sitio.")}
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      micStreamRef.current=stream;
+      const preferred=MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
+      const rec=preferred ? new MediaRecorder(stream,{mimeType:preferred}) : new MediaRecorder(stream);
+      recorderRef.current=rec;
+      micChunksRef.current=[];
+
+      rec.ondataavailable=(e:BlobEvent)=>{if(e.data.size>0)micChunksRef.current.push(e.data)};
+      rec.onstop=async()=>{
+        setRecording(false);
+        micStreamRef.current?.getTracks().forEach(t=>t.stop());
+        const blob=new Blob(micChunksRef.current,{type:rec.mimeType||"audio/webm"});
+        if(blob.size<800){
+          setMicError("No escuché suficiente audio. Tocá el micrófono, hablá y volvé a tocar para enviar.");
+          return;
+        }
+        setCaption("Estoy escuchando lo que dijiste…");
+        try{
+          const fd=new FormData();
+          fd.append("audio",new File([blob],"voz-lolo.webm",{type:blob.type}));
+          const r=await fetch("/api/transcribe",{method:"POST",body:fd});
+          const j=await r.json();
+          if(!r.ok)throw new Error(j.error||"No pude transcribir");
+          const text=String(j.text||"").trim();
+          if(!text)throw new Error("No pude reconocer lo que dijiste");
+          setInput(text);
+          await sendChat(text);
+        }catch(e:any){
+          setMicError(e?.message||"No pude procesar el audio.");
+          setCaption("No pude entender el audio. Probá de nuevo.");
+        }
+      };
+
+      rec.start();
+      setRecording(true);
+      setCaption("Te escucho. Hablá y tocá de nuevo el micrófono para enviar.");
+      window.setTimeout(()=>{if(rec.state==="recording")rec.stop()},20000);
+    }catch{
+      setMicError("El micrófono está bloqueado. Permitilo desde la configuración del sitio.");
+    }
   };
 
   const compressImage=(file:File)=>new Promise<string>((resolve,reject)=>{
@@ -221,7 +270,7 @@ export default function Page() {
         {micError&&<div className="notice">{micError}</div>}
         <div className="chat">{messages.map((m,i)=><div key={i} className={"msg "+(m.role==="user"?"user":"bot")}>{m.content}</div>)}{busy&&<div className="msg sys">LOLO está pensando…</div>}</div>
         <div className="composer">
-          <button className="circle" onClick={startMic}>🎤</button>
+          <button className={"circle "+(recording?"on":"")} onClick={startMic} title={recording?"Detener y enviar":"Hablar con LOLO"}>{recording?"⏹️":"🎤"}</button>
           <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")sendChat()}} placeholder="Preguntale algo a LOLO"/>
           <label className="circle photoButton" style={{display:"grid",placeItems:"center"}}>📷<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <button className="circle" onClick={()=>sendChat()} disabled={busy}>➤</button>
