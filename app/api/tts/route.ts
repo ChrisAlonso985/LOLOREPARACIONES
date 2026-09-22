@@ -1,3 +1,4 @@
+import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -10,35 +11,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Falta texto." }, { status: 400 });
     }
 
-    const token = process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN;
+    const token = process.env.OPENAI_API_KEY;
     if (!token) {
-      return NextResponse.json({ error: "AI Gateway no está autenticado." }, { status: 503 });
+      return NextResponse.json({ error: "LOLO todavía no tiene OPENAI_API_KEY configurada en Railway." }, { status: 503 });
     }
 
-    const response = await fetch("https://ai-gateway.vercel.sh/v4/ai/speech-model", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-        "ai-model-id": process.env.LOLO_TTS_MODEL || "openai/tts-1"
-      },
-      body: JSON.stringify({
-        text: text.slice(0, 3500),
-        voice: process.env.LOLO_TTS_VOICE || "onyx",
-        outputFormat: "mp3",
-        speed: 0.98,
-        language: "es",
-        instructions: "Voz masculina, cálida, clara, docente y tranquila. Español rioplatense/argentino cuando sea posible."
-      })
+    const client = new OpenAI({ apiKey: token });
+    const speech = await client.audio.speech.create({
+      model: process.env.LOLO_TTS_MODEL || "gpt-4o-mini-tts",
+      voice: (process.env.LOLO_TTS_VOICE || "onyx") as any,
+      input: text.slice(0, 3500),
+      instructions: "Voz masculina, cálida, clara y docente. Hablá en español argentino, con ritmo natural y sin sonar robótico."
     });
 
-    const raw = await response.text();
-    if (!response.ok) {
-      console.error(raw);
-      return NextResponse.json({ error: "No se pudo generar la voz IA." }, { status: 502 });
-    }
-    const json = JSON.parse(raw);
-    return NextResponse.json({ audio: json.audio, mime: "audio/mpeg", warnings: json.warnings || [] });
+    const buffer = Buffer.from(await speech.arrayBuffer());
+    return NextResponse.json({ audio: buffer.toString("base64"), mime: "audio/mpeg" });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ error: error?.message || "Error de voz" }, { status: 500 });
