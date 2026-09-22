@@ -119,3 +119,20 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .bigMic{min-height:108px}.composer{grid-template-columns:auto minmax(0,1fr) auto auto auto}.composer .photoButton,.composer .galleryButton{grid-column:auto}
   .learnCard{align-items:flex-start;flex-direction:column}.learnCard .btn{width:100%}
 }
+
+/* Cuenta y planes Mercado Pago */
+.accountPanel{border-color:#2a6d97}
+.accountHead{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.accountHead h2{margin:0}.accountHead p{margin:4px 0 0}
+.paymentState{border-radius:999px;padding:7px 10px;font-size:11px;font-weight:900;white-space:nowrap;border:1px solid #806d28;background:#342c15;color:#ffe5a3}
+.paymentState.ready{border-color:#2c8a65;background:#12372d;color:#c9f7e5}
+.paymentEmail{margin:15px 0}.paymentEmail small{display:block;margin-top:5px}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:12px}
+.planCard{position:relative;border:1px solid #275677;background:linear-gradient(155deg,#0c2940,#071724);border-radius:18px;padding:16px;display:flex;flex-direction:column;min-height:235px}
+.planCard.featured{border-color:#36aef1}
+.planTag{align-self:flex-start;font-size:10px;font-weight:950;letter-spacing:.7px;border:1px solid #3479a5;border-radius:999px;padding:4px 7px;color:#8fd7ff}
+.planCard h3{font-size:20px;margin:12px 0 5px}
+.planCard p{color:var(--muted);font-size:13px;line-height:1.45;flex:1}
+.price{font-size:28px;font-weight:950;margin:4px 0}.price small{font-size:13px;color:var(--muted);font-weight:700}
+.payBtn{width:100%;margin-top:10px;min-height:46px}
+@media(max-width:600px){.plans{grid-template-columns:1fr}.accountHead{align-items:center}.paymentState{max-width:130px;text-align:center}}

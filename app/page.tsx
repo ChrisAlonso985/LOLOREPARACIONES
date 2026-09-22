@@ -109,6 +109,10 @@ export default function Page() {
   const greetingAudioRef=useRef<HTMLAudioElement|null>(null);
   const [recording,setRecording]=useState(false);
   const [conversationMode,setConversationMode]=useState(true);
+  const [paymentEmail,setPaymentEmail]=useState("");
+  const [paymentBusy,setPaymentBusy]=useState<"monthly"|"lifetime"|null>(null);
+  const [paymentError,setPaymentError]=useState("");
+  const [mpConfigured,setMpConfigured]=useState(false);
   const recorderRef=useRef<MediaRecorder|null>(null);
   const micStreamRef=useRef<MediaStream|null>(null);
   const micChunksRef=useRef<Blob[]>([]);
@@ -160,6 +164,13 @@ export default function Page() {
   },[deviceVoice]);
 
   useEffect(()=>{messagesRef.current=messages},[messages]);
+
+  useEffect(()=>{
+    fetch("/api/payments/status")
+      .then(r=>r.json())
+      .then(j=>setMpConfigured(Boolean(j.configured)))
+      .catch(()=>setMpConfigured(false));
+  },[]);
 
   useEffect(()=>{
     const el=chatRef.current;
@@ -398,6 +409,30 @@ export default function Page() {
     finally{setBusy(false)}
   };
 
+  const startPayment=async(plan:"monthly"|"lifetime")=>{
+    setPaymentError("");
+    const email=paymentEmail.trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+      setPaymentError("Ingresá un correo válido. Ese correo se usará para vincular el acceso del alumno.");
+      return;
+    }
+    setPaymentBusy(plan);
+    try{
+      const r=await fetch("/api/payments/create",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({plan,email})
+      });
+      const j=await r.json();
+      if(!r.ok) throw new Error(j.error||"No pude iniciar el pago.");
+      if(!j.url) throw new Error("Mercado Pago no devolvió un enlace de pago.");
+      window.location.href=j.url;
+    }catch(e:any){
+      setPaymentError(e?.message||"No pude iniciar Mercado Pago.");
+      setPaymentBusy(null);
+    }
+  };
+
   const markerStyle=(m:Marker)=>({left:imageBox.left+m.x*imageBox.width,top:imageBox.top+m.y*imageBox.height});
   const cautionStyle=(c:Caution)=>({
     left:imageBox.left+c.x*imageBox.width,top:imageBox.top+c.y*imageBox.height,
@@ -443,7 +478,7 @@ export default function Page() {
           <button className="card" onClick={()=>nav("plate")}><b>📷 Analizar tu placa</b><span className="muted small">Visión IA + marcas automáticas</span></button>
           <button className="card" onClick={()=>nav("talk")}><b>🎤 Hablar con LOLO</b><span className="muted small">Chat + micrófono + voz</span></button>
           <button className="card workshopCard" onClick={()=>nav("learn")}><b>📘 Aprender con LOLO</b><span className="muted small">Clases conversadas, paso a paso</span></button>
-          <button className="card" onClick={()=>nav("settings")}><b>🔊 Voz de LOLO</b><span className="muted small">IA masculina + respaldo del teléfono</span></button>
+          <button className="card" onClick={()=>nav("settings")}><b>💳 Planes LOLO</b><span className="muted small">$12.000 mensual o $120.000 permanente</span></button>
         </div>
       </div>
       <div className="panel"><div className="tip good"><b>Regla de LOLO:</b> si la IA no puede justificar visualmente dónde está VBUS, no marca un punto. Te pide una foto mejor, modelo, esquema o una prueba adicional.</div></div>
@@ -601,8 +636,50 @@ export default function Page() {
     </section>
 
     <section className={"section "+(tab==="settings"?"active":"")}>
-      <div className="panel settings"><h2>Voz de LOLO</h2>
-        <div className="tip good">LOLO usa por defecto su <b>voz IA masculina</b>. Ya no cambia automáticamente a una voz femenina del teléfono.</div>
+      <div className="panel accountPanel">
+        <div className="accountHead">
+          <div>
+            <h2>Mi cuenta LOLO</h2>
+            <p className="muted">Elegí cómo querés acceder a tu profesor IA.</p>
+          </div>
+          <span className={"paymentState "+(mpConfigured?"ready":"pending")}>{mpConfigured?"Mercado Pago listo":"Mercado Pago pendiente"}</span>
+        </div>
+
+        <div className="field paymentEmail">
+          <label>Correo del alumno</label>
+          <input type="email" value={paymentEmail} onChange={e=>setPaymentEmail(e.target.value)} placeholder="alumno@email.com" autoComplete="email"/>
+          <small className="muted">Se usará para vincular el pago con la cuenta del alumno.</small>
+        </div>
+
+        {paymentError&&<div className="notice">{paymentError}</div>}
+
+        <div className="plans">
+          <article className="planCard featured">
+            <div className="planTag">MENSUAL</div>
+            <h3>LOLO Mensual</h3>
+            <div className="price">$12.000 <small>/ mes</small></div>
+            <p>Acceso a LOLO, diagnóstico con imágenes, clases, práctica y seguimiento.</p>
+            <button className="btn primary payBtn" onClick={()=>void startPayment("monthly")} disabled={paymentBusy!==null||!mpConfigured}>
+              {paymentBusy==="monthly"?"Abriendo Mercado Pago…":"Pagar con Mercado Pago"}
+            </button>
+          </article>
+
+          <article className="planCard">
+            <div className="planTag">PAGO ÚNICO</div>
+            <h3>LOLO Permanente</h3>
+            <div className="price">$120.000</div>
+            <p>Un solo pago para acceder a LOLO sin cuota mensual.</p>
+            <button className="btn payBtn" onClick={()=>void startPayment("lifetime")} disabled={paymentBusy!==null||!mpConfigured}>
+              {paymentBusy==="lifetime"?"Abriendo Mercado Pago…":"Pagar con Mercado Pago"}
+            </button>
+          </article>
+        </div>
+
+        {!mpConfigured&&<div className="tip warn"><b>Falta vincular tu cuenta de Mercado Pago.</b> La pantalla de cobro ya está preparada; los botones se habilitan cuando se configure la credencial privada en el servidor.</div>}
+      </div>
+
+      <div className="panel settings"><h3>Voz de LOLO</h3>
+        <div className="tip good">LOLO usa por defecto su <b>voz IA masculina</b>.</div>
         <label>Modo de voz</label>
         <select value={voiceMode} onChange={e=>setVoiceMode(e.target.value as any)}>
           <option value="ai">Voz IA masculina de LOLO</option>
@@ -620,7 +697,7 @@ export default function Page() {
       <button className={tab==="talk"?"on":""} onClick={()=>nav("talk")}><b>🎤</b>Hablar</button>
       <button className={tab==="plate"?"on":""} onClick={()=>nav("plate")}><b>📷</b>Tu placa</button>
       <button className={tab==="learn"?"on":""} onClick={()=>nav("learn")}><b>📘</b>Aprender</button>
-      <button className={tab==="settings"?"on":""} onClick={()=>nav("settings")}><b>⚙️</b>Ajustes</button>
+      <button className={tab==="settings"?"on":""} onClick={()=>nav("settings")}><b>👤</b>Mi cuenta</button>
     </nav>
   </main>
 }
