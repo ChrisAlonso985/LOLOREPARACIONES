@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       model: process.env.LOLO_TTS_MODEL || "gpt-4o-mini-tts",
       voice: (process.env.LOLO_TTS_VOICE || "onyx") as any,
       input: text.slice(0, 3500),
-      instructions: "Voz masculina, cálida, clara y docente. Hablá en español argentino, con ritmo natural y sin sonar robótico."
+      instructions: "Sos LOLO, un profesor varón argentino de reparación electrónica. Usá una voz claramente masculina, adulta, de tono medio-grave, cálida y cercana. Español rioplatense/argentino, dicción clara, ritmo continuo y natural, pausas suaves solamente entre ideas. No uses voz femenina, no susurres y no cortes las frases."
     });
 
     const buffer = Buffer.from(await speech.arrayBuffer());
