@@ -60,59 +60,57 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 @media(max-width:600px){.app{padding:8px}.hero{grid-template-columns:108px 1fr;min-height:142px;padding:12px}.heroActor{width:104px;height:126px;transform:scale(.9);transform-origin:center bottom}.grid{grid-template-columns:1fr 1fr}.formGrid{grid-template-columns:1fr}.composer{grid-template-columns:auto 1fr auto}.composer .photoButton{grid-column:1/2}}
 
 
-/* Taller interactivo LOLO */
+/* Taller interactivo LOLO — sobre foto real */
 .workshopCard{border-color:#2c8fc4;background:linear-gradient(145deg,#103755,#082337)}
 .workshopPanel{overflow:hidden}
 .workshopHead{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
 .workshopCounter{background:#0e3150;border:1px solid #2c76ac;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:900;white-space:nowrap}
-.workshopStage{position:relative;min-height:390px;border-radius:20px;overflow:hidden;border:1px solid #245d82;background:radial-gradient(circle at 68% 18%,#163d58,#071827 50%,#03090e);margin:12px 0}
-.workshopStage:before{content:"";position:absolute;left:0;right:0;bottom:0;height:32%;background:linear-gradient(#17384c,#0a1a25);border-top:2px solid #2b6383}
-.sceneCaption{position:absolute;left:14px;top:12px;z-index:8;background:#06111edb;border:1px solid #2c76ac;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900}
-.techCharacter{position:absolute;left:5%;bottom:19%;width:135px;height:225px;z-index:5}
-.techHead{position:absolute;top:0;left:30px;width:78px;height:78px;border-radius:50%;overflow:hidden;border:3px solid #35b7ff;box-shadow:0 0 26px #25aaff55;z-index:4}
-.techHead img{width:100%;height:100%;object-fit:cover}
-.techBody{position:absolute;top:68px;left:18px;width:102px;height:105px;border-radius:32px 32px 18px 18px;background:linear-gradient(160deg,#177fc7,#0a3451);border:2px solid #3bbcff;display:flex;align-items:center;justify-content:center;font-weight:950;letter-spacing:1px;padding-top:25px}
-.techArm{position:absolute;top:96px;width:25px;height:112px;border-radius:16px;background:#166da8;border:2px solid #38b8ff;transform-origin:12px 12px}
-.armA{left:18px;transform:rotate(18deg)}.armB{right:2px;transform:rotate(-24deg)}
-.workshopStage.running .techCharacter{animation:techBodyWork 1.2s ease-in-out infinite}.running .techHead{animation:techNod .65s ease-in-out infinite}.running .armA{animation:armAssist .9s ease-in-out infinite alternate}.running .armB{animation:armWork .55s ease-in-out infinite alternate}
-@keyframes techBodyWork{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes techNod{50%{transform:translateY(3px) rotate(2deg)}}@keyframes armAssist{to{transform:rotate(44deg) translate(4px,5px)}}@keyframes armWork{to{transform:rotate(-64deg) translate(9px,8px)}}
-.workbench{position:absolute;left:24%;right:3%;bottom:13%;height:260px;z-index:3}
-.demoBoard{position:absolute;left:18%;right:8%;bottom:18px;height:150px;border-radius:18px;background:linear-gradient(145deg,#164e3a,#0b2e25);border:3px solid #2b916a;box-shadow:0 14px 30px #0009,inset 0 0 0 2px #75d1a433}
-.demoChip{position:absolute;background:#111a20;border:2px solid #425765;border-radius:5px;box-shadow:0 3px 8px #0007}.chip1{width:52px;height:46px;left:19%;top:27px}.chip2{width:38px;height:32px;right:19%;top:38px}
-.trace{position:absolute;height:3px;background:#c9a64088;border-radius:3px}.t1{width:33%;left:31%;top:49px;transform:rotate(7deg)}.t2{width:27%;left:40%;top:91px;transform:rotate(-6deg)}
-.demoPort{position:absolute;left:50%;bottom:-3px;transform:translateX(-50%);width:74px;height:30px;border-radius:6px 6px 2px 2px;background:#aab5bc;border:3px solid #d9e0e4;box-shadow:0 3px 8px #0008}
-.demoPort:after{content:"";position:absolute;left:12px;right:12px;top:8px;height:8px;border-radius:4px;background:#253139}
-.demoPads{position:absolute;left:calc(50% - 33px);bottom:22px;display:flex;gap:4px}.demoPads i{width:9px;height:18px;background:#d3ae57;border-radius:2px}
-.batterySocket{position:absolute;right:12%;bottom:14px;width:48px;height:22px;background:#e7ddd0;border:2px solid #777;border-radius:4px}
-.batteryPlug{position:absolute;right:4%;bottom:40px;font-size:42px;filter:drop-shadow(0 4px 7px #000)}
-.tool{position:absolute;z-index:7;opacity:0;filter:drop-shadow(0 5px 8px #0009);font-size:42px}.magnifier{left:42%;top:5px}.shield{left:33%;top:35px}.flux{left:57%;top:18px}.hotair{right:13%;top:5px}.tweezers{right:29%;top:18px}.braid{left:43%;bottom:45px;font-size:22px;color:#d3ae57}.newPort{left:48%;top:22px;font-size:48px;color:#dce7ed}.iron{right:20%;bottom:55px;font-size:49px;transform:rotate(45deg)}.cable{left:49%;bottom:0;font-size:46px}
-.probe{position:absolute;z-index:7;width:18px;height:126px;border-radius:12px 12px 6px 6px;opacity:0;transform-origin:50% 100%;box-shadow:0 5px 9px #0008}.probe:before{content:"";position:absolute;top:-31px;left:6px;width:5px;height:38px;background:#c9d0d5}.probe b{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:15px}.probeBlack{background:#151515;color:white;left:36%;bottom:44px;transform:rotate(28deg)}.probeRed{background:#ce3340;color:white;right:21%;bottom:44px;transform:rotate(-28deg)}
-.chargeBadge{position:absolute;right:5%;top:18px;background:#0f3f2e;border:1px solid #3cd89a;color:#bff6df;border-radius:999px;padding:8px 11px;font-weight:900;font-size:12px;opacity:0;z-index:9}
-.scene-inspect .magnifier,.scene-protect .shield,.scene-protect .flux,.scene-remove .hotair,.scene-remove .tweezers,.scene-clean .braid,.scene-install .newPort,.scene-install .iron,.scene-measure .probe,.scene-test .cable,.scene-test .chargeBadge{opacity:1}
-.scene-inspect.running .magnifier{animation:scan 2s ease-in-out infinite}
-.scene-battery.running .batteryPlug{animation:unplug 1.6s ease-in-out infinite alternate}
-.scene-protect.running .shield{animation:protect 1.6s ease-in-out infinite}.scene-protect.running .flux{animation:dropFlux 1.2s ease-in-out infinite}
-.scene-remove.running .hotair{animation:heatMove 1.7s ease-in-out infinite}.scene-remove.running .tweezers{animation:tweeze 1.5s ease-in-out infinite}.scene-remove.running .demoPort{animation:portLift 1.8s ease-in-out infinite}
-.scene-clean.running .braid{animation:wipePads 1.5s ease-in-out infinite}
-.scene-install.running .newPort{animation:installPort 1.7s ease-in-out infinite}.scene-install.running .iron{animation:solderMove 1.5s ease-in-out infinite}
-.scene-measure.running .probeBlack{animation:probeBlack 1.4s ease-in-out infinite alternate}.scene-measure.running .probeRed{animation:probeRed 1.4s ease-in-out infinite alternate}
-.scene-test.running .cable{animation:plugCable 1.4s ease-in-out infinite alternate}.scene-test.running .chargeBadge{animation:chargeGlow .9s ease-in-out infinite alternate}
-@keyframes scan{0%,100%{transform:translate(-90px,18px) rotate(-8deg)}50%{transform:translate(95px,55px) rotate(8deg)}}
-@keyframes unplug{to{transform:translate(70px,-12px) rotate(8deg)}}
-@keyframes protect{50%{transform:scale(1.16);filter:drop-shadow(0 0 16px #58c8ff)}}@keyframes dropFlux{50%{transform:translateY(42px) scale(.82)}}
-@keyframes heatMove{0%,100%{transform:translate(-35px,5px) rotate(-8deg)}50%{transform:translate(-105px,55px) rotate(8deg)}}@keyframes tweeze{50%{transform:translate(-42px,62px) rotate(18deg)}}@keyframes portLift{0%,55%{transform:translateX(-50%)}85%,100%{transform:translate(-50%,-24px) rotate(3deg)}}
-@keyframes wipePads{0%,100%{transform:translateX(-46px)}50%{transform:translateX(58px)}}
-@keyframes installPort{0%{transform:translateY(-45px) scale(.8);opacity:.2}50%,100%{transform:translateY(82px) scale(1);opacity:1}}@keyframes solderMove{0%,100%{transform:translate(30px,-22px) rotate(50deg)}50%{transform:translate(-55px,18px) rotate(38deg)}}
-@keyframes probeBlack{to{transform:translate(15px,-15px) rotate(20deg)}}@keyframes probeRed{to{transform:translate(-18px,-12px) rotate(-20deg)}}
-@keyframes plugCable{to{transform:translateY(-47px)}}@keyframes chargeGlow{to{box-shadow:0 0 24px #3cd89aaa;transform:scale(1.05)}}
+.workshopStage{position:relative;min-height:430px;border-radius:20px;overflow:hidden;border:1px solid #245d82;background:#02090f;margin:12px 0;display:flex;align-items:center;justify-content:center}
+.workshopBoardPhoto{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#02090f;z-index:1}
+.photoShade{position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,#02090fa8 0%,transparent 28%,transparent 78%,#02090f42 100%);pointer-events:none}
+.sceneCaption{position:absolute;left:14px;top:12px;z-index:20;background:#06111ee8;border:1px solid #2c76ac;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:900}
+.orientationTag{position:absolute;left:50%;bottom:9px;transform:translateX(-50%);z-index:20;background:#06111ee8;border:1px solid #806d28;color:#ffe6a4;border-radius:999px;padding:5px 9px;font-size:10px;white-space:nowrap}
+.workshopEmpty{z-index:5;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;color:#d7e6ef;padding:30px}
+.workshopEmpty span{color:var(--muted);font-size:13px}.emptyIcon{font-size:54px}
+.loloCoach{position:absolute;left:13px;bottom:18px;z-index:15;display:flex;align-items:center;gap:7px}
+.coachFace{width:62px;height:62px;border-radius:50%;overflow:hidden;border:3px solid #35b7ff;box-shadow:0 0 24px #25aaff66;background:#071725}
+.coachFace img{width:100%;height:100%;object-fit:cover}.coachBubble{background:#071725e8;border:1px solid #2c76ac;border-radius:14px;padding:7px 9px;font-size:11px;font-weight:850}
+.running .coachFace{animation:coachTalk .5s ease-in-out infinite alternate}.running .coachBubble{box-shadow:0 0 18px #25aaff44}
+@keyframes coachTalk{from{transform:translateY(0) rotate(-1deg)}to{transform:translateY(-4px) rotate(2deg)}}
+.focusRing{position:absolute;z-index:8;width:86px;height:86px;border:3px dashed #ffd14a;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 999px #00000012;pointer-events:none;opacity:.8}
+.running .focusRing{animation:ringPulse .8s ease-in-out infinite alternate}
+@keyframes ringPulse{to{width:105px;height:105px;box-shadow:0 0 24px #ffd14a77}}
+.realTool{position:absolute;z-index:12;transform:translate(-50%,-50%);font-size:48px;filter:drop-shadow(0 6px 9px #000c);pointer-events:none}
+.scanTool{font-size:54px}.running .scanTool{animation:scanPhoto 1.6s ease-in-out infinite}
+@keyframes scanPhoto{0%,100%{transform:translate(-90%,-90%) rotate(-14deg)}50%{transform:translate(10%,10%) rotate(12deg)}}
+.shieldTool{font-size:56px}.fluxTool{margin-left:52px;margin-top:-35px;font-size:38px}
+.running .shieldTool{animation:shieldPulse 1s ease-in-out infinite alternate}.running .fluxTool{animation:fluxDrop .8s ease-in-out infinite}
+@keyframes shieldPulse{to{transform:translate(-50%,-50%) scale(1.15)}}@keyframes fluxDrop{50%{transform:translate(-50%,10px) scale(.8)}}
+.hotairTool{margin-left:75px;margin-top:-65px}.tweezersTool{margin-left:-70px;margin-top:40px;font-size:44px}
+.running .hotairTool{animation:heatOrbit 1.2s ease-in-out infinite}.running .tweezersTool{animation:tweezePhoto 1s ease-in-out infinite alternate}
+@keyframes heatOrbit{0%,100%{transform:translate(-50%,-50%) rotate(-15deg)}50%{transform:translate(-95%,-15%) rotate(15deg)}}@keyframes tweezePhoto{to{transform:translate(-20%,-80%) rotate(14deg)}}
+.braidTool{font-size:55px}.running .braidTool{animation:cleanSweep 1s ease-in-out infinite}
+@keyframes cleanSweep{0%,100%{transform:translate(-120%,-50%) rotate(-5deg)}50%{transform:translate(20%,-50%) rotate(5deg)}}
+.portTool{font-size:56px;color:#e6eef4;margin-top:-85px}.ironTool{font-size:50px;margin-left:80px}
+.running .portTool{animation:portPlace 1.2s ease-in-out infinite}.running .ironTool{animation:ironPhoto 1.1s ease-in-out infinite}
+@keyframes portPlace{0%{transform:translate(-50%,-130%) scale(.8);opacity:.4}60%,100%{transform:translate(-50%,-50%) scale(1);opacity:1}}@keyframes ironPhoto{0%,100%{transform:translate(-50%,-50%) rotate(35deg)}50%{transform:translate(-80%,-15%) rotate(48deg)}}
+.instructionFlag,.measureBlocked,.measureConfirmed,.testBadge{position:absolute;z-index:18;left:50%;transform:translateX(-50%);background:#071725ee;border-radius:14px;padding:9px 12px;text-align:center;font-size:12px;font-weight:850}
+.instructionFlag{top:65px;border:1px solid #ffc45d;color:#ffe5ab}.measureBlocked{top:65px;border:1px solid #ffc45d;color:#ffe5ab;max-width:85%}.measureConfirmed{top:65px;border:1px solid #3cd89a;color:#c8f7e4}.testBadge{top:65px;border:1px solid #3cd89a;color:#c8f7e4}
+.realProbe{position:absolute;z-index:14;width:18px;height:120px;border-radius:12px;transform-origin:50% 100%;box-shadow:0 5px 10px #000a}
+.realProbe:before{content:"";position:absolute;top:-30px;left:6px;width:5px;height:36px;background:#dbe4e9;border-radius:3px}.realProbe span{position:absolute;bottom:-25px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:900;background:#06111ee8;border-radius:7px;padding:3px 5px}
+.blackProbe{background:#111;color:white;transform:translate(-50%,-100%) rotate(28deg)}.redProbe{background:#d93d49;color:white;transform:translate(-50%,-100%) rotate(-28deg)}
+.running .blackProbe{animation:blackMeasure .8s ease-in-out infinite alternate}.running .redProbe{animation:redMeasure .8s ease-in-out infinite alternate}
+@keyframes blackMeasure{to{transform:translate(-45%,-94%) rotate(20deg)}}@keyframes redMeasure{to{transform:translate(-55%,-94%) rotate(-20deg)}}
+.cableTool{font-size:58px;margin-top:85px}.running .cableTool{animation:cablePlug 1s ease-in-out infinite alternate}@keyframes cablePlug{to{transform:translate(-50%,-110%)}}
 .workshopInfo{background:#0a2032;border:1px solid #184664;border-radius:14px;padding:12px}.workshopStepTitle{font-size:19px;font-weight:950;color:#6bc9ff}.workshopInfo p{line-height:1.5}
 .stepDots{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.stepDots button{width:32px;height:32px;border-radius:50%;border:1px solid #2b648a;background:#0b2438;color:#a8bfd0;font-weight:850}.stepDots button.on{background:#1688dc;color:white;border-color:#58c9ff;box-shadow:0 0 15px #25aaff55}
 .uploadActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 @media(max-width:600px){
-  .workshopStage{min-height:355px}
-  .techCharacter{left:0;transform:scale(.78);transform-origin:left bottom}
-  .workbench{left:17%;right:-5%;transform:scale(.88);transform-origin:center bottom}
+  .workshopStage{min-height:390px}
+  .loloCoach{left:8px;bottom:12px}.coachFace{width:54px;height:54px}.coachBubble{font-size:10px;max-width:115px}
+  .realTool{font-size:42px}.focusRing{width:70px;height:70px}
   .workshopHead{align-items:center}
+  .orientationTag{font-size:9px;max-width:90%;overflow:hidden;text-overflow:ellipsis}
   .composer{grid-template-columns:auto minmax(0,1fr) auto auto auto}
   .composer .photoButton,.composer .galleryButton{grid-column:auto}
 }

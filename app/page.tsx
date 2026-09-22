@@ -312,10 +312,15 @@ export default function Page() {
     };img.onerror=reject;img.src=url;
   });
 
-  const loadPhoto=async(file?:File)=>{
+  const loadPhoto=async(file?:File,nextTab:"plate"|"workshop"="plate")=>{
     if(!file)return;setVision(null);setVisionError("");
-    try{setImage(await compressImage(file));setTab("plate");setCaption("Foto cargada. Completá los datos y tocá Analizar con visión IA.");}
-    catch{setVisionError("No pude abrir esa imagen.")}
+    try{
+      setImage(await compressImage(file));
+      setTab(nextTab);
+      setCaption(nextTab==="workshop"
+        ?"Foto real cargada en el Taller. LOLO va a trabajar visualmente sobre esta imagen."
+        :"Foto cargada. Completá los datos y tocá Analizar con visión IA.");
+    }catch{setVisionError("No pude abrir esa imagen.")}
   };
 
   const analyze=async()=>{
@@ -451,12 +456,12 @@ export default function Page() {
         <div className="workshopHead">
           <div>
             <h2>🧰 Taller interactivo: cambio de pin de carga</h2>
-            <p className="muted">LOLO te muestra cada etapa con movimiento y voz. Es una simulación didáctica: sobre una placa real, LOLO primero analiza la foto antes de marcar puntos de medición.</p>
+            <p className="muted">LOLO trabaja sobre la misma foto que vos subiste. Las herramientas se animan encima de tu placa; los puntos de medición solo se muestran cuando la visión IA los pudo confirmar.</p>
           </div>
           <span className="workshopCounter">{workshopStep+1}/{WORKSHOP_STEPS.length}</span>
         </div>
 
-        <WorkshopScene step={workshopStep} active={workshopRunning||speaking}/>
+        <WorkshopScene step={workshopStep} active={workshopRunning||speaking} image={image} vision={vision}/>
 
         <div className="workshopInfo">
           <div className="workshopStepTitle">{WORKSHOP_STEPS[workshopStep].title}</div>
@@ -473,13 +478,14 @@ export default function Page() {
       </div>
 
       <div className="panel">
-        <h3>📷 Pasar de la simulación a tu placa real</h3>
-        <p className="muted">Después de ver el paso, sacá una foto o subí una imagen. LOLO analiza la placa y, si tiene suficiente evidencia, marca dónde medir.</p>
+        <h3>📷 Tu placa real en el Taller</h3>
+        <p className="muted">{image?"Esta es la misma imagen que cargaste. Podés reemplazarla cuando quieras.":"Primero cargá una foto real de la placa. El Taller ya no usa una placa dibujada."}</p>
         <div className="uploadActions">
-          <label className="btn primary">📷 Sacar foto<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
-          <label className="btn">🖼️ Subir imagen<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
-          <button className="btn" onClick={()=>nav("plate")}>Ir a Tu placa →</button>
+          <label className="btn primary">📷 Sacar foto<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0],"workshop")}/></label>
+          <label className="btn">🖼️ Subir imagen<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0],"workshop")}/></label>
+          {image&&<button className="btn" onClick={()=>nav("plate")}>🤖 Analizar esta placa con IA</button>}
         </div>
+        {image&&!vision&&<div className="tip warn">Para el paso “Medir con tester”, analizá primero la imagen en <b>Tu placa</b>. LOLO no va a inventar dónde apoyar las puntas.</div>}
       </div>
 
       <div className="panel">
@@ -515,40 +521,63 @@ export default function Page() {
 }
 
 
-function WorkshopScene({step,active}:{step:number;active:boolean}){
+function WorkshopScene({step,active,image,vision}:{step:number;active:boolean;image:string;vision:VisionResult|null}){
   const scene=WORKSHOP_STEPS[step].scene;
-  return <div className={"workshopStage scene-"+scene+" "+(active?"running":"")}>
-    <div className="techCharacter">
-      <div className="techHead"><img src={LOLO_FACE} alt="LOLO"/></div>
-      <div className="techBody">LOLO</div>
-      <div className="techArm armA"></div>
-      <div className="techArm armB"></div>
-    </div>
+  const red=vision?.can_mark&&vision.red_probe?vision.red_probe:null;
+  const black=vision?.can_mark&&vision.black_probe?vision.black_probe:null;
+  const target=red||{x:.5,y:.72,label:"zona del conector"};
+  const targetStyle={left:(target.x*100)+"%",top:(target.y*100)+"%"};
+  const redStyle=red?{left:(red.x*100)+"%",top:(red.y*100)+"%"}:{};
+  const blackStyle=black?{left:(black.x*100)+"%",top:(black.y*100)+"%"}:{};
 
-    <div className="workbench">
-      <div className="demoBoard">
-        <div className="trace t1"></div><div className="trace t2"></div>
-        <div className="demoChip chip1"></div><div className="demoChip chip2"></div>
-        <div className="demoPort"><span></span></div>
-        <div className="batterySocket"></div>
-        <div className="demoPads"><i></i><i></i><i></i><i></i><i></i></div>
+  return <div className={"workshopStage realScene scene-"+scene+" "+(active?"running":"")}>
+    {!image&&<div className="workshopEmpty">
+      <div className="emptyIcon">📷</div>
+      <b>Cargá una foto real de tu placa</b>
+      <span>La animación se hará sobre esa misma imagen.</span>
+    </div>}
+
+    {image&&<>
+      <img className="workshopBoardPhoto" src={image} alt="Placa real cargada por el alumno"/>
+      <div className="photoShade"></div>
+
+      <div className="loloCoach">
+        <div className="coachFace"><img src={LOLO_FACE} alt="LOLO"/></div>
+        <div className="coachBubble">{active?"Te muestro este paso":"LOLO"}</div>
       </div>
-      <div className="batteryPlug">🔋</div>
-      <div className="tool magnifier">🔍</div>
-      <div className="tool shield">🛡️</div>
-      <div className="tool flux">💧</div>
-      <div className="tool hotair">♨️</div>
-      <div className="tool tweezers">✂️</div>
-      <div className="tool braid">▰▰▰</div>
-      <div className="tool newPort">▣</div>
-      <div className="tool iron">🖊️</div>
-      <div className="probe probeBlack"><b>−</b></div>
-      <div className="probe probeRed"><b>+</b></div>
-      <div className="tool cable">🔌</div>
-      <div className="chargeBadge">⚡ CARGA OK</div>
-    </div>
+
+      <div className="focusRing" style={targetStyle}></div>
+
+      {scene==="inspect"&&<div className="realTool scanTool" style={targetStyle}>🔍</div>}
+      {scene==="battery"&&<div className="instructionFlag">🔋 Desconectá la batería antes de aplicar calor</div>}
+      {scene==="protect"&&<>
+        <div className="realTool shieldTool" style={targetStyle}>🛡️</div>
+        <div className="realTool fluxTool" style={targetStyle}>💧</div>
+      </>}
+      {scene==="remove"&&<>
+        <div className="realTool hotairTool" style={targetStyle}>♨️</div>
+        <div className="realTool tweezersTool" style={targetStyle}>🔧</div>
+      </>}
+      {scene==="clean"&&<div className="realTool braidTool" style={targetStyle}>〰️</div>}
+      {scene==="install"&&<>
+        <div className="realTool portTool" style={targetStyle}>▣</div>
+        <div className="realTool ironTool" style={targetStyle}>🖊️</div>
+      </>}
+      {scene==="measure"&&<>
+        {black&&red?<>
+          <div className="realProbe blackProbe" style={blackStyle}><span>NEGRA</span></div>
+          <div className="realProbe redProbe" style={redStyle}><span>ROJA</span></div>
+          <div className="measureConfirmed">✓ Puntos confirmados por visión IA</div>
+        </>:<div className="measureBlocked">⚠️ Primero analizá la placa con visión IA para ubicar las puntas sin adivinar.</div>}
+      </>}
+      {scene==="test"&&<>
+        <div className="realTool cableTool" style={targetStyle}>🔌</div>
+        <div className="testBadge">PRUEBA FINAL</div>
+      </>}
+    </>}
 
     <div className="sceneCaption">{WORKSHOP_STEPS[step].title}</div>
+    {image&&!red&&scene!=="measure"&&<div className="orientationTag">Movimiento didáctico sobre tu foto · posición orientativa</div>}
   </div>
 }
 
