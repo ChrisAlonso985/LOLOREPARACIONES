@@ -380,3 +380,45 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .neoRobot.stage{width:100%;height:245px}
   .robotStage{min-height:274px}
 }
+
+/* LOLO Premium fotorealista v19 */
+.premiumRobot{position:relative;width:198px;height:145px;display:block;filter:drop-shadow(0 14px 28px #000b)}
+.premiumRobotVisual{position:relative;width:100%;height:100%;overflow:hidden;border-radius:22px;border:1px solid #2bbce8;background:radial-gradient(circle at 50% 35%,#123b5b,#030b12 72%);box-shadow:inset 0 0 28px #27cfff18,0 0 28px #159fe722}
+.premiumRobotVisual img{position:absolute;inset:-3%;width:106%;height:106%;object-fit:cover;object-position:center 52%;display:block;transform:scale(1.015);transition:filter .25s ease}
+.premiumTopMask{position:absolute;left:0;top:0;width:34%;height:8%;background:linear-gradient(105deg,#06131f 0%,#071827eb 60%,transparent 100%);pointer-events:none}
+.premiumStateGlow{position:absolute;inset:0;border-radius:inherit;border:2px solid transparent;pointer-events:none}
+.premiumScanLine{position:absolute;left:5%;right:5%;top:18%;height:2px;background:linear-gradient(90deg,transparent,#59ffe4,transparent);box-shadow:0 0 14px #59ffe4;opacity:0;pointer-events:none}
+.premiumVoiceBars{position:absolute;left:50%;bottom:15%;transform:translateX(-50%);height:30px;display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:999px;background:#03121ac9;border:1px solid #38dfff88;opacity:0;backdrop-filter:blur(6px)}
+.premiumVoiceBars i{display:block;width:4px;height:9px;border-radius:4px;background:#61efff;box-shadow:0 0 8px #37dfff}
+.premiumThinkDots{position:absolute;right:9%;top:9%;display:flex;gap:5px;opacity:0}
+.premiumThinkDots i{width:7px;height:7px;border-radius:50%;background:#ffd76a;box-shadow:0 0 9px #ffd76a}
+.premiumRobot .avatarStatus{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:4;font-size:8px;font-weight:950;letter-spacing:.8px;border-radius:999px;padding:4px 9px;color:#c9f7ff;border:1px solid #42d7ff;background:#03131de8;box-shadow:0 0 18px #29cfff44;white-space:nowrap;backdrop-filter:blur(8px)}
+.premiumRobotLoading{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#c8f5ff;background:radial-gradient(circle,#12415f,#06111b)}
+.premiumRobotLoading b{font-size:20px;letter-spacing:3px}.premiumRobotLoading span{font-size:9px;color:#7fcbe8}
+.premiumRobot.idle .premiumRobotVisual img{animation:premiumBreathe 4s ease-in-out infinite}
+.premiumRobot.listening .premiumStateGlow{border-color:#48e6a8;box-shadow:inset 0 0 38px #37e29d33,0 0 22px #37e29d33;animation:premiumGlow .65s ease-in-out infinite alternate}
+.premiumRobot.listening .premiumRobotVisual img{animation:premiumListen .8s ease-in-out infinite alternate}
+.premiumRobot.listening .avatarStatus{border-color:#48e6a8;color:#d8fff1;background:#0a392de8}
+.premiumRobot.thinking .premiumRobotVisual img{filter:saturate(.9) brightness(.88);animation:premiumThink 1.2s ease-in-out infinite alternate}
+.premiumRobot.thinking .premiumThinkDots{opacity:1}.premiumRobot.thinking .premiumThinkDots i{animation:premiumDot .75s ease-in-out infinite alternate}.premiumRobot.thinking .premiumThinkDots i:nth-child(2){animation-delay:.12s}.premiumRobot.thinking .premiumThinkDots i:nth-child(3){animation-delay:.24s}
+.premiumRobot.thinking .avatarStatus{border-color:#ffd66b;color:#ffeab0;background:#3a2c0de8}
+.premiumRobot.speaking .premiumRobotVisual img{animation:premiumSpeak .48s ease-in-out infinite alternate}
+.premiumRobot.speaking .premiumVoiceBars{opacity:1}.premiumRobot.speaking .premiumVoiceBars i{animation:premiumBar .22s ease-in-out infinite alternate}.premiumRobot.speaking .premiumVoiceBars i:nth-child(2),.premiumRobot.speaking .premiumVoiceBars i:nth-child(4){animation-delay:.06s}.premiumRobot.speaking .premiumVoiceBars i:nth-child(3){animation-delay:.12s}
+.premiumRobot.speaking .premiumStateGlow{border-color:#47d7ff;box-shadow:inset 0 0 36px #32cfff2b,0 0 22px #32cfff33}
+.premiumRobot.pointing .premiumScanLine{opacity:1;animation:premiumScan 1.1s ease-in-out infinite alternate}.premiumRobot.pointing .premiumStateGlow{border-color:#58ffe5}
+.premiumRobot.stage{width:min(100%,500px);height:310px;margin:0 auto}
+.premiumRobot.stage .avatarStatus{font-size:10px;padding:5px 11px;bottom:9px}
+.premiumRobot.compact{width:102px;height:74px}.premiumRobot.compact .avatarStatus{font-size:6px;padding:2px 5px;bottom:2px}
+@keyframes premiumBreathe{0%,100%{transform:scale(1.015)}50%{transform:scale(1.035) translateY(-2px)}}
+@keyframes premiumListen{to{transform:scale(1.03) translateY(-2px) rotate(-.35deg)}}
+@keyframes premiumGlow{to{opacity:.58}}
+@keyframes premiumThink{to{transform:scale(1.025) translateX(2px)}}
+@keyframes premiumDot{to{transform:translateY(-5px);opacity:.35}}
+@keyframes premiumSpeak{to{transform:scale(1.035) translateY(-2px) rotate(.3deg)}}
+@keyframes premiumBar{from{transform:scaleY(.45)}to{transform:scaleY(1.7)}}
+@keyframes premiumScan{from{top:18%}to{top:82%}}
+@media(max-width:600px){
+  .premiumRobot{width:132px;height:98px}
+  .premiumRobot.stage{width:100%;height:258px}
+  .robotStage{min-height:286px}
+}

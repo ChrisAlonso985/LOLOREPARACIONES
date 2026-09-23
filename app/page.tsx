@@ -84,150 +84,36 @@ const WORKSHOP_STEPS = [
 
 type AvatarMode = "idle"|"listening"|"thinking"|"speaking"|"pointing";
 
+let premiumRobotPromise: Promise<string>|null = null;
+function loadPremiumRobot(){
+  if(!premiumRobotPromise){
+    premiumRobotPromise=Promise.all([1,2,3,4].map(n=>fetch(`/robot/chunk${n}.txt?v=19`).then(r=>{
+      if(!r.ok) throw new Error("No se pudo cargar LOLO");
+      return r.text();
+    }))).then(parts=>"data:image/webp;base64,"+parts.join(""));
+  }
+  return premiumRobotPromise;
+}
+
 function LoloAvatar({mode="idle",compact=false,stage=false}:{mode?:AvatarMode;compact?:boolean;stage?:boolean}){
   const label=mode==="listening"?"ESCUCHANDO":mode==="thinking"?"PROCESANDO":mode==="speaking"?"HABLANDO":mode==="pointing"?"ANALIZANDO":"EN LÍNEA";
-  return <div className={"loloAvatar neoRobot "+mode+(compact?" compact":"")+(stage?" stage":"")} aria-label={"LOLO robot "+label.toLowerCase()}>
-    <svg viewBox="0 0 360 300" role="img" aria-hidden="true">
-      <defs>
-        <linearGradient id="neoShell" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#ffffff"/>
-          <stop offset="22%" stopColor="#d9e6ef"/>
-          <stop offset="52%" stopColor="#92a9b9"/>
-          <stop offset="77%" stopColor="#f7fbff"/>
-          <stop offset="100%" stopColor="#8197a8"/>
-        </linearGradient>
-        <linearGradient id="neoShellDark" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#60788a"/>
-          <stop offset="50%" stopColor="#1a2a36"/>
-          <stop offset="100%" stopColor="#94a9b8"/>
-        </linearGradient>
-        <linearGradient id="neoBlack" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0b1822"/>
-          <stop offset="55%" stopColor="#02070c"/>
-          <stop offset="100%" stopColor="#0d1720"/>
-        </linearGradient>
-        <linearGradient id="neoBlue" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#9cffff"/>
-          <stop offset="38%" stopColor="#38dcff"/>
-          <stop offset="72%" stopColor="#1593ff"/>
-          <stop offset="100%" stopColor="#1b5cff"/>
-        </linearGradient>
-        <radialGradient id="neoCore">
-          <stop offset="0%" stopColor="#efffff"/>
-          <stop offset="22%" stopColor="#8cffff"/>
-          <stop offset="52%" stopColor="#27d9ff"/>
-          <stop offset="78%" stopColor="#117fff"/>
-          <stop offset="100%" stopColor="#082a52"/>
-        </radialGradient>
-        <filter id="neoGlow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="4.5" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-        <filter id="neoShadow" x="-60%" y="-60%" width="220%" height="240%">
-          <feDropShadow dx="0" dy="10" stdDeviation="9" floodColor="#000000" floodOpacity=".58"/>
-        </filter>
-      </defs>
-
-      <g className="neoHud" opacity=".9">
-        <circle cx="180" cy="132" r="119" fill="none" stroke="#16698f" strokeWidth="1.1" strokeDasharray="9 10"/>
-        <circle cx="180" cy="132" r="139" fill="none" stroke="#0f3e5a" strokeWidth=".8" strokeDasharray="2 11"/>
-        <path d="M27 132 H64 M296 132 H333 M180 6 V28" stroke="#36dfff" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M58 58 l14 0 M288 58 l14 0 M52 214 l14 0 M294 214 l14 0" stroke="#1b7dab" strokeWidth="1.2"/>
-      </g>
-
-      <g className="neoRobotBody" filter="url(#neoShadow)">
-        {/* torso / frame */}
-        <path d="M116 292 C118 245 127 202 148 180 Q180 166 212 180 C233 202 242 245 244 292 Z" fill="url(#neoBlack)" stroke="#276f93" strokeWidth="1.6"/>
-        <path d="M129 286 C132 235 140 210 157 192 L203 192 C220 210 228 235 231 286 Z" fill="#0a141d" stroke="#173f56" strokeWidth="1.2"/>
-        <path d="M132 188 L155 172 L205 172 L228 188 L217 222 L143 222 Z" fill="url(#neoShell)" stroke="#78eaff" strokeWidth="1.4"/>
-        <path d="M144 223 L158 211 H202 L216 223 L207 274 L153 274 Z" fill="#0e1d27" stroke="#36708e" strokeWidth="1.2"/>
-        <path d="M158 233 L180 216 L202 233 L195 261 L165 261 Z" fill="#07111a" stroke="#39dfff" strokeWidth="1.6"/>
-        <circle className="neoCore" cx="180" cy="239" r="14" fill="url(#neoCore)" stroke="#b2ffff" strokeWidth="2" filter="url(#neoGlow)"/>
-        <circle cx="180" cy="239" r="7" fill="#dffeff" opacity=".92"/>
-        <text x="180" y="284" textAnchor="middle" fontSize="11" fontWeight="950" fill="#b9e8f7" letterSpacing="2.1">LOLO · AI</text>
-
-        {/* shoulders */}
-        <g className="neoShoulders">
-          <path d="M126 194 C105 179 82 181 66 198 L79 232 C96 227 112 218 128 205 Z" fill="url(#neoShell)" stroke="#76e7ff" strokeWidth="1.4"/>
-          <path d="M234 194 C255 179 278 181 294 198 L281 232 C264 227 248 218 232 205 Z" fill="url(#neoShell)" stroke="#76e7ff" strokeWidth="1.4"/>
-          <path d="M78 202 Q95 188 114 198" fill="none" stroke="#ffffff" strokeWidth="3" opacity=".28"/>
-          <path d="M282 202 Q265 188 246 198" fill="none" stroke="#ffffff" strokeWidth="3" opacity=".28"/>
-        </g>
-
-        {/* left arm */}
-        <g className="neoLeftArm">
-          <circle cx="83" cy="218" r="15" fill="#07121a" stroke="#3acfff" strokeWidth="2"/>
-          <path d="M73 225 C55 239 44 257 42 279" fill="none" stroke="url(#neoShell)" strokeWidth="22" strokeLinecap="round"/>
-          <path d="M46 271 C35 276 28 286 29 295" fill="none" stroke="#647b8d" strokeWidth="14" strokeLinecap="round"/>
-          <circle cx="30" cy="294" r="9" fill="#dbe7ee" stroke="#52ddff" strokeWidth="1.5"/>
-          <circle cx="25" cy="291" r="2.8" fill="#071018"/>
-          <circle cx="30" cy="297" r="2.8" fill="#071018"/>
-          <circle cx="35" cy="291" r="2.8" fill="#071018"/>
-        </g>
-
-        {/* right arm / gesture */}
-        <g className="neoRightArm">
-          <circle cx="277" cy="218" r="15" fill="#07121a" stroke="#3acfff" strokeWidth="2"/>
-          <path d="M287 225 C306 236 318 249 326 265" fill="none" stroke="url(#neoShell)" strokeWidth="22" strokeLinecap="round"/>
-          <path d="M324 260 C334 254 342 244 344 234" fill="none" stroke="#647b8d" strokeWidth="14" strokeLinecap="round"/>
-          <circle cx="344" cy="232" r="9" fill="#dbe7ee" stroke="#52ddff" strokeWidth="1.5"/>
-          <path d="M339 229 l-3 -7 M344 226 v-8 M349 229 l4 -7" stroke="#071018" strokeWidth="2.6" strokeLinecap="round"/>
-        </g>
-
-        {/* neck */}
-        <g className="neoNeck">
-          <path d="M158 155 H202 L198 184 H162 Z" fill="#07121a" stroke="#2baad3" strokeWidth="1.4"/>
-          <path d="M164 161 H196 M162 169 H198 M164 177 H196" stroke="#28d7ff" strokeWidth="1.1" opacity=".8"/>
-        </g>
-
-        {/* head shell */}
-        <g className="neoHead">
-          <circle className="neoEar left" cx="103" cy="101" r="25" fill="#08151e" stroke="#3bdfff" strokeWidth="3"/>
-          <circle className="neoEar right" cx="257" cy="101" r="25" fill="#08151e" stroke="#3bdfff" strokeWidth="3"/>
-          <circle cx="103" cy="101" r="15" fill="#112835" stroke="#8af6ff" strokeWidth="1.2"/>
-          <circle cx="257" cy="101" r="15" fill="#112835" stroke="#8af6ff" strokeWidth="1.2"/>
-
-          <path d="M117 44 Q180 17 243 44 L253 86 Q253 130 222 153 Q180 173 138 153 Q107 130 107 86 Z" fill="url(#neoShell)" stroke="#a1f2ff" strokeWidth="2.2"/>
-          <path d="M132 38 Q180 21 228 38 L219 52 H141 Z" fill="#0b1720" stroke="#3d7a96"/>
-          <rect x="169" y="28" width="22" height="22" rx="7" fill="#0b1822" stroke="#35dfff" strokeWidth="1.5"/>
-          <rect className="neoSensor" x="176" y="33" width="8" height="12" rx="4" fill="#35eaff" filter="url(#neoGlow)"/>
-
-          {/* black glass visor */}
-          <path d="M126 63 Q180 47 234 63 L239 91 Q237 119 217 134 Q180 148 143 134 Q123 119 121 91 Z" fill="url(#neoBlack)" stroke="#244e63" strokeWidth="1.5"/>
-          <path d="M136 66 Q180 53 224 66" fill="none" stroke="#ffffff" strokeWidth="3" opacity=".15" strokeLinecap="round"/>
-
-          {/* expressive luminous eyes */}
-          <g className="neoEyes" filter="url(#neoGlow)">
-            <path className="neoEye left" d="M145 91 Q157 79 169 91" fill="none" stroke="url(#neoBlue)" strokeWidth="7" strokeLinecap="round"/>
-            <path className="neoEye right" d="M191 91 Q203 79 215 91" fill="none" stroke="url(#neoBlue)" strokeWidth="7" strokeLinecap="round"/>
-          </g>
-
-          {/* speaking equalizer */}
-          <g className="neoMouth">
-            <rect x="147" y="111" width="66" height="20" rx="10" fill="#06121a" stroke="#1c4358"/>
-            <rect className="neoBar n1" x="158" y="118" width="4" height="6" rx="2" fill="#52ecff"/>
-            <rect className="neoBar n2" x="166" y="115" width="4" height="12" rx="2" fill="#52ecff"/>
-            <rect className="neoBar n3" x="174" y="113" width="4" height="16" rx="2" fill="#52ecff"/>
-            <rect className="neoBar n4" x="182" y="116" width="4" height="10" rx="2" fill="#52ecff"/>
-            <rect className="neoBar n5" x="190" y="113" width="4" height="16" rx="2" fill="#52ecff"/>
-            <rect className="neoBar n6" x="198" y="115" width="4" height="12" rx="2" fill="#52ecff"/>
-          </g>
-          <text x="180" y="54" textAnchor="middle" fontSize="12" fontWeight="950" fill="#07131b" letterSpacing="1.4">LOLO</text>
-        </g>
-      </g>
-
-      <g className="neoThinkFx" opacity="0" filter="url(#neoGlow)">
-        <circle cx="180" cy="10" r="3.2" fill="#ffd86f"/>
-        <circle cx="193" cy="14" r="2.6" fill="#ffd86f"/>
-        <circle cx="205" cy="21" r="2.1" fill="#ffd86f"/>
-      </g>
-
-      <g className="neoScanFx" opacity="0">
-        <path d="M322 78 L233 153" stroke="#58ffe5" strokeWidth="2" strokeDasharray="7 6"/>
-        <circle cx="322" cy="78" r="8" fill="none" stroke="#58ffe5" strokeWidth="2"/>
-        <circle cx="233" cy="153" r="5" fill="none" stroke="#58ffe5" strokeWidth="1.5"/>
-      </g>
-    </svg>
+  const [robotSrc,setRobotSrc]=useState("");
+  useEffect(()=>{
+    let active=true;
+    loadPremiumRobot().then(src=>{if(active)setRobotSrc(src)}).catch(()=>{});
+    return()=>{active=false};
+  },[]);
+  return <div className={"loloAvatar premiumRobot "+mode+(compact?" compact":"")+(stage?" stage":"")} aria-label={"LOLO robot "+label.toLowerCase()}>
+    <div className="premiumRobotVisual">
+      {robotSrc
+        ? <img src={robotSrc} alt="LOLO, robot técnico IA"/>
+        : <div className="premiumRobotLoading"><b>LOLO</b><span>iniciando IA…</span></div>}
+      <div className="premiumTopMask"></div>
+      <div className="premiumStateGlow"></div>
+      <div className="premiumScanLine"></div>
+      <div className="premiumVoiceBars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <div className="premiumThinkDots" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
     <span className="avatarStatus">{label}</span>
   </div>
 }
