@@ -314,3 +314,69 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .robotFlow{padding-bottom:4px}
   .bigMic{margin-bottom:10px}
 }
+
+
+/* LOLO NEO — robot tecnológico premium */
+.neoRobot{position:relative;width:192px;height:138px;display:grid;place-items:center;filter:drop-shadow(0 13px 24px #000a)}
+.neoRobot svg{width:100%;height:100%;overflow:visible}
+.neoRobot .avatarStatus{position:absolute;left:50%;bottom:0;transform:translateX(-50%);font-size:8px;font-weight:950;letter-spacing:.85px;border-radius:999px;padding:4px 8px;color:#baf3ff;border:1px solid #4bdfff;background:#03131ddd;box-shadow:0 0 18px #28cfff38;white-space:nowrap;backdrop-filter:blur(8px)}
+.neoRobot .neoHead,.neoRobot .neoRobotBody,.neoRobot .neoRightArm,.neoRobot .neoLeftArm,.neoRobot .neoEye,.neoRobot .neoBar,.neoRobot .neoCore,.neoRobot .neoEar,.neoRobot .neoSensor{transform-box:fill-box;transform-origin:center}
+.neoRobot .neoHud{transform-origin:180px 132px}
+
+.neoRobot.idle .neoRobotBody{animation:neoFloat 3.4s ease-in-out infinite}
+.neoRobot.idle .neoHead{animation:neoIdleHead 4.6s ease-in-out infinite}
+.neoRobot.idle .neoEyes{animation:neoBlink 4.8s ease-in-out infinite}
+.neoRobot.idle .neoCore{animation:neoCoreIdle 1.8s ease-in-out infinite alternate}
+
+.neoRobot.listening .neoHead{animation:neoListenHead .8s ease-in-out infinite alternate}
+.neoRobot.listening .neoEar{animation:neoListenRing .55s ease-in-out infinite alternate;filter:url(#neoGlow)}
+.neoRobot.listening .neoSensor{animation:neoSensorPulse .5s ease-in-out infinite alternate}
+.neoRobot.listening .neoCore{animation:neoCoreFast .55s ease-in-out infinite alternate}
+.neoRobot.listening .avatarStatus{color:#d7fff1;border-color:#47e8ac;background:#0a392bdd;box-shadow:0 0 18px #47e8ac40}
+
+.neoRobot.thinking .neoHud{animation:neoHudSpin 4s linear infinite}
+.neoRobot.thinking .neoThinkFx{opacity:1;animation:neoThinkDots .8s ease-in-out infinite alternate}
+.neoRobot.thinking .neoEye{animation:neoThinkEye .72s ease-in-out infinite alternate}
+.neoRobot.thinking .neoCore{animation:neoCoreThink .4s ease-in-out infinite alternate}
+.neoRobot.thinking .neoSensor{fill:#ffd86f}
+.neoRobot.thinking .avatarStatus{color:#ffecb7;border-color:#ffd86f;background:#3b2c0bdd}
+
+.neoRobot.speaking .neoHead{animation:neoSpeakHead .48s ease-in-out infinite alternate}
+.neoRobot.speaking .neoRightArm{animation:neoGesture .72s ease-in-out infinite alternate}
+.neoRobot.speaking .neoCore{animation:neoCoreFast .28s ease-in-out infinite alternate}
+.neoRobot.speaking .neoBar{animation:neoTalk .22s ease-in-out infinite alternate}
+.neoRobot.speaking .neoBar.n2,.neoRobot.speaking .neoBar.n5{animation-delay:.04s}
+.neoRobot.speaking .neoBar.n3{animation-delay:.08s}
+.neoRobot.speaking .neoBar.n4{animation-delay:.13s}
+.neoRobot.speaking .avatarStatus{box-shadow:0 0 20px #3bdfff55}
+
+.neoRobot.pointing .neoRightArm{transform:rotate(-14deg) translate(-3px,-8px)}
+.neoRobot.pointing .neoScanFx{opacity:1;animation:neoScan 1s ease-in-out infinite alternate}
+
+.neoRobot.stage{width:min(100%,470px);height:315px;margin:0 auto}
+.neoRobot.stage .avatarStatus{font-size:10px;padding:5px 11px;bottom:5px}
+.neoRobot.compact{width:96px;height:72px}
+.neoRobot.compact .avatarStatus{font-size:6px;padding:2px 5px;bottom:-1px}
+
+@keyframes neoFloat{50%{transform:translateY(-2px) scale(1.008)}}
+@keyframes neoIdleHead{0%,100%{transform:rotate(0deg)}42%{transform:rotate(1.4deg)}68%{transform:rotate(-1deg)}}
+@keyframes neoBlink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.12)}}
+@keyframes neoCoreIdle{to{transform:scale(1.08);opacity:.82}}
+@keyframes neoListenHead{to{transform:translateY(-2px) rotate(-1.2deg)}}
+@keyframes neoListenRing{to{transform:scale(1.16);opacity:.55}}
+@keyframes neoSensorPulse{to{transform:scale(1.55);opacity:.65}}
+@keyframes neoCoreFast{to{transform:scale(1.2);opacity:.72}}
+@keyframes neoHudSpin{to{transform:rotate(360deg)}}
+@keyframes neoThinkDots{to{transform:translateY(-5px);opacity:.35}}
+@keyframes neoThinkEye{to{transform:translateX(4px) scaleX(.86)}}
+@keyframes neoCoreThink{to{transform:scale(1.15);filter:brightness(1.35)}}
+@keyframes neoSpeakHead{to{transform:translateY(-1.8px) rotate(.8deg)}}
+@keyframes neoGesture{to{transform:rotate(-9deg) translate(-3px,-8px)}}
+@keyframes neoTalk{from{transform:scaleY(.38)}to{transform:scaleY(1.45)}}
+@keyframes neoScan{to{transform:translate(-9px,6px);opacity:.4}}
+
+@media(max-width:600px){
+  .neoRobot{width:132px;height:100px}
+  .neoRobot.stage{width:100%;height:245px}
+  .robotStage{min-height:274px}
+}
