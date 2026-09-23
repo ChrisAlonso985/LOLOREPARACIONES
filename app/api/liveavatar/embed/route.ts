@@ -33,54 +33,47 @@ async function liveFetch(path:string, apiKey:string, init?:RequestInit){
   });
 }
 
-function avatarItems(body:any):any[]{
-  const d=body?.data??body;
-  const candidates=[
-    d?.avatars,d?.items,d?.results,
-    body?.avatars,body?.items,body?.results,
-    Array.isArray(d)?d:null,
-    Array.isArray(body)?body:null
-  ];
-  return candidates.find(Array.isArray)||[];
-}
-
-function avatarMeta(a:any){
-  return {
-    id:String(a?.avatar_id??a?.id??a?.avatarId??""),
-    name:String(a?.name??a?.avatar_name??a?.display_name??""),
-    gender:String(a?.gender??a?.metadata?.gender??a?.attributes?.gender??"").toLowerCase(),
-    status:String(a?.status??a?.state??"").toLowerCase()
-  };
-}
-
 function likelyMaleName(name:string){
-  return /\b(josh|adrian|bryan|brian|matt|mike|james|john|david|daniel|alex|jack|ryan|ethan|noah|liam|wayne|marcus|henry|eric|sam|will|adam|peter|robert|george|chris|carlos|diego|juan|mateo|lucas|martin|santiago)\b/i.test(name);
+  const n=name.toLowerCase();
+  const maleNames=[
+    "wayne","josh","adrian","bryan","brian","matt","mike","james","john","david","daniel","alex",
+    "jack","ryan","ethan","noah","liam","marcus","henry","eric","sam","will","adam","peter","robert",
+    "george","chris","carlos","diego","juan","mateo","lucas","martin","santiago","sebastian","rafael",
+    "ronan","elliot","damian","dante","brody","hayes","lasse","julian","fintan","beckett","kenji",
+    "dashiell","cassian","rafi","kacper","henrik"
+  ];
+  return maleNames.some(m=>n.includes(m));
 }
 
 async function chooseAvatar(apiKey:string,sandbox:boolean){
-  if(sandbox) return {id:SANDBOX_AVATAR,name:"Sandbox",gender:"female"};
+  if(sandbox) return {id:SANDBOX_AVATAR,name:"Sandbox",gender:"male"};
 
   const configured=(process.env.LIVEAVATAR_AVATAR_ID||"").trim();
   if(configured && configured!=="auto-male"){
-    return {id:configured,name:"Configurado",gender:""};
+    return {id:configured,name:"LOLO",gender:"male"};
   }
   if(cachedMaleAvatar) return cachedMaleAvatar;
 
-  const res=await liveFetch("/v1/avatars",apiKey,{method:"GET"});
+  // Official public catalogue endpoint; it does not require authentication.
+  const res=await fetch(API+"/v1/avatars/public?page_size=100",{cache:"no-store"});
   const body=await res.json().catch(()=>null);
-  if(!res.ok) throw new Error(body?.message||"No se pudo leer el catálogo de LiveAvatar.");
+  if(!res.ok) throw new Error("No se pudo consultar el catálogo público de LiveAvatar.");
 
-  const avatars=avatarItems(body).map(avatarMeta).filter((a:any)=>a.id);
-  const active=avatars.filter((a:any)=>!["inactive","disabled","failed","rejected"].includes(a.status));
-  const male=active.find((a:any)=>a.gender==="male"||a.gender==="man")
-    ||active.find((a:any)=>likelyMaleName(a.name));
+  const results=Array.isArray(body?.data?.results)?body.data.results:[];
+  const active=results
+    .filter((a:any)=>a?.id && String(a?.status||"").toUpperCase()==="ACTIVE")
+    .filter((a:any)=>!a?.type || String(a.type).toUpperCase()==="VIDEO");
 
+  const male=active.find((a:any)=>likelyMaleName(String(a?.name||"")));
   if(!male){
-    throw new Error("No encontré un avatar masculino disponible en tu biblioteca de LiveAvatar.");
+    const names=active.slice(0,12).map((a:any)=>String(a?.name||"")).filter(Boolean);
+    console.error("[liveavatar] No male match. Public avatars:",names.join(", "));
+    throw new Error("LiveAvatar no devolvió un avatar masculino identificable. Probá nuevamente en unos segundos.");
   }
 
-  cachedMaleAvatar=male;
-  return male;
+  cachedMaleAvatar={id:String(male.id),name:String(male.name||"LOLO"),gender:"male"};
+  console.log("[liveavatar] Avatar masculino seleccionado:",cachedMaleAvatar.name,cachedMaleAvatar.id);
+  return cachedMaleAvatar;
 }
 
 async function ensureContext(apiKey:string){
