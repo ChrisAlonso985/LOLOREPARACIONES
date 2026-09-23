@@ -129,10 +129,6 @@ export async function POST(){
     return NextResponse.json({configured:true,error:message},{status:502});
   }
 
-  const envRenew=Number(process.env.LIVEAVATAR_RENEW_SECONDS||"");
-  const renewAfterSeconds=Number.isFinite(envRenew)&&envRenew>=30
-    ?Math.round(envRenew)
-    :(sandbox?45:105);
 
   return NextResponse.json({
     configured:true,
@@ -140,7 +136,6 @@ export async function POST(){
     sandbox,
     avatarId:selected.id,
     avatarName:selected.name,
-    avatarGender:selected.gender||"male",
-    renewAfterSeconds
+    avatarGender:selected.gender||"male"
   });
 }
