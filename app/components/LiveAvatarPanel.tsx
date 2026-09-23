@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type LiveAvatarResponse = {
   configured?: boolean;
@@ -8,6 +8,7 @@ type LiveAvatarResponse = {
   sandbox?: boolean;
   message?: string;
   error?: string;
+  avatarId?: string;
 };
 
 export default function LiveAvatarPanel(){
@@ -15,45 +16,53 @@ export default function LiveAvatarPanel(){
   const [url,setUrl]=useState("");
   const [error,setError]=useState("");
   const [sandbox,setSandbox]=useState(true);
+  const frameRef=useRef<HTMLIFrameElement|null>(null);
 
   async function startLive(){
     setLoading(true);
     setError("");
     try{
-      const r=await fetch("/api/liveavatar/embed",{method:"POST"});
+      const r=await fetch("/api/liveavatar/embed",{method:"POST",cache:"no-store"});
       const data:LiveAvatarResponse=await r.json().catch(()=>({}));
-      if(!r.ok || !data.url){
-        throw new Error(data.message||data.error||"No se pudo iniciar LOLO en vivo.");
-      }
+      if(!r.ok || !data.url) throw new Error(data.message||data.error||"No se pudo iniciar LiveAvatar.");
       setSandbox(Boolean(data.sandbox));
       setUrl(data.url);
     }catch(e){
-      setError(e instanceof Error?e.message:"No se pudo iniciar LOLO en vivo.");
+      setError(e instanceof Error?e.message:"No se pudo iniciar LiveAvatar.");
     }finally{
       setLoading(false);
     }
   }
 
-  return <div className="liveAvatarCard">
+  useEffect(()=>{
+    return()=>{ setUrl(""); };
+  },[]);
+
+  return <div className={"liveAvatarCard "+(url?"live":"")}>
     <div className="liveAvatarHeader">
       <div>
-        <span className="demoEyebrow">LOLO · AVATAR EN VIVO</span>
-        <h3>Conversá cara a cara con LOLO</h3>
-        <p className="muted">El micrófono entra directo a la sesión en vivo y el avatar responde con labios, rostro y movimientos sincronizados.</p>
+        <span className="demoEyebrow">LOLO · LIVEAVATAR REAL</span>
+        <h3>{url?"LOLO está en vivo":"Iniciá el avatar en vivo"}</h3>
+        <p className="muted">{url
+          ?"Ahora sí estás viendo un stream de avatar real. Permití el micrófono y hablale normalmente."
+          :"Tocá iniciar. Se abre una sesión LiveAvatar con video, movimiento facial, labios y voz sincronizada."}</p>
       </div>
-      <span className={"liveBadge "+(url?"online":"")}>{url?"● EN VIVO":"○ LISTO"}</span>
+      <span className={"liveBadge "+(url?"online":"")}>{url?"● EN VIVO":"○ PREPARADO"}</span>
     </div>
 
-    {!url && <div className="liveAvatarPreview">
-      <img src="/lolo-real.jpg" alt="LOLO, técnico de reparación"/>
-      <div className="liveAvatarPreviewShade"></div>
+    {!url && <div className="liveAvatarPreview robotPoster">
+      <div className="robotPosterText">
+        <b>LOLO</b>
+        <span>Avatar en vivo listo para iniciar</span>
+      </div>
       <button className="btn primary liveStart" onClick={()=>void startLive()} disabled={loading}>
-        {loading?"Conectando LOLO…":"▶ Iniciar LOLO en vivo"}
+        {loading?"Conectando LiveAvatar…":"▶ Iniciar avatar en vivo"}
       </button>
     </div>}
 
     {url && <div className="liveAvatarFrameWrap">
       <iframe
+        ref={frameRef}
         className="liveAvatarFrame"
         src={url}
         allow="microphone; autoplay; camera"
@@ -62,14 +71,15 @@ export default function LiveAvatarPanel(){
     </div>}
 
     {error && <div className="notice liveAvatarError">
-      <b>Falta una sola conexión para encenderlo.</b>
+      <b>No se pudo abrir la sesión.</b>
       <span>{error}</span>
-      <a href="https://app.liveavatar.com/developers" target="_blank" rel="noreferrer">Abrir LiveAvatar · Developers</a>
     </div>}
 
     <div className="avatarFlow">
-      <span>🎤 Vos hablás</span><b>→</b><span>👂 LOLO escucha</span><b>→</b><span>🧠 responde</span><b>→</b><span>🗣️ avatar en vivo</span>
+      <span>🎤 hablás</span><b>→</b><span>👂 escucha</span><b>→</b><span>🧠 responde</span><b>→</b><span>🎥 avatar se mueve</span>
     </div>
-    {url&&sandbox&&<div className="demoNote">Modo de prueba LiveAvatar: sesión corta y avatar público. Cuando carguemos el avatar propio de LOLO, esta misma pantalla usa su apariencia definitiva.</div>}
+
+    {!url&&<div className="demoNote">La imagen estática anterior ya no se usa como “avatar vivo”. El movimiento real empieza al iniciar esta sesión.</div>}
+    {url&&sandbox&&<div className="demoNote">Modo Free/Sandbox: usa un avatar público de LiveAvatar y la sesión tiene límites de prueba. Para usar el robot LOLO como personaje vivo propio hace falta crear un avatar personalizado en LiveAvatar.</div>}
   </div>;
 }

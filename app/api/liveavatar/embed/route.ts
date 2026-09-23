@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const API = "https://api.liveavatar.com";
-const SANDBOX_AVATAR = "dd73ea75-1218-4ef3-92ce-606d5f7fbc0a";
+const SANDBOX_AVATAR = "65f9e3c9-d48b-4118-b73a-4ae2e3cbb8f0";
 
 let cachedContextId = "";
 
@@ -70,14 +70,9 @@ export async function POST(){
 
   const payload:any={
     avatar_id:avatarId,
-    type:"DEFAULT",
-    max_session_duration:sandbox?60:600,
-    default_language:"es",
-    is_sandbox:sandbox,
-    orientation:"horizontal"
+    is_sandbox:sandbox
   };
   if(contextId) payload.context_id=contextId;
-  if(process.env.LIVEAVATAR_VOICE_ID) payload.voice_id=process.env.LIVEAVATAR_VOICE_ID;
 
   let res=await liveFetch("/v2/embeddings",apiKey,{method:"POST",body:JSON.stringify(payload)});
   let body=await res.json().catch(()=>null);
