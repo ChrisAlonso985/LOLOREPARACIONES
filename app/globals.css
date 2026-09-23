@@ -459,3 +459,11 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .robotPoster{min-height:230px}
   .liveAvatarFrameWrap,.liveAvatarFrame{min-height:235px}
 }
+
+/* LiveAvatar estabilidad v25 */
+.liveAvatarFrameWrap{position:relative}
+.liveRenewOverlay{position:absolute;inset:0;display:grid;place-items:center;background:#03101bd9;color:#d9f8ff;font-weight:900;letter-spacing:.3px;backdrop-filter:blur(5px);z-index:5}
+.liveSessionBar{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:9px;font-size:10px;color:#bdd8e8}
+.liveSessionBar span{border:1px solid #255d7b;background:#0b2638;border-radius:999px;padding:5px 8px}
+.liveSessionBar button{border:1px solid #2c8cba;background:#0b2b43;color:#d7f4ff;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800}
+.liveSessionBar button:disabled{opacity:.45}
