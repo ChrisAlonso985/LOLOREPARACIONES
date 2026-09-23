@@ -246,11 +246,15 @@ export default function Page() {
     if(!("speechSynthesis" in window)){resolve();return}
     window.speechSynthesis.cancel();
     const maleHints=["Pablo","Jorge","Diego","Carlos","Miguel","Juan","Antonio","Mario","Javier","Sergio","Male"];
+    const selected=voices.find(v=>v.name===deviceVoice);
     const male=voices.find(v=>v.lang.toLowerCase().startsWith("es")&&maleHints.some(h=>v.name.toLowerCase().includes(h.toLowerCase())));
-    if(!male){setMicError("No encontré una voz masculina del dispositivo.");resolve();return}
+    const spanish=voices.find(v=>v.lang.toLowerCase().startsWith("es"));
+    const voice=selected||male||spanish||voices[0];
+    if(!voice){setMicError("El teléfono todavía no cargó una voz. Tocá Probar voz de nuevo.");resolve();return}
     const u=new SpeechSynthesisUtterance(text);
-    u.voice=male;u.lang=male.lang;u.rate=1.12;u.pitch=.9;u.volume=1;
+    u.voice=voice;u.lang=voice.lang||"es-AR";u.rate=1.12;u.pitch=.92;u.volume=1;
     setSpeaking(true);
+    u.onstart=()=>setSpeaking(true);
     u.onend=()=>{setSpeaking(false);resolve()};
     u.onerror=()=>{setSpeaking(false);resolve()};
     window.speechSynthesis.speak(u);
@@ -310,7 +314,8 @@ export default function Page() {
     }catch(e:any){
       if(seq===speechSeqRef.current){
         setSpeaking(false);
-        setMicError(e?.message||"No se pudo reproducir la voz de LOLO.");
+        setMicError("");
+        await browserSpeak(text);
       }
     }
   };
@@ -402,6 +407,8 @@ export default function Page() {
       let heardVoice=false;
       let lastVoice=Date.now();
       const startedAt=Date.now();
+      let noiseFloor=.006;
+      let noiseSamples=0;
 
       rec.ondataavailable=(e:BlobEvent)=>{if(e.data.size>0)micChunksRef.current.push(e.data)};
       rec.onstop=async()=>{
@@ -410,9 +417,9 @@ export default function Page() {
         micStreamRef.current?.getTracks().forEach(t=>t.stop());
         const rawType=(rec.mimeType||preferred||"audio/webm").split(";")[0].toLowerCase();
         const blob=new Blob(micChunksRef.current,{type:rawType});
-        if(blob.size<1200||!heardVoice){
+        if(blob.size<1200){
           setCaption("No llegué a escucharte. Tocá el micrófono y hablame de nuevo.");
-          setMicError("No escuché una frase completa.");
+          setMicError("La grabación quedó demasiado corta.");
           return;
         }
         setCaption("Entendiendo lo que me dijiste…");
@@ -453,10 +460,16 @@ export default function Page() {
           for(const v of data){const n=(v-128)/128;sum+=n*n}
           const rms=Math.sqrt(sum/data.length);
           const now=Date.now();
-          if(rms>.035){heardVoice=true;lastVoice=now}
-          if(heardVoice&&now-lastVoice>1150&&now-startedAt>1400){rec.stop();return}
-          if(!heardVoice&&now-startedAt>7000){rec.stop();return}
-          if(now-startedAt>18000){rec.stop();return}
+          const elapsed=now-startedAt;
+          if(elapsed<550){
+            noiseFloor=(noiseFloor*noiseSamples+rms)/(noiseSamples+1);
+            noiseSamples++;
+          }
+          const threshold=Math.max(.012,noiseFloor*2.15);
+          if(rms>threshold){heardVoice=true;lastVoice=now}
+          if(heardVoice&&now-lastVoice>950&&elapsed>1200){rec.stop();return}
+          if(!heardVoice&&elapsed>5500){rec.stop();return}
+          if(elapsed>12000){rec.stop();return}
           micRafRef.current=requestAnimationFrame(monitor);
         };
         micRafRef.current=requestAnimationFrame(monitor);
@@ -610,6 +623,9 @@ export default function Page() {
           <div className="robotFlow">
             <span>🎤 Vos hablás</span><b>→</b><span>👂 escucha</span><b>→</b><span>🧠 IA analiza</span><b>→</b><span>🤖 LOLO responde</span>
           </div>
+          <button className="voiceTestBtn" onClick={()=>void speak("Hola, soy LOLO. La voz está funcionando. Hablame y te acompaño paso a paso en el diagnóstico.")} disabled={recording||busy}>
+            🔊 Probar voz de LOLO
+          </button>
         </div>
 
         <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy}>

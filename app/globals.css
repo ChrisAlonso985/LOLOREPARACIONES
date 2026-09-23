@@ -422,3 +422,17 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .premiumRobot.stage{width:100%;height:258px}
   .robotStage{min-height:286px}
 }
+
+/* Movimiento visible del avatar + prueba de voz v20 */
+.premiumRobotVisual img{transform-origin:50% 68%}
+.premiumRobot.listening .premiumRobotVisual img{animation:premiumListenStrong .62s ease-in-out infinite alternate}
+.premiumRobot.listening .premiumStateGlow{animation:premiumGlowStrong .52s ease-in-out infinite alternate}
+.premiumRobot.speaking .premiumRobotVisual img{animation:premiumSpeakStrong .34s ease-in-out infinite alternate}
+.premiumRobot.speaking .premiumVoiceBars{opacity:1;transform:translateX(-50%) scale(1.08)}
+.premiumRobot.thinking .premiumRobotVisual img{animation:premiumThinkStrong .85s ease-in-out infinite alternate}
+.voiceTestBtn{display:block;width:max-content;max-width:100%;margin:11px auto 2px;border:1px solid #2b93c5;background:#0b2b43;color:#d9f5ff;border-radius:999px;padding:9px 15px;font-weight:850;font-size:12px;box-shadow:0 0 18px #1fbfff1f}
+.voiceTestBtn:disabled{opacity:.45}
+@keyframes premiumListenStrong{from{transform:scale(1.025) rotate(-.8deg) translateY(1px)}to{transform:scale(1.065) rotate(.9deg) translateY(-5px)}}
+@keyframes premiumGlowStrong{from{opacity:.35;box-shadow:inset 0 0 20px #37e29d22}to{opacity:1;box-shadow:inset 0 0 55px #37e29d55,0 0 26px #37e29d55}}
+@keyframes premiumSpeakStrong{from{transform:scale(1.025) rotate(-.7deg) translateY(1px)}to{transform:scale(1.06) rotate(.75deg) translateY(-4px)}}
+@keyframes premiumThinkStrong{from{transform:scale(1.02) translateX(-3px)}to{transform:scale(1.045) translateX(4px)}}
