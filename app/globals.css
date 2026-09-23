@@ -216,3 +216,84 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .liveAvatarError span{font-size:12px;line-height:1.35}
 .liveAvatarError a{color:#72d9ff;font-weight:800;font-size:12px}
 @media(max-width:600px){.liveAvatarHeader{display:block}.liveBadge{display:inline-block;margin-top:7px}.liveStart{min-width:175px}}
+
+
+/* LOLO Robot IA moderno */
+.robotAvatar{position:relative;width:188px;height:132px;display:grid;place-items:center;filter:drop-shadow(0 12px 24px #0009)}
+.robotAvatar svg{width:100%;height:100%;overflow:visible}
+.robotAvatar .avatarStatus{position:absolute;left:50%;bottom:1px;transform:translateX(-50%);font-size:8px;font-weight:950;letter-spacing:.8px;border-radius:999px;padding:3px 7px;color:#a9ebff;border:1px solid #39cfff;background:#04131ddd;box-shadow:0 0 15px #2ecfff33;white-space:nowrap}
+.robotAvatar .robotHead{transform-box:fill-box;transform-origin:center}
+.robotAvatar .robotBody{transform-box:fill-box;transform-origin:center}
+.robotAvatar .robotHalo{transform-origin:180px 117px}
+.robotAvatar .robotRightArm,.robotAvatar .robotLeftArm{transform-box:fill-box;transform-origin:center top}
+.robotAvatar .robotEye,.robotAvatar .robotBrow,.robotAvatar .robotMouthBar,.robotAvatar .robotCore,.robotAvatar .robotEarPulse,.robotAvatar .robotSensor{transform-box:fill-box;transform-origin:center}
+.robotAvatar.idle .robotBody{animation:robotBreathe 3.2s ease-in-out infinite}
+.robotAvatar.idle .robotHead{animation:robotIdleHead 4.2s ease-in-out infinite}
+.robotAvatar.idle .robotEyes{animation:robotBlink 4.5s ease-in-out infinite}
+.robotAvatar.listening .robotHead{animation:robotListenHead .85s ease-in-out infinite alternate}
+.robotAvatar.listening .robotEarPulse{animation:robotListenRing .6s ease-in-out infinite alternate;filter:url(#neonGlow)}
+.robotAvatar.listening .robotSensor{animation:robotSensorPulse .5s ease-in-out infinite alternate}
+.robotAvatar.listening .avatarStatus{color:#cffff0;border-color:#45e4a7;background:#0b392cdd}
+.robotAvatar.thinking .robotHalo{animation:robotHaloSpin 4s linear infinite}
+.robotAvatar.thinking .robotThinkFx{opacity:1;animation:robotThinkDots .8s ease-in-out infinite alternate}
+.robotAvatar.thinking .robotEye{animation:robotThinkEye .75s ease-in-out infinite alternate}
+.robotAvatar.thinking .robotSensor{fill:#ffd86f}
+.robotAvatar.thinking .avatarStatus{color:#ffe7aa;border-color:#ffd86f;background:#3a2c0add}
+.robotAvatar.speaking .robotHead{animation:robotSpeakHead .48s ease-in-out infinite alternate}
+.robotAvatar.speaking .robotRightArm{animation:robotGesture .75s ease-in-out infinite alternate}
+.robotAvatar.speaking .robotCore{animation:robotCorePulse .35s ease-in-out infinite alternate}
+.robotAvatar.speaking .robotMouthBar{animation:robotTalk .24s ease-in-out infinite alternate}
+.robotAvatar.speaking .robotMouthBar.b2,.robotAvatar.speaking .robotMouthBar.b5{animation-delay:.05s}
+.robotAvatar.speaking .robotMouthBar.b3{animation-delay:.1s}
+.robotAvatar.speaking .robotMouthBar.b4{animation-delay:.15s}
+.robotAvatar.pointing .robotRightArm{transform:rotate(-15deg) translate(-2px,-6px)}
+.robotAvatar.pointing .robotScanFx{opacity:1;animation:robotScan 1s ease-in-out infinite alternate}
+.robotAvatar.stage{width:min(100%,440px);height:300px;margin:0 auto}
+.robotAvatar.stage .avatarStatus{font-size:10px;padding:5px 10px;bottom:6px}
+.robotAvatar.compact{width:92px;height:68px}
+.robotAvatar.compact .avatarStatus{font-size:6px;padding:2px 5px;bottom:-1px}
+
+@keyframes robotBreathe{50%{transform:translateY(-2px) scale(1.01)}}
+@keyframes robotIdleHead{0%,100%{transform:rotate(0deg)}45%{transform:rotate(1.8deg)}65%{transform:rotate(-1deg)}}
+@keyframes robotBlink{0%,44%,48%,100%{transform:scaleY(1)}46%{transform:scaleY(.16)}}
+@keyframes robotListenHead{to{transform:translateY(-2px) rotate(-1.5deg)}}
+@keyframes robotListenRing{to{transform:scale(1.16);opacity:.6}}
+@keyframes robotSensorPulse{to{transform:scale(1.45);opacity:.65}}
+@keyframes robotHaloSpin{to{transform:rotate(360deg)}}
+@keyframes robotThinkDots{to{transform:translateY(-4px);opacity:.45}}
+@keyframes robotThinkEye{to{transform:translateX(4px) scaleX(.85)}}
+@keyframes robotSpeakHead{to{transform:translateY(-1.8px) rotate(1deg)}}
+@keyframes robotGesture{to{transform:rotate(-8deg) translate(-3px,-7px)}}
+@keyframes robotCorePulse{to{transform:scale(1.18);opacity:.7}}
+@keyframes robotTalk{from{transform:scaleY(.45)}to{transform:scaleY(1.35)}}
+@keyframes robotScan{to{transform:translate(-8px,5px);opacity:.45}}
+
+.robotInteractionCard{margin:14px 0 16px;border:1px solid #237eae;background:radial-gradient(circle at 50% 25%,#123b5b 0,#081b2b 45%,#06121d 100%);border-radius:22px;padding:13px;box-shadow:0 18px 50px #0008,inset 0 0 0 1px #66e3ff0d}
+.robotInteractionTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:9px}
+.robotInteractionTop h3{margin:4px 0 4px;font-size:19px}
+.robotInteractionTop p{margin:0;font-size:12px;line-height:1.42;max-width:520px}
+.robotLiveBadge{flex:0 0 auto;font-size:9px;font-weight:950;letter-spacing:.6px;border:1px solid #2f8db9;background:#0a2a40;color:#9fe7ff;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.robotLiveBadge.ready{border-color:#32b77d;background:#0b3426;color:#baffdf}
+.robotLiveBadge.listen{border-color:#43e7a7;background:#0c3a2d;color:#d2fff0;box-shadow:0 0 16px #43e7a744}
+.robotLiveBadge.think{border-color:#ffd46b;background:#3a2d0f;color:#ffebb5}
+.robotLiveBadge.speak{border-color:#46cbff;background:#0a3450;color:#d3f4ff;box-shadow:0 0 16px #39cfff44}
+.robotStage{position:relative;min-height:315px;border:1px solid #1f6085;border-radius:18px;background:linear-gradient(180deg,#071622,#03090f);overflow:hidden;display:grid;place-items:center;padding:8px 8px 46px}
+.robotStage:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.7%,#29ccff0e 50%,transparent 50.3%),linear-gradient(0deg,transparent 49.7%,#29ccff08 50%,transparent 50.3%);background-size:48px 48px;pointer-events:none}
+.robotStageCaption{position:absolute;left:10px;right:10px;bottom:10px;min-height:32px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid #1e506e;border-radius:12px;background:#03101bd9;color:#e8f7ff;font-size:12px;line-height:1.35;padding:7px 10px;backdrop-filter:blur(8px)}
+.robotFlow{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#d9efff}
+.robotFlow span{background:#0c2940;border:1px solid #245f82;border-radius:999px;padding:5px 8px}
+.robotFlow b{color:#4ccfff}
+.robotInteractionCard.isListening{border-color:#36bc82}
+.robotInteractionCard.isThinking{border-color:#a4802d}
+.robotInteractionCard.isSpeaking{border-color:#31afe8}
+
+@media(max-width:600px){
+  .robotAvatar{width:128px;height:96px}
+  .robotAvatar.stage{width:100%;height:245px}
+  .robotStage{min-height:260px;padding-bottom:43px}
+  .robotInteractionTop{display:block}
+  .robotLiveBadge{display:inline-block;margin-top:7px}
+  .robotInteractionTop h3{font-size:17px}
+  .robotStageCaption{font-size:11px}
+  .hero{grid-template-columns:132px minmax(0,1fr);min-height:132px;padding:10px}
+}

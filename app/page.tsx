@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import LiveAvatarPanel from "./components/LiveAvatarPanel";
 
 
 const LOLO_FACE = "data:image/jpeg;base64,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";
@@ -85,15 +84,132 @@ const WORKSHOP_STEPS = [
 
 type AvatarMode = "idle"|"listening"|"thinking"|"speaking"|"pointing";
 
-function LoloAvatar({mode="idle",compact=false}:{mode?:AvatarMode;compact?:boolean}){
-  const label=mode==="listening"?"ESCUCHANDO":mode==="thinking"?"PENSANDO":mode==="speaking"?"HABLANDO":mode==="pointing"?"TE MUESTRO":"LOLO";
-  return <div className={"loloAvatar photoAvatar "+mode+(compact?" compact":"")} aria-label={"LOLO "+label.toLowerCase()}>
-    <div className="realAvatarFrame">
-      <img src="/lolo-real.jpg" alt="LOLO, técnico de reparación"/>
-      <div className="avatarShade"></div>
-      <div className="avatarPulse"></div>
-      <span className="avatarStatus">{label}</span>
-    </div>
+function LoloAvatar({mode="idle",compact=false,stage=false}:{mode?:AvatarMode;compact?:boolean;stage?:boolean}){
+  const label=mode==="listening"?"ESCUCHANDO":mode==="thinking"?"PROCESANDO":mode==="speaking"?"HABLANDO":mode==="pointing"?"ANALIZANDO":"EN LÍNEA";
+  return <div className={"loloAvatar robotAvatar "+mode+(compact?" compact":"")+(stage?" stage":"")} aria-label={"LOLO robot "+label.toLowerCase()}>
+    <svg viewBox="0 0 360 250" role="img" aria-hidden="true">
+      <defs>
+        <linearGradient id="robotShell" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#f7fbff"/>
+          <stop offset="42%" stopColor="#c9d8e4"/>
+          <stop offset="72%" stopColor="#8ea5b5"/>
+          <stop offset="100%" stopColor="#eef7fb"/>
+        </linearGradient>
+        <linearGradient id="robotDark" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#101b25"/>
+          <stop offset="100%" stopColor="#02070c"/>
+        </linearGradient>
+        <linearGradient id="robotBlue" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#75f4ff"/>
+          <stop offset="48%" stopColor="#16bfff"/>
+          <stop offset="100%" stopColor="#2076ff"/>
+        </linearGradient>
+        <radialGradient id="coreGlow">
+          <stop offset="0%" stopColor="#d8ffff"/>
+          <stop offset="35%" stopColor="#53e9ff"/>
+          <stop offset="100%" stopColor="#0d69ff"/>
+        </radialGradient>
+        <filter id="neonGlow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="7" stdDeviation="7" floodColor="#000" floodOpacity=".55"/>
+        </filter>
+      </defs>
+
+      <g className="robotHalo" opacity=".9">
+        <ellipse cx="180" cy="117" rx="137" ry="102" fill="none" stroke="#1a88bd" strokeWidth="1.2" strokeDasharray="9 10"/>
+        <ellipse cx="180" cy="117" rx="154" ry="116" fill="none" stroke="#124b72" strokeWidth=".8" strokeDasharray="2 9"/>
+        <path d="M33 117 H66 M294 117 H327 M180 5 V25" stroke="#2ee7ff" strokeWidth="2" strokeLinecap="round" opacity=".8"/>
+      </g>
+
+      <g className="robotDesk" opacity=".95">
+        <rect x="36" y="215" width="288" height="20" rx="10" fill="#07111a" stroke="#1a5679"/>
+        <rect x="115" y="219" width="132" height="9" rx="4.5" fill="#0e4f49" stroke="#41f2c9"/>
+        <rect x="129" y="221.5" width="20" height="4" rx="2" fill="#d9ca85"/>
+        <rect x="155" y="221.5" width="12" height="4" rx="2" fill="#1c2930"/>
+        <circle cx="182" cy="223.5" r="2.2" fill="#72ffd8"/>
+        <rect x="201" y="221" width="28" height="5" rx="2" fill="#293842"/>
+      </g>
+
+      <g className="robotBody" filter="url(#softShadow)">
+        <path d="M100 232 C103 181 121 153 151 145 H209 C239 153 257 181 260 232 Z" fill="url(#robotShell)" stroke="#84eaff" strokeWidth="1.6"/>
+        <path d="M129 229 C132 187 143 166 160 158 H200 C218 166 229 187 231 229 Z" fill="url(#robotDark)" opacity=".92"/>
+        <path d="M147 157 Q180 171 213 157 L203 191 Q180 204 157 191 Z" fill="#152c3b" stroke="#49dfff" strokeWidth="1.2"/>
+        <path d="M162 170 H198 L192 194 H168 Z" fill="#08131c" stroke="#286f92"/>
+        <path className="robotCore" d="M180 174 L191 183 L187 198 L173 198 L169 183 Z" fill="url(#coreGlow)" filter="url(#neonGlow)"/>
+        <text x="180" y="214" textAnchor="middle" fontSize="11" fontWeight="950" fill="#a9dff5" letterSpacing="2">LOLO · AI</text>
+
+        <g className="robotLeftArm">
+          <path d="M104 171 C83 172 70 187 67 210" fill="none" stroke="url(#robotShell)" strokeWidth="25" strokeLinecap="round"/>
+          <path d="M78 199 C65 199 55 207 52 220" fill="none" stroke="#a9bac6" strokeWidth="16" strokeLinecap="round"/>
+          <circle cx="54" cy="222" r="10" fill="#dbe6ed" stroke="#61e5ff"/>
+          <circle cx="48" cy="222" r="4" fill="#07121a"/>
+          <circle cx="54" cy="226" r="4" fill="#07121a"/>
+          <circle cx="60" cy="222" r="4" fill="#07121a"/>
+        </g>
+
+        <g className="robotRightArm">
+          <path d="M256 171 C278 172 291 184 296 205" fill="none" stroke="url(#robotShell)" strokeWidth="25" strokeLinecap="round"/>
+          <path d="M293 199 C307 198 317 190 323 180" fill="none" stroke="#a9bac6" strokeWidth="16" strokeLinecap="round"/>
+          <circle cx="326" cy="177" r="10" fill="#dbe6ed" stroke="#61e5ff"/>
+          <circle cx="322" cy="172" r="3.2" fill="#07121a"/>
+          <circle cx="328" cy="170" r="3.2" fill="#07121a"/>
+          <circle cx="333" cy="175" r="3.2" fill="#07121a"/>
+        </g>
+
+        <g className="robotNeck">
+          <rect x="162" y="126" width="36" height="34" rx="13" fill="#07111a" stroke="#3ba7d6"/>
+          <path d="M167 134 H193 M165 143 H195 M168 152 H192" stroke="#25cfff" strokeWidth="1.2" opacity=".7"/>
+        </g>
+
+        <g className="robotHead">
+          <circle className="robotEarPulse left" cx="98" cy="96" r="23" fill="#0a1822" stroke="#39dfff" strokeWidth="3"/>
+          <circle className="robotEarPulse right" cx="262" cy="96" r="23" fill="#0a1822" stroke="#39dfff" strokeWidth="3"/>
+          <circle cx="98" cy="96" r="13" fill="#112937" stroke="#76f5ff"/>
+          <circle cx="262" cy="96" r="13" fill="#112937" stroke="#76f5ff"/>
+
+          <path d="M115 48 Q180 16 245 48 L255 86 Q252 128 221 146 Q180 164 139 146 Q108 128 105 86 Z" fill="url(#robotShell)" stroke="#8ceeff" strokeWidth="2"/>
+          <path d="M127 56 Q180 34 233 56 L239 85 Q237 112 217 126 Q180 141 143 126 Q123 112 121 85 Z" fill="url(#robotDark)" stroke="#223c4a" strokeWidth="1.3"/>
+
+          <path className="robotBrow left" d="M143 79 Q154 72 165 77" fill="none" stroke="#65ecff" strokeWidth="3" strokeLinecap="round"/>
+          <path className="robotBrow right" d="M195 77 Q206 72 217 79" fill="none" stroke="#65ecff" strokeWidth="3" strokeLinecap="round"/>
+
+          <g className="robotEyes" filter="url(#neonGlow)">
+            <ellipse className="robotEye left" cx="156" cy="91" rx="11" ry="8" fill="#4eeeff"/>
+            <ellipse className="robotEye right" cx="204" cy="91" rx="11" ry="8" fill="#4eeeff"/>
+            <ellipse cx="158" cy="89" rx="3" ry="2" fill="#e8ffff"/>
+            <ellipse cx="206" cy="89" rx="3" ry="2" fill="#e8ffff"/>
+          </g>
+
+          <g className="robotMouth" transform="translate(0 1)">
+            <rect x="148" y="112" width="64" height="19" rx="9.5" fill="#07151f" stroke="#24526b"/>
+            <rect className="robotMouthBar b1" x="158" y="119" width="4" height="5" rx="2" fill="#40e9ff"/>
+            <rect className="robotMouthBar b2" x="166" y="116" width="4" height="10" rx="2" fill="#40e9ff"/>
+            <rect className="robotMouthBar b3" x="174" y="114" width="4" height="14" rx="2" fill="#40e9ff"/>
+            <rect className="robotMouthBar b4" x="182" y="117" width="4" height="8" rx="2" fill="#40e9ff"/>
+            <rect className="robotMouthBar b5" x="190" y="114" width="4" height="14" rx="2" fill="#40e9ff"/>
+            <rect className="robotMouthBar b6" x="198" y="116" width="4" height="10" rx="2" fill="#40e9ff"/>
+          </g>
+
+          <path d="M142 47 Q180 29 218 47" fill="none" stroke="#ffffff" strokeWidth="3" opacity=".28" strokeLinecap="round"/>
+          <circle className="robotSensor" cx="180" cy="50" r="5" fill="#33e6ff" filter="url(#neonGlow)"/>
+        </g>
+      </g>
+
+      <g className="robotScanFx" opacity="0">
+        <path d="M330 80 L220 145" stroke="#4fffe5" strokeWidth="2" strokeDasharray="6 6"/>
+        <circle cx="330" cy="80" r="7" fill="none" stroke="#4fffe5" strokeWidth="2"/>
+      </g>
+
+      <g className="robotThinkFx" opacity="0" filter="url(#neonGlow)">
+        <circle cx="180" cy="19" r="3" fill="#ffd86f"/>
+        <circle cx="191" cy="21" r="2.5" fill="#ffd86f"/>
+        <circle cx="201" cy="26" r="2" fill="#ffd86f"/>
+      </g>
+    </svg>
+    <span className="avatarStatus">{label}</span>
   </div>
 }
 
@@ -571,7 +687,25 @@ export default function Page() {
 
         {micError&&<div className="notice">{micError}</div>}
 
-        <LiveAvatarPanel />
+        <div className={"robotInteractionCard "+(recording?"isListening ":speaking?"isSpeaking ":busy?"isThinking ":"isIdle")}>
+          <div className="robotInteractionTop">
+            <div>
+              <span className="demoEyebrow">LOLO · ASISTENTE IA EN VIVO</span>
+              <h3>Tu técnico IA está activo</h3>
+              <p className="muted">Hablale. LOLO escucha, procesa y responde mientras el robot cambia de expresión y movimiento en tiempo real.</p>
+            </div>
+            <span className={"robotLiveBadge "+(recording?"listen":speaking?"speak":busy?"think":"ready")}>
+              {recording?"● ESCUCHANDO":speaking?"● HABLANDO":busy?"● PROCESANDO":"● EN LÍNEA"}
+            </span>
+          </div>
+          <div className="robotStage">
+            <LoloAvatar stage mode={recording?"listening":busy?"thinking":speaking?"speaking":"idle"}/>
+            <div className="robotStageCaption">{caption}</div>
+          </div>
+          <div className="robotFlow">
+            <span>🎤 Vos hablás</span><b>→</b><span>👂 escucha</span><b>→</b><span>🧠 IA analiza</span><b>→</b><span>🤖 LOLO responde</span>
+          </div>
+        </div>
 
         <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy}>
           <span>{recording?"■":"🎤"}</span>
