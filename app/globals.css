@@ -436,3 +436,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 @keyframes premiumGlowStrong{from{opacity:.35;box-shadow:inset 0 0 20px #37e29d22}to{opacity:1;box-shadow:inset 0 0 55px #37e29d55,0 0 26px #37e29d55}}
 @keyframes premiumSpeakStrong{from{transform:scale(1.025) rotate(-.7deg) translateY(1px)}to{transform:scale(1.06) rotate(.75deg) translateY(-4px)}}
 @keyframes premiumThinkStrong{from{transform:scale(1.02) translateX(-3px)}to{transform:scale(1.045) translateX(4px)}}
+
+.avatarRealityNote{margin:10px auto 0;max-width:520px;border:1px solid #8a6a27;background:#2b220f;color:#ffe8a8;border-radius:14px;padding:10px 12px;display:grid;gap:4px;font-size:11px;line-height:1.35;text-align:left}
+.avatarRealityNote b{font-size:12px;color:#fff0bd}
+.avatarRealityNote span{color:#dbc993}

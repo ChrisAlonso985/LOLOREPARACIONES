@@ -608,12 +608,12 @@ export default function Page() {
         <div className={"robotInteractionCard "+(recording?"isListening ":speaking?"isSpeaking ":busy?"isThinking ":"isIdle")}>
           <div className="robotInteractionTop">
             <div>
-              <span className="demoEyebrow">LOLO · ASISTENTE IA EN VIVO</span>
-              <h3>Tu técnico IA está activo</h3>
-              <p className="muted">Hablale. LOLO escucha, procesa y responde mientras el robot cambia de expresión y movimiento en tiempo real.</p>
+              <span className="demoEyebrow">LOLO · ASISTENTE IA</span>
+              <h3>Tu técnico IA</h3>
+              <p className="muted">Hablale. LOLO escucha, procesa y responde por voz. El avatar visual todavía está en modo imagen hasta conectar LiveAvatar.</p>
             </div>
             <span className={"robotLiveBadge "+(recording?"listen":speaking?"speak":busy?"think":"ready")}>
-              {recording?"● ESCUCHANDO":speaking?"● HABLANDO":busy?"● PROCESANDO":"● EN LÍNEA"}
+              {recording?"● ESCUCHANDO":speaking?"● HABLANDO":busy?"● PROCESANDO":"● IA ACTIVA"}
             </span>
           </div>
           <div className="robotStage">
@@ -626,6 +626,10 @@ export default function Page() {
           <button className="voiceTestBtn" onClick={()=>void speak("Hola, soy LOLO. La voz está funcionando. Hablame y te acompaño paso a paso en el diagnóstico.")} disabled={recording||busy}>
             🔊 Probar voz de LOLO
           </button>
+          <div className="avatarRealityNote">
+            <b>Avatar visual: imagen</b>
+            <span>La voz y la IA sí funcionan. Para movimiento real de boca, rostro y cuerpo hay que conectar LiveAvatar.</span>
+          </div>
         </div>
 
         <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy}>
