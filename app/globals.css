@@ -297,3 +297,20 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .robotStageCaption{font-size:11px}
   .hero{grid-template-columns:132px minmax(0,1fr);min-height:132px;padding:10px}
 }
+
+/* Mobile polish: un solo LOLO en Hablar + espacio para barra inferior */
+.app{padding-bottom:110px}
+.section{padding-bottom:18px}
+.robotInteractionCard{overflow:hidden}
+.robotStage{margin-top:4px}
+@media(max-width:600px){
+  .app{padding-bottom:124px}
+  .section.active{padding-bottom:26px}
+  .interactiveTutor{padding-top:18px}
+  .interactiveTitle{margin-bottom:8px}
+  .robotInteractionCard{margin-top:10px}
+  .robotStage{min-height:248px}
+  .robotAvatar.stage{height:228px;transform:translateY(-2px)}
+  .robotFlow{padding-bottom:4px}
+  .bigMic{margin-bottom:10px}
+}

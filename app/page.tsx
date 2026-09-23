@@ -654,13 +654,13 @@ export default function Page() {
       <div className="status"><span className={"dot "+(busy?"":"on")}></span>{busy?"Procesando…":"Listo"}</div>
     </header>
 
-    <div className={"hero tutorHero "+(speaking?"speaking ":"")+(recording?"listening ":"")+(busy?"thinking ":"")}>
+    {tab!=="talk"&&<div className={"hero tutorHero "+(speaking?"speaking ":"")+(recording?"listening ":"")+(busy?"thinking ":"")}>
       <LoloAvatar mode={recording?"listening":busy?"thinking":speaking?"speaking":(tab==="plate"&&vision?.can_mark)?"pointing":"idle"}/>
       <div className="heroWords">
         <div className="caption">{caption}</div>
         <div className="wave"><i></i><i></i><i></i><i></i></div>
       </div>
-    </div>
+    </div>}
 
     <section className={"section "+(tab==="home"?"active":"")}>
       <div className="panel"><h2>LOLO completo</h2>
