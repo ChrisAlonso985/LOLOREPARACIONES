@@ -179,3 +179,22 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .loloAvatar{width:132px;height:94px}
   .loloAvatar.compact{width:88px;height:64px}
 }
+
+/* Demo de avatar realista dentro de Hablar */
+.avatarDemoCard{margin:14px 0 16px;border:1px solid #247eae;background:linear-gradient(160deg,#0b2236,#07131f);border-radius:20px;padding:12px;box-shadow:0 16px 40px #0006}
+.avatarDemoTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+.avatarDemoTop h3{margin:4px 0 4px;font-size:18px}
+.avatarDemoTop p{margin:0;font-size:12px;line-height:1.4}
+.demoEyebrow{font-size:9px;font-weight:950;letter-spacing:.9px;color:#6bdcff}
+.demoLiveDot{font-size:9px;font-weight:950;letter-spacing:.5px;color:#8affc9;border:1px solid #2d8d66;background:#10382c;border-radius:999px;padding:5px 7px;white-space:nowrap}
+.avatarDemoStage{position:relative;overflow:hidden;border-radius:16px;border:1px solid #2d6b93;background:#020810;aspect-ratio:16/9}
+.avatarDemoVideo{width:100%;height:100%;display:block;object-fit:cover;background:#020810}
+.avatarFlow{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:#d9efff}
+.avatarFlow span{background:#0c2940;border:1px solid #245f88;border-radius:999px;padding:5px 8px}
+.avatarFlow b{color:#4ccfff}
+.demoNote{margin-top:9px;font-size:10px;line-height:1.35;color:#91a9ba;text-align:center}
+@media(max-width:600px){
+  .avatarDemoTop{display:block}
+  .demoLiveDot{display:inline-block;margin-top:7px}
+  .avatarFlow{gap:5px}
+}
