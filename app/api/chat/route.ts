@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { requirePaidAccess } from "@/app/lib/security";
+import { requireChatAccess } from "@/app/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -33,7 +33,7 @@ OBJETIVO:
 El alumno debe sentir que está hablando con LOLO, su profesor IA. Guiá, preguntá, esperá su respuesta y continuá desde ahí.`;
 
 export async function POST(req: Request) {
-  const gate=await requirePaidAccess();
+  const gate=await requireChatAccess();
   if(gate.response)return gate.response;
   try {
     const { messages } = await req.json();
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
       max_output_tokens: 300,
     } as any);
 
-    return NextResponse.json({ text: response.output_text || "No pude generar una respuesta." });
+    return NextResponse.json({ text: response.output_text || "No pude generar una respuesta.", trial: gate.trial });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ error: error?.message || "Error de chat" }, { status: 500 });
