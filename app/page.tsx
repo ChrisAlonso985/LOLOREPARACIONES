@@ -142,6 +142,8 @@ export default function Page() {
   const [deviceVoice,setDeviceVoice]=useState("");
   const [voices,setVoices]=useState<SpeechSynthesisVoice[]>([]);
   const [installPrompt,setInstallPrompt]=useState<any>(null);
+  const [installHelp,setInstallHelp]=useState(false);
+  const [isInstalled,setIsInstalled]=useState(false);
   const imageRef=useRef<HTMLImageElement|null>(null);
   const stageRef=useRef<HTMLDivElement|null>(null);
   const [imageBox,setImageBox]=useState({left:0,top:0,width:0,height:0});
@@ -214,9 +216,28 @@ export default function Page() {
     const saved=localStorage.getItem("lolo.progress");
     if(saved) try{setProgress(JSON.parse(saved))}catch{}
     if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});
-    const fn=(e:any)=>{e.preventDefault();setInstallPrompt(e)};
-    window.addEventListener("beforeinstallprompt",fn);
-    return()=>window.removeEventListener("beforeinstallprompt",fn);
+
+    const standalone=
+      window.matchMedia?.("(display-mode: standalone)")?.matches ||
+      (window.navigator as any).standalone===true;
+    setIsInstalled(Boolean(standalone));
+
+    const beforeInstall=(e:any)=>{
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    const installed=()=>{
+      setIsInstalled(true);
+      setInstallPrompt(null);
+      setInstallHelp(false);
+    };
+
+    window.addEventListener("beforeinstallprompt",beforeInstall);
+    window.addEventListener("appinstalled",installed);
+    return()=>{
+      window.removeEventListener("beforeinstallprompt",beforeInstall);
+      window.removeEventListener("appinstalled",installed);
+    };
   },[]);
 
   useEffect(()=>{
@@ -285,6 +306,21 @@ export default function Page() {
     const protectedTabs=["plate","learn","workshop"];
     if(protectedTabs.includes(id)&&!hasAccess){setTab("settings");return}
     setTab(id);
+  };
+
+  const installLolo=async()=>{
+    if(isInstalled)return;
+    if(installPrompt){
+      try{
+        await installPrompt.prompt();
+        const choice=await installPrompt.userChoice;
+        if(choice?.outcome==="accepted"){
+          setInstallPrompt(null);
+          return;
+        }
+      }catch{}
+    }
+    setInstallHelp(true);
   };
 
   const stopVoice=()=>{
@@ -642,7 +678,11 @@ export default function Page() {
 
   return <main className="app">
     <header>
-      <div><div className="logo">L<span>O</span>LO</div><div className="muted small">Tu profe IA de reparación</div></div>
+      <div>
+        <div className="logo">L<span>O</span>LO</div>
+        <div className="muted small">Tu profe IA de reparación</div>
+        <div className="creatorCredit">Creado por <b>Christian Alonso</b></div>
+      </div>
       <div className="status"><span className={"dot "+(busy?"":"on")}></span>{busy?"Procesando…":"Listo"}</div>
     </header>
 
@@ -668,7 +708,19 @@ export default function Page() {
         </div>
       </div>
       <div className="panel"><div className="tip good"><b>Regla de LOLO:</b> si la IA no puede justificar visualmente dónde está VBUS, no marca un punto. Te pide una foto mejor, modelo, esquema o una prueba adicional.</div></div>
-      {installPrompt&&<button className="btn primary" onClick={async()=>{await installPrompt.prompt();setInstallPrompt(null)}}>📲 Instalar LOLO en este celular</button>}
+      <div className="panel installLoloCard">
+        <div className="installLoloIcon">📲</div>
+        <div className="installLoloCopy">
+          <span className="installEyebrow">LOLO EN TU CELULAR</span>
+          <h3>¿Querés tener la aplicación en tu celular?</h3>
+          <p>{isInstalled
+            ?"LOLO ya está instalada en este dispositivo."
+            :"Instalala y te queda un ícono en la pantalla principal, como cualquier otra app."}</p>
+        </div>
+        <button className={"btn primary installLoloBtn "+(isInstalled?"installed":"")} onClick={()=>void installLolo()} disabled={isInstalled}>
+          {isInstalled?"✓ LOLO instalada":"⬇ Instalar aplicación"}
+        </button>
+      </div>
     </section>
 
     <section className={"section "+(tab==="talk"&&canTalk?"active":"")}>
@@ -845,6 +897,26 @@ export default function Page() {
         <div className="actions"><button className="btn primary" onClick={()=>{if(hasAccess)void speak("Hola, soy LOLO. Esta es mi voz. Vamos a aprender reparación paso a paso y a medir sobre tu placa real.");else setTab("settings")}}>🔊 Probar voz</button></div>
       </div>
     </section>
+
+    <div className="creatorFooter">
+      <span>LOLO · Tu profe IA de reparación</span>
+      <b>Creado por Christian Alonso</b>
+    </div>
+
+    {installHelp&&<div className="installOverlay" onClick={()=>setInstallHelp(false)}>
+      <div className="installSheet" onClick={e=>e.stopPropagation()}>
+        <button className="installClose" onClick={()=>setInstallHelp(false)}>×</button>
+        <div className="installSheetIcon">📲</div>
+        <h2>Instalar LOLO en tu celular</h2>
+        <p>Si no apareció el botón automático de instalación, hacelo desde el navegador:</p>
+        <div className="installSteps">
+          <div><b>Android · Chrome</b><span>1. Tocá ⋮ arriba a la derecha.<br/>2. Elegí <b>Instalar aplicación</b> o <b>Agregar a pantalla principal</b>.<br/>3. Confirmá <b>Instalar</b>.</span></div>
+          <div><b>iPhone · Safari</b><span>1. Tocá Compartir ⤴︎.<br/>2. Elegí <b>Agregar a inicio</b>.<br/>3. Tocá <b>Agregar</b>.</span></div>
+        </div>
+        <div className="tip good"><b>No necesitás Play Store.</b> LOLO queda instalada como aplicación y se actualiza automáticamente.</div>
+        <button className="btn primary installSheetDone" onClick={()=>setInstallHelp(false)}>Entendido</button>
+      </div>
+    </div>}
 
     <nav>
       <button className={tab==="home"?"on":""} onClick={()=>nav("home")}><b>⌂</b>Inicio</button>
