@@ -150,6 +150,7 @@ export default function Page() {
   const [recording,setRecording]=useState(false);
   const [conversationMode,setConversationMode]=useState(true);
   const [paymentEmail,setPaymentEmail]=useState("");
+  const paymentEmailRef=useRef<HTMLInputElement|null>(null);
   const [paymentBusy,setPaymentBusy]=useState<"monthly"|"lifetime"|null>(null);
   const [paymentError,setPaymentError]=useState("");
   const [mpConfigured,setMpConfigured]=useState(false);
@@ -525,7 +526,8 @@ export default function Page() {
 
   const startPayment=async(plan:"monthly"|"lifetime")=>{
     setPaymentError("");
-    const email=paymentEmail.trim();
+    const email=(paymentEmailRef.current?.value||paymentEmail||"").trim().toLowerCase();
+    setPaymentEmail(email);
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
       setPaymentError("Ingresá un correo válido. Ese correo se usará para vincular el acceso del alumno.");
       return;
@@ -762,7 +764,16 @@ export default function Page() {
 
         <div className="field paymentEmail">
           <label>Correo del alumno</label>
-          <input type="email" value={paymentEmail} onChange={e=>setPaymentEmail(e.target.value)} placeholder="alumno@email.com" autoComplete="email"/>
+          <input
+            ref={paymentEmailRef}
+            type="email"
+            value={paymentEmail}
+            onChange={e=>{setPaymentEmail(e.target.value);setPaymentError("")}}
+            onInput={e=>{const v=(e.currentTarget as HTMLInputElement).value;setPaymentEmail(v);if(paymentError)setPaymentError("")}}
+            placeholder="alumno@email.com"
+            autoComplete="email"
+            inputMode="email"
+          />
           <small className="muted">Se usará para vincular el pago con la cuenta del alumno.</small>
         </div>
 
