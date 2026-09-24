@@ -6,9 +6,9 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const TASKS = [
-  "diagnose","module_no_frame","module_frame","display_touch","charging",
-  "audio_buzzer","audio_earpiece","microphone","buttons","signal","sim",
-  "camera","battery","flex","solder","moisture","measure"
+  "diagnose","module_no_frame","module_frame","display_touch","power","charging",
+  "audio_buzzer","audio_earpiece","microphone","buttons","signal","sim","wifi",
+  "camera","vibrator","sensors","battery","flex","solder","moisture","measure"
 ] as const;
 
 const markerSchema = {
@@ -99,11 +99,15 @@ const PROMPT = `Sos LOLO, profesor argentino de reparación de celulares. Analiz
 NO estás limitado a pines de carga. Podés ayudar visualmente con:
 - módulos con marco y sin marco;
 - display/táctil/sin imagen;
-- conectores de carga;
+- equipos que no encienden y zonas visibles relacionadas con alimentación;
+- conectores, subplacas y circuito de carga;
 - buzzer/altavoz, auricular y micrófono;
 - botones y flex;
 - antenas, coaxiales, SIM y conectores;
+- Wi‑Fi y Bluetooth cuando haya antenas/conectores visibles;
 - cámaras;
+- vibrador;
+- huella, proximidad y sensores;
 - batería y su conector;
 - flex/FPC;
 - soldaduras, pads, pistas, corrosión y humedad;
@@ -123,7 +127,10 @@ REGLAS POR TIPO DE TRABAJO:
 - AUDIO: diferenciar buzzer, auricular y micrófono; una foto puede confirmar suciedad, contactos, flex o daño físico, pero no una etapa de audio interna.
 - BOTONES: identificar tecla/flex/switch visible; para confirmar continuidad pedir medición desenergizada.
 - ANTENA/SEÑAL: identificar coaxiales, contactos, lector SIM o antenas visibles; no diagnosticar RF interno sin pruebas o esquema.
-- CARGA: reconocer conector y daño físico, pero no asumir VBUS por ubicación.
+- NO ENCIENDE: usar la foto para identificar batería, conectores, flex, corrosión, golpes o daños visibles; para confirmar consumo o líneas pedir mediciones.
+- CARGA: reconocer puerto, subplaca, flex y daño físico, pero no asumir VBUS por ubicación.
+- WI-FI/BLUETOOTH: marcar antenas, contactos o coaxiales visibles; separar evidencia visual de fallas internas de RF.
+- VIBRADOR/SENSORES: identificar piezas, flex y conectores visibles; no afirmar falla eléctrica sin prueba.
 - SOLDADURA/CORROSIÓN: marcar pads levantados, puentes visibles, restos, corrosión o daño mecánico solo cuando haya evidencia visual.
 - MEDICIÓN: solo entonces intentar black_probe/red_probe. Preferir test points o pads grandes y seguros.
 
@@ -146,7 +153,7 @@ export async function POST(req:Request){
   if(gate.response)return gate.response;
 
   try{
-    const {imageDataUrl,deviceModel,task,symptom,connectorHint,measurement}=await req.json();
+    const {imageDataUrl,deviceModel,task,symptom,componentHint,connectorHint,measurement}=await req.json();
 
     if(!imageDataUrl||typeof imageDataUrl!=="string"||!imageDataUrl.startsWith("data:image/")){
       return NextResponse.json({error:"Falta una imagen válida."},{status:400});
@@ -165,7 +172,8 @@ DATOS DEL ALUMNO:
 - Marca/modelo: ${deviceModel||"no informado"}
 - Objetivo seleccionado: ${normalizedTask}
 - Síntoma/comentario: ${symptom||"no informado"}
-- Conector indicado: ${connectorHint||"no informado"}
+- Zona/componente indicado: ${componentHint||"que LOLO lo detecte"}
+- Puerto de carga indicado: ${connectorHint||"no informado"}
 - Medición solicitada: ${measurement||"ninguna"}
 
 Si el objetivo NO es "measure", no fuerces puntos de tester: black_probe y red_probe pueden ser null.
