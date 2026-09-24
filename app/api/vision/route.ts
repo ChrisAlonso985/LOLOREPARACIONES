@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";\nimport { requirePaidAccess } from "@/app/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -95,7 +95,7 @@ REGLAS DE SEGURIDAD Y PRECISIÓN:
 
 Tu salida debe respetar estrictamente el JSON schema.`;
 
-export async function POST(req: Request) {
+export async function POST(req: Request) {\n  const gate=await requirePaidAccess();\n  if(gate.response)return gate.response;
   try {
     const { imageDataUrl, deviceModel, connectorHint, measurement } = await req.json();
 
