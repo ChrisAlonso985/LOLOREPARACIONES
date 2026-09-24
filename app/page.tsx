@@ -264,6 +264,13 @@ export default function Page() {
     const saved=localStorage.getItem("lolo.progress");
     if(saved) try{setProgress(JSON.parse(saved))}catch{}
     if("serviceWorker" in navigator) {
+      let refreshing=false;
+      const onControllerChange=()=>{
+        if(refreshing)return;
+        refreshing=true;
+        window.location.reload();
+      };
+      navigator.serviceWorker.addEventListener("controllerchange",onControllerChange);
       navigator.serviceWorker.register("/sw.js",{updateViaCache:"none"})
         .then(reg=>reg.update())
         .catch(()=>{});
@@ -581,8 +588,7 @@ export default function Page() {
     }catch(e:any){
       if(seq===speechSeqRef.current){
         setSpeaking(false);
-        setMicError("");
-        await browserSpeak(text);
+        setMicError("La voz IA no pudo reproducirse. Tocá Probar voz o volvé a intentar.");
       }
     }
   };
