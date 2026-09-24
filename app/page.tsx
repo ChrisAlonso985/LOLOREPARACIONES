@@ -150,6 +150,8 @@ export default function Page() {
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const greetingAudioRef=useRef<HTMLAudioElement|null>(null);
   const speechSeqRef=useRef(0);
+  const utteranceRef=useRef<SpeechSynthesisUtterance|null>(null);
+  const speechGapTimerRef=useRef<number|null>(null);
   const [recording,setRecording]=useState(false);
   const [conversationMode,setConversationMode]=useState(true);
   const [paymentEmail,setPaymentEmail]=useState("");
@@ -325,6 +327,11 @@ export default function Page() {
 
   const stopVoice=()=>{
     speechSeqRef.current++;
+    if(speechGapTimerRef.current!==null){
+      window.clearTimeout(speechGapTimerRef.current);
+      speechGapTimerRef.current=null;
+    }
+    utteranceRef.current=null;
     if("speechSynthesis" in window) window.speechSynthesis.cancel();
     if(audioRef.current){
       audioRef.current.oncanplay=null;
@@ -339,20 +346,100 @@ export default function Page() {
 
   const browserSpeak=(text:string)=>new Promise<void>((resolve)=>{
     if(!("speechSynthesis" in window)){resolve();return}
-    window.speechSynthesis.cancel();
+
+    const synth=window.speechSynthesis;
+    synth.cancel();
+
     const maleHints=["Pablo","Jorge","Diego","Carlos","Miguel","Juan","Antonio","Mario","Javier","Sergio","Male"];
     const selected=voices.find(v=>v.name===deviceVoice);
     const male=voices.find(v=>v.lang.toLowerCase().startsWith("es")&&maleHints.some(h=>v.name.toLowerCase().includes(h.toLowerCase())));
     const spanish=voices.find(v=>v.lang.toLowerCase().startsWith("es"));
     const voice=selected||male||spanish||voices[0];
-    if(!voice){setMicError("El teléfono todavía no cargó una voz. Tocá Probar voz de nuevo.");resolve();return}
-    const u=new SpeechSynthesisUtterance(text);
-    u.voice=voice;u.lang=voice.lang||"es-AR";u.rate=1.12;u.pitch=.92;u.volume=1;
+
+    if(!voice){
+      setMicError("El teléfono todavía no cargó una voz. Tocá Probar voz de nuevo.");
+      resolve();
+      return;
+    }
+
+    const seq=speechSeqRef.current;
+    const clean=String(text||"").replace(/\s+/g," ").trim();
+
+    // Android/PWA can cut long SpeechSynthesisUtterance objects.
+    // Speak short chunks sequentially and keep a strong JS reference to each one.
+    const sentences=(clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g)||[clean])
+      .map(x=>x.trim())
+      .filter(Boolean);
+
+    const chunks:string[]=[];
+    for(const sentence of sentences){
+      if(sentence.length<=145){
+        chunks.push(sentence);
+        continue;
+      }
+      let rest=sentence;
+      while(rest.length>145){
+        let cut=rest.lastIndexOf(" ",145);
+        if(cut<75)cut=145;
+        chunks.push(rest.slice(0,cut).trim());
+        rest=rest.slice(cut).trim();
+      }
+      if(rest)chunks.push(rest);
+    }
+
+    if(!chunks.length){resolve();return}
+
     setSpeaking(true);
-    u.onstart=()=>setSpeaking(true);
-    u.onend=()=>{setSpeaking(false);resolve()};
-    u.onerror=()=>{setSpeaking(false);resolve()};
-    window.speechSynthesis.speak(u);
+    let index=0;
+    let finished=false;
+
+    const finish=()=>{
+      if(finished)return;
+      finished=true;
+      utteranceRef.current=null;
+      if(speechGapTimerRef.current!==null){
+        window.clearTimeout(speechGapTimerRef.current);
+        speechGapTimerRef.current=null;
+      }
+      if(seq===speechSeqRef.current)setSpeaking(false);
+      resolve();
+    };
+
+    const speakNext=()=>{
+      if(seq!==speechSeqRef.current){finish();return}
+      if(index>=chunks.length){finish();return}
+
+      const u=new SpeechSynthesisUtterance(chunks[index++]);
+      utteranceRef.current=u;
+      u.voice=voice;
+      u.lang=voice.lang||"es-AR";
+      u.rate=1.04;
+      u.pitch=.94;
+      u.volume=1;
+
+      u.onstart=()=>{
+        if(seq===speechSeqRef.current)setSpeaking(true);
+      };
+      u.onend=()=>{
+        if(seq!==speechSeqRef.current){finish();return}
+        speechGapTimerRef.current=window.setTimeout(()=>{
+          speechGapTimerRef.current=null;
+          speakNext();
+        },70);
+      };
+      u.onerror=()=>{
+        // If one chunk fails, continue with the next instead of losing the whole answer.
+        if(seq!==speechSeqRef.current){finish();return}
+        speechGapTimerRef.current=window.setTimeout(()=>{
+          speechGapTimerRef.current=null;
+          speakNext();
+        },100);
+      };
+
+      synth.speak(u);
+    };
+
+    speakNext();
   });
 
   const speak=async(text:string)=>{
