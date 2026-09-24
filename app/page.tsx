@@ -176,6 +176,7 @@ export default function Page() {
   const [deviceModel,setDeviceModel]=useState("");
   const [visionTask,setVisionTask]=useState("diagnose");
   const [symptom,setSymptom]=useState("");
+  const [componentHint,setComponentHint]=useState("auto");
   const [connector,setConnector]=useState("auto");
   const [measurement,setMeasurement]=useState("voltage");
   const [vision,setVision]=useState<VisionResult|null>(null);
@@ -262,7 +263,11 @@ export default function Page() {
   useEffect(()=>{
     const saved=localStorage.getItem("lolo.progress");
     if(saved) try{setProgress(JSON.parse(saved))}catch{}
-    if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});
+    if("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js",{updateViaCache:"none"})
+        .then(reg=>reg.update())
+        .catch(()=>{});
+    }
 
     const standalone=
       window.matchMedia?.("(display-mode: standalone)")?.matches ||
@@ -754,6 +759,7 @@ export default function Page() {
         deviceModel,
         task:visionTask,
         symptom,
+        componentHint,
         connectorHint:visionTask==="charging"?connector:"auto",
         measurement:visionTask==="measure"?measurement:"none"
       })});
@@ -946,19 +952,47 @@ export default function Page() {
                 <option value="module_no_frame">Cambio de módulo sin marco</option>
                 <option value="module_frame">Cambio de módulo con marco</option>
                 <option value="display_touch">Pantalla / táctil / sin imagen</option>
-                <option value="charging">Pin de carga / conector de carga</option>
+                <option value="power">No enciende / consumo / encendido</option>
+                <option value="charging">Carga / pin / subplaca / circuito de carga</option>
                 <option value="audio_buzzer">Buzzer / altavoz</option>
                 <option value="audio_earpiece">Auricular de llamada</option>
                 <option value="microphone">Micrófono</option>
                 <option value="buttons">Botón power / volumen</option>
                 <option value="signal">Antena / señal / coaxial</option>
                 <option value="sim">SIM / lector SIM</option>
+                <option value="wifi">Wi‑Fi / Bluetooth</option>
                 <option value="camera">Cámara</option>
+                <option value="vibrator">Vibrador</option>
+                <option value="sensors">Huella / proximidad / sensores</option>
                 <option value="battery">Batería / conector de batería</option>
                 <option value="flex">Flex / conectores FPC</option>
                 <option value="solder">Soldadura / pads / pistas</option>
                 <option value="moisture">Humedad / sulfatación / corrosión</option>
                 <option value="measure">Medición con tester</option>
+              </select>
+            </div>
+
+            <div className="field">
+              <label>Zona o componente que aparece en la foto</label>
+              <select value={componentHint} onChange={e=>setComponentHint(e.target.value)}>
+                <option value="auto">Que LOLO lo detecte automáticamente</option>
+                <option value="mainboard">Placa principal</option>
+                <option value="subboard">Subplaca / placa de carga</option>
+                <option value="display">Módulo / pantalla / táctil</option>
+                <option value="charging_port">Pin / puerto de carga</option>
+                <option value="battery">Batería / conector de batería</option>
+                <option value="interconnect_flex">Flex interconexión / FPC</option>
+                <option value="power_buttons">Botón power / volumen / flex</option>
+                <option value="buzzer">Buzzer / altavoz</option>
+                <option value="earpiece">Auricular de llamada</option>
+                <option value="microphone">Micrófono</option>
+                <option value="antenna">Antena / coaxial / contactos RF</option>
+                <option value="sim">Lector SIM / bandeja / contactos</option>
+                <option value="camera">Cámara / conector de cámara</option>
+                <option value="vibrator">Vibrador</option>
+                <option value="sensor">Huella / proximidad / sensores</option>
+                <option value="solder_area">Soldadura / pads / pistas / componentes</option>
+                <option value="other">Otra zona o componente</option>
               </select>
             </div>
 
@@ -968,7 +1002,7 @@ export default function Page() {
             </div>
 
             {visionTask==="charging"&&<div className="field">
-              <label>Tipo de conector</label>
+              <label>Tipo de puerto de carga (solo si lo sabés)</label>
               <select value={connector} onChange={e=>setConnector(e.target.value)}>
                 <option value="auto">Que LOLO lo detecte</option>
                 <option value="usb-c">USB-C</option>
