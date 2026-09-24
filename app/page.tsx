@@ -162,6 +162,8 @@ export default function Page() {
   const micAudioCtxRef=useRef<AudioContext|null>(null);
   const chatRef=useRef<HTMLDivElement|null>(null);
   const [account,setAccount]=useState<AccountSnapshot|null>(null);
+  const [trialAvailable,setTrialAvailable]=useState(false);
+  const [trialUsed,setTrialUsed]=useState(false);
 
   useEffect(()=>{
     let alive=true;
@@ -193,6 +195,19 @@ export default function Page() {
       window.clearTimeout(timeout);
       controller.abort();
     };
+  },[]);
+
+  useEffect(()=>{
+    let alive=true;
+    fetch("/api/trial/status",{cache:"no-store"})
+      .then(r=>r.json())
+      .then(j=>{
+        if(!alive)return;
+        setTrialAvailable(Boolean(j?.available));
+        setTrialUsed(Boolean(j?.used));
+      })
+      .catch(()=>{if(alive){setTrialAvailable(false);setTrialUsed(true)}});
+    return()=>{alive=false};
   },[]);
 
   useEffect(()=>{
@@ -264,8 +279,10 @@ export default function Page() {
   },[image,vision]);
 
   const hasAccess=Boolean(account?.authenticated&&account?.access?.active);
+  const canTalk=hasAccess||trialAvailable;
   const nav=(id:string)=>{
-    const protectedTabs=["talk","plate","learn","workshop"];
+    if(id==="talk"&&!canTalk){setTab("settings");return}
+    const protectedTabs=["plate","learn","workshop"];
     if(protectedTabs.includes(id)&&!hasAccess){setTab("settings");return}
     setTab(id);
   };
@@ -393,6 +410,7 @@ export default function Page() {
 
   const sendChat=async(text=input,fromVoice=false)=>{
     const q=text.trim();if(!q||busy)return;
+    if(!hasAccess&&!trialAvailable){setTrialUsed(true);setTab("settings");return}
     const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
     messagesRef.current=next;setMessages(next);setInput("");
     if(isFastGreeting(q)){
@@ -406,8 +424,21 @@ export default function Page() {
     setCaption("Estoy pensando cómo explicártelo…");
     try{
       const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:next})});
-      const j=await r.json();if(!r.ok)throw new Error(j.error||"Error");
+      const j=await r.json();
+      if(!r.ok){
+        if(j?.code==="TRIAL_USED"){
+          setTrialAvailable(false);
+          setTrialUsed(true);
+          setTab("settings");
+          return;
+        }
+        throw new Error(j.error||"Error");
+      }
       const ans=j.text||"No pude responder.";
+      if(j.trial){
+        setTrialAvailable(false);
+        setTrialUsed(true);
+      }
       const answered=[...next,{role:"assistant",content:ans} as ChatMessage];
       messagesRef.current=answered;setMessages(answered);
       setBusy(false);
@@ -624,6 +655,10 @@ export default function Page() {
     </div>}
 
     <section className={"section "+(tab==="home"?"active":"")}>
+      {!hasAccess&&<div className="panel trialWelcome">
+        <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Hacé <b>una consulta real gratis</b> y recibí la respuesta de LOLO. Para seguir conversando después, elegís un plan.</p></div>
+        <button className="btn primary" onClick={()=>nav("talk")} disabled={!trialAvailable}>{trialAvailable?"🤖 Hacer mi consulta gratis":"✓ Consulta gratis utilizada"}</button>
+      </div>}
       <div className="panel"><h2>LOLO completo</h2>
         <div className="grid">
           <button className="card" onClick={()=>nav("plate")}><b>📷 Analizar tu placa</b><span className="muted small">Visión IA + marcas automáticas</span></button>
@@ -636,7 +671,7 @@ export default function Page() {
       {installPrompt&&<button className="btn primary" onClick={async()=>{await installPrompt.prompt();setInstallPrompt(null)}}>📲 Instalar LOLO en este celular</button>}
     </section>
 
-    <section className={"section "+(tab==="talk"&&hasAccess?"active":"")}>
+    <section className={"section "+(tab==="talk"&&canTalk?"active":"")}>
       <div className="panel interactiveTutor">
         <div className="interactiveTitle">
           <div>
@@ -646,6 +681,7 @@ export default function Page() {
           <span className={"talkState "+(recording?"listen":speaking?"speak":busy?"think":"ready")}>{recording?"Te escucho":speaking?"Te respondo":busy?"Pensando":"Listo para hablar"}</span>
         </div>
 
+        {!hasAccess&&<div className="trialBanner"><b>🎁 Tu consulta gratis</b><span>Escribí una pregunta. LOLO te responde una vez sin pagar.</span></div>}
         {micError&&<div className="notice">{micError}</div>}
 
         <FreeLolo3D
@@ -653,7 +689,7 @@ export default function Page() {
           caption={caption}
         />
 
-        <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy}>
+        <button className={"bigMic "+(recording?"on":"")} onClick={()=>{if(hasAccess)void startMic();else setMicError("La prueba gratis es por texto. Para hablar por voz, activá un plan.")}} disabled={busy}>
           <span>{recording?"■":"🎤"}</span>
           <b>{recording?"Terminar ahora":"Hablar con LOLO"}</b>
           <small>{recording?"Podés tocar para cortar antes":"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
@@ -679,12 +715,14 @@ export default function Page() {
         </div>
         <div className="composer">
           <button className={"circle "+(recording?"on":"")} onClick={()=>void startMic()} title="Hablar">{recording?"■":"🎤"}</button>
-          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")void sendChat()}} placeholder="También podés escribirle a LOLO"/>
+          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")void sendChat()}} placeholder={!hasAccess?"Escribí tu pregunta gratis para LOLO":"También podés escribirle a LOLO"}/>
           <label className="circle photoButton" style={{display:"grid",placeItems:"center"}} title="Sacar foto">📷<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <label className="circle galleryButton" style={{display:"grid",placeItems:"center"}} title="Subir imagen">🖼️<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <button className="circle" onClick={()=>void sendChat()} disabled={busy}>➤</button>
         </div>
-        <div className="talkHint">Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.</div>
+        {!hasAccess&&trialUsed
+          ? <div className="trialFinished"><b>✓ Ya probaste a LOLO</b><span>Para hacer otra pregunta, usar voz, analizar placas y acceder a las clases, activá un plan.</span><button className="btn primary" onClick={()=>setTab("settings")}>Ver planes LOLO</button></div>
+          : <div className="talkHint">{hasAccess?"Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.":"Tu primera consulta por texto es gratis. Después elegís si querés continuar con LOLO."}</div>}
       </div>
     </section>
 
@@ -810,7 +848,7 @@ export default function Page() {
 
     <nav>
       <button className={tab==="home"?"on":""} onClick={()=>nav("home")}><b>⌂</b>Inicio</button>
-      <button className={tab==="talk"?"on":""} onClick={()=>nav("talk")}><b>🎤</b>Hablar</button>
+      <button className={tab==="talk"?"on":""} onClick={()=>nav("talk")}><b>🤖</b>{hasAccess?"Hablar":"Probar"}</button>
       <button className={tab==="plate"?"on":""} onClick={()=>nav("plate")}><b>📷</b>Tu placa</button>
       <button className={tab==="learn"?"on":""} onClick={()=>nav("learn")}><b>📘</b>Aprender</button>
       <button className={tab==="settings"?"on":""} onClick={()=>nav("settings")}><b>👤</b>Mi cuenta</button>
