@@ -489,3 +489,21 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .free3dStage{height:300px}
   .free3dCaption{font-size:11px}
 }
+
+/* Cuenta, paywall y administración v33 */
+.authPanel{max-width:760px;margin-left:auto;margin-right:auto}
+.authTabs{display:flex;gap:8px;margin:14px 0}
+.authTabs button{flex:1;border:1px solid #245c7c;background:#081b29;color:#a9c7d8;border-radius:12px;padding:10px;font-weight:800}
+.authTabs button.on{border-color:#36c7ff;background:#0b3854;color:#fff}
+.authMainBtn{width:100%;margin:10px 0 12px}
+.accessActiveBox{display:flex;flex-direction:column;gap:4px;border:1px solid #2eb978;background:#0b3528;color:#d9fff0;border-radius:14px;padding:14px;margin:14px 0}
+.accessActiveBox span{font-size:12px;color:#a9e5cb}
+.accountActions{display:flex;justify-content:flex-end;margin-top:12px}
+.adminBox{margin-top:18px;border-top:1px solid #244a61;padding-top:15px}
+.adminHead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.adminHead div{display:grid;gap:2px}.adminHead span,.adminHead div span{font-size:10px;color:#8fb6c9}
+.adminUsers{display:grid;gap:7px;max-height:300px;overflow:auto}
+.adminUser{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #1f4a62;background:#071a27;border-radius:11px;padding:9px 10px}
+.adminUser div{display:grid;gap:2px;min-width:0}.adminUser b{font-size:11px;overflow:hidden;text-overflow:ellipsis}.adminUser small{font-size:9px;color:#82a9bc}
+.adminUser>span{font-size:8px;font-weight:950;border-radius:999px;padding:5px 7px}
+.adminUser>span.ok{background:#0a432e;color:#a8ffd7;border:1px solid #2ac681}.adminUser>span.off{background:#3c2810;color:#ffd89a;border:1px solid #9e6b29}
