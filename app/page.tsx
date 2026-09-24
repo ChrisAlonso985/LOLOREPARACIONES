@@ -164,6 +164,38 @@ export default function Page() {
   const [account,setAccount]=useState<AccountSnapshot|null>(null);
 
   useEffect(()=>{
+    let alive=true;
+    const controller=new AbortController();
+    const timeout=window.setTimeout(()=>controller.abort(),8000);
+
+    const loadAccount=async()=>{
+      try{
+        const r=await fetch("/api/auth/me",{cache:"no-store",signal:controller.signal});
+        const j=await r.json();
+        if(!alive)return;
+        setAccount(j);
+        if(!j?.authenticated||!j?.access?.active)setTab("settings");
+      }catch{
+        if(!alive)return;
+        setAccount({
+          authenticated:false,
+          access:{active:false,plan:null,status:"unpaid",label:"Sin acceso activo"}
+        });
+        setTab("settings");
+      }finally{
+        window.clearTimeout(timeout);
+      }
+    };
+
+    void loadAccount();
+    return()=>{
+      alive=false;
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  },[]);
+
+  useEffect(()=>{
     const saved=localStorage.getItem("lolo.progress");
     if(saved) try{setProgress(JSON.parse(saved))}catch{}
     if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(()=>{});
