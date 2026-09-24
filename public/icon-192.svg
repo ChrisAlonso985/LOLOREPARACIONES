@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">LOLO</title><desc id="desc">Reparación de celulares con inteligencia artificial</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b315f"/><stop offset=".48" stop-color="#061a35"/><stop offset="1" stop-color="#020916"/></linearGradient>
+  <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".45" stop-color="#e8f1fb"/><stop offset="1" stop-color="#93b7dc"/></linearGradient>
+  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5ef2ff"/><stop offset=".5" stop-color="#15b8ff"/><stop offset="1" stop-color="#237cff"/></linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="shadow"><feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<rect x="4" y="4" width="504" height="504" rx="104" fill="url(#bg)" stroke="#2aaaff" stroke-width="4"/>
+<rect x="18" y="18" width="476" height="476" rx="92" fill="none" stroke="#6de8ff" stroke-opacity=".18" stroke-width="2"/>
+
+<g filter="url(#shadow)">
+  <g transform="translate(176 58) rotate(-7 88 122)">
+    <rect x="0" y="0" width="176" height="244" rx="30" fill="#b8d9f3" stroke="#62caff" stroke-width="6"/>
+    <rect x="10" y="12" width="156" height="220" rx="23" fill="#030a14"/>
+    <rect x="58" y="16" width="60" height="12" rx="6" fill="#081b2d"/>
+    <circle cx="139" cy="22" r="4" fill="#16bfff"/>
+    <g stroke="#1ac9ff" stroke-width="4" fill="none" stroke-linecap="round" filter="url(#glow)">
+      <path d="M31 63h30l20 20h25"/><path d="M29 96h35l19 18h43"/><path d="M34 136h32l18-18h38"/>
+      <path d="M124 61v27l-17 17"/><path d="M143 82v42l-18 18"/><path d="M43 171h34l17-16h38"/>
+    </g>
+    <g fill="#92dfff"><circle cx="31" cy="63" r="5"/><circle cx="29" cy="96" r="5"/><circle cx="34" cy="136" r="5"/><circle cx="43" cy="171" r="5"/><circle cx="124" cy="61" r="5"/><circle cx="143" cy="82" r="5"/></g>
+    <rect x="68" y="90" width="64" height="64" rx="12" fill="#073563" stroke="#55e8ff" stroke-width="5" filter="url(#glow)"/>
+    <text x="100" y="135" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="900" fill="#fff">AI</text>
+    <rect x="24" y="183" width="54" height="35" rx="6" fill="#1b2d42" stroke="#536c81"/>
+    <rect x="91" y="178" width="52" height="41" rx="6" fill="#18283b" stroke="#536c81"/>
+  </g>
+
+  <path d="M352 104c21-11 46-10 67 1l-28 28 4 21 21 4 28-28c8 23 5 48-9 67-14 19-36 29-59 29l-92 133-40-29 96-129c-5-13-5-28 0-42 3-9 7-17 12-23z"
+        fill="url(#metal)" stroke="#c6efff" stroke-width="3"/>
+  <path d="M398 266l20-9 54 105-12 7z" fill="#b8d8ed"/>
+  <rect x="406" y="351" width="43" height="84" rx="16" transform="rotate(-26 427 393)" fill="#0b2744" stroke="#31bfff" stroke-width="4"/>
+  <path d="M420 348l-24-47" stroke="url(#metal)" stroke-width="11" stroke-linecap="round"/>
+
+  <path d="M66 267C130 190 213 175 296 194c52 12 103 42 153 93" fill="none" stroke="url(#cyan)" stroke-width="15" stroke-linecap="round" filter="url(#glow)" opacity=".92"/>
+  <path d="M65 267c61 62 148 88 237 68 59-13 111-49 148-88" fill="none" stroke="#38e8ff" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+</g>
+
+<text x="256" y="424" text-anchor="middle" font-family="Arial,sans-serif" font-size="108" font-weight="900" letter-spacing="-7" fill="url(#metal)" stroke="#dff8ff" stroke-width="1.5">LOLO</text>
+<path d="M132 442h248" stroke="#21baff" stroke-width="3" stroke-linecap="round" opacity=".75"/>
+</svg>
