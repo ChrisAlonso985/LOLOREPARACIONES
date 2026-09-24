@@ -921,7 +921,7 @@ export default function Page() {
 
     <section className={"section "+(tab==="plate"&&hasAccess?"active":"")}>
       <div className="panel"><h2>Tu placa + visión IA</h2>
-        <p className="muted">Sacá una foto enfocada de la zona que estás diagnosticando. Para mediciones eléctricas, LOLO puede ayudarte a ubicar puntos seguros cuando la imagen permite confirmarlos. Para módulos, botones, audio, antena y otros componentes, usá la foto junto con el chat para avanzar paso a paso.</p>
+        <p className="muted">Sacá una foto enfocada de la zona que querés revisar. LOLO puede analizar módulos, conectores, flex, botones, audio, antena, batería, soldadura, corrosión y otras fallas visibles. Si el diagnóstico necesita mediciones o una vista distinta, te va a pedir el siguiente paso sin inventar.</p>
         <div className="uploadActions">
           <label className="btn primary">📷 Sacar foto<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <label className="btn">🖼️ Subir imagen<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
@@ -931,32 +931,90 @@ export default function Page() {
           {image&&<img ref={imageRef} onLoad={()=>window.dispatchEvent(new Event("resize"))} src={image} alt="Placa a analizar"/>}
           {vision?.can_mark&&vision.black_probe&&<div className="marker black" data-label={vision.black_probe.label} style={markerStyle(vision.black_probe)}>N</div>}
           {vision?.can_mark&&vision.red_probe&&<div className="marker red" data-label={vision.red_probe.label} style={markerStyle(vision.red_probe)}>R</div>}
-          {vision?.cautions?.map((c,i)=><div key={i} className="cautionCircle" style={cautionStyle(c)} title={c.label}/>)}
+          {vision?.cautions?.map((c,i)=><div key={"c"+i} className="cautionCircle" style={cautionStyle(c)} title={c.label}/>)}
+          {vision?.can_mark&&vision.findings?.map((f,i)=><div key={"f"+i} className="findingBox" style={findingStyle(f)}><span>{i+1}</span><b>{f.label}</b></div>)}
         </div>
 
         {image&&<>
-          <div className="formGrid" style={{marginTop:10}}>
-            <div className="field"><label>Marca/modelo</label><input value={deviceModel} onChange={e=>setDeviceModel(e.target.value)} placeholder="Ej.: Samsung A03"/></div>
-            <div className="field"><label>Conector</label><select value={connector} onChange={e=>setConnector(e.target.value)}><option value="auto">Que LOLO lo detecte</option><option value="usb-c">USB-C</option><option value="micro-usb">Micro-USB</option></select></div>
-            <div className="field"><label>Qué querés medir</label><select value={measurement} onChange={e=>setMeasurement(e.target.value)}><option value="voltage">Voltaje / VBUS</option><option value="continuity">Continuidad</option><option value="resistance">Resistencia</option></select></div>
+          <div className="visionTaskPanel" style={{marginTop:10}}>
+            <div className="field"><label>Marca / modelo</label><input value={deviceModel} onChange={e=>setDeviceModel(e.target.value)} placeholder="Ej.: Samsung A03, Moto E14, iPhone 11"/></div>
+
+            <div className="field">
+              <label>¿Qué querés revisar?</label>
+              <select value={visionTask} onChange={e=>setVisionTask(e.target.value)}>
+                <option value="diagnose">Diagnóstico general de la falla</option>
+                <option value="module_no_frame">Cambio de módulo sin marco</option>
+                <option value="module_frame">Cambio de módulo con marco</option>
+                <option value="display_touch">Pantalla / táctil / sin imagen</option>
+                <option value="charging">Pin de carga / conector de carga</option>
+                <option value="audio_buzzer">Buzzer / altavoz</option>
+                <option value="audio_earpiece">Auricular de llamada</option>
+                <option value="microphone">Micrófono</option>
+                <option value="buttons">Botón power / volumen</option>
+                <option value="signal">Antena / señal / coaxial</option>
+                <option value="sim">SIM / lector SIM</option>
+                <option value="camera">Cámara</option>
+                <option value="battery">Batería / conector de batería</option>
+                <option value="flex">Flex / conectores FPC</option>
+                <option value="solder">Soldadura / pads / pistas</option>
+                <option value="moisture">Humedad / sulfatación / corrosión</option>
+                <option value="measure">Medición con tester</option>
+              </select>
+            </div>
+
+            <div className="field visionSymptom">
+              <label>Síntoma o qué querés comprobar</label>
+              <textarea value={symptom} onChange={e=>setSymptom(e.target.value)} placeholder="Ej.: no tiene sonido, no reconoce SIM, se cayó y no da imagen, quiero saber si este flex está dañado…"/>
+            </div>
+
+            {visionTask==="charging"&&<div className="field">
+              <label>Tipo de conector</label>
+              <select value={connector} onChange={e=>setConnector(e.target.value)}>
+                <option value="auto">Que LOLO lo detecte</option>
+                <option value="usb-c">USB-C</option>
+                <option value="micro-usb">Micro-USB</option>
+                <option value="lightning">Lightning</option>
+              </select>
+            </div>}
+
+            {visionTask==="measure"&&<div className="field">
+              <label>¿Qué querés medir?</label>
+              <select value={measurement} onChange={e=>setMeasurement(e.target.value)}>
+                <option value="voltage">Voltaje</option>
+                <option value="continuity">Continuidad</option>
+                <option value="resistance">Resistencia</option>
+              </select>
+            </div>}
           </div>
           <div className="actions"><button className="btn primary" onClick={analyze} disabled={busy}>🤖 {busy?"Analizando…":"Analizar con visión IA"}</button></div>
         </>}
 
         {visionError&&<div className="notice">{visionError}</div>}
-        {vision&&<div className="resultBox">
-          <b>{vision.can_mark?"LOLO encontró puntos utilizables":"LOLO necesita más información"}</b>
+        {vision&&<div className="resultBox visionResult">
+          <div className="visionResultHead">
+            <b>{vision.need_better_photo?"LOLO necesita otra vista":vision.can_mark?"LOLO encontró elementos útiles":"Análisis visual de LOLO"}</b>
+            <span>{Math.round((vision.confidence||0)*100)}% confianza</span>
+          </div>
           <p>{vision.summary}</p>
-          <p><b>Confianza:</b> {Math.round((vision.confidence||0)*100)}%</p>
-          <div className="tip warn">{vision.safety_warning}</div>
-          {vision.can_mark&&<>
-            <p><b>⚫ Punta negra:</b> {vision.black_probe?.label}. {vision.black_probe?.evidence}</p>
-            <p><b>🔴 Punta roja:</b> {vision.red_probe?.label}. {vision.red_probe?.evidence}</p>
-            <p>{vision.explanation}</p>
-            <p><b>Qué esperar:</b> {vision.expected_reading}</p>
+          {vision.diagnosis&&<p><b>Qué puede decir de la foto:</b> {vision.diagnosis}</p>}
+          {vision.explanation&&<p><b>Interpretación:</b> {vision.explanation}</p>}
+          {vision.suggested_action&&<p><b>Acción sugerida:</b> {vision.suggested_action}</p>}
+
+          {vision.findings?.length>0&&<div className="visionFindings">
+            <b>Elementos marcados en la imagen</b>
+            {vision.findings.map((f,i)=><div key={i}><span>{i+1}</span><p><b>{f.label}</b><small>{f.evidence}</small></p></div>)}
+          </div>}
+
+          {vision.can_measure&&vision.black_probe&&vision.red_probe&&<>
+            <p><b>⚫ Punta negra:</b> {vision.black_probe.label}. {vision.black_probe.evidence}</p>
+            <p><b>🔴 Punta roja:</b> {vision.red_probe.label}. {vision.red_probe.evidence}</p>
+            {vision.expected_reading&&<p><b>Qué esperar:</b> {vision.expected_reading}</p>}
           </>}
+
+          <div className="tip warn">{vision.safety_warning}</div>
+          {vision.required_next_view&&<p><b>Si necesitás otra foto:</b> {vision.required_next_view}</p>}
           <p><b>Siguiente paso:</b> {vision.follow_up_question}</p>
-          <button className="btn" onClick={()=>speak(vision.can_mark?`${vision.explanation} ${vision.safety_warning} ${vision.follow_up_question}`:`${vision.summary} ${vision.follow_up_question}`)}>🔊 Escuchar a LOLO</button>
+          <button className="btn" onClick={()=>void speak([vision.summary,vision.diagnosis,vision.explanation,vision.safety_warning,vision.follow_up_question].filter(Boolean).join(" "))}>🔊 Escuchar a LOLO</button>
         </div>}
       </div>
     </section>
