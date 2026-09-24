@@ -184,7 +184,7 @@ export default function Page() {
   const [progress,setProgress]=useState<number[]>([]);
   const [workshopStep,setWorkshopStep]=useState(0);
   const [workshopRunning,setWorkshopRunning]=useState(false);
-  const [voiceMode,setVoiceMode]=useState<"ai"|"device">("device");
+  const [voiceMode,setVoiceMode]=useState<"ai"|"device">("ai");
   const [deviceVoice,setDeviceVoice]=useState("");
   const [voices,setVoices]=useState<SpeechSynthesisVoice[]>([]);
   const [installPrompt,setInstallPrompt]=useState<any>(null);
@@ -502,47 +502,82 @@ export default function Page() {
       return;
     }
 
+    const clean=String(text||"").replace(/\s+/g," ").trim();
+    if(!clean)return;
+
+    // Generamos la voz IA en bloques completos para evitar cortes en respuestas largas.
+    const pieces:string[]=[];
+    let rest=clean;
+    const maxChars=2200;
+    while(rest.length>maxChars){
+      let cut=Math.max(
+        rest.lastIndexOf(". ",maxChars),
+        rest.lastIndexOf("? ",maxChars),
+        rest.lastIndexOf("! ",maxChars),
+        rest.lastIndexOf("; ",maxChars),
+        rest.lastIndexOf(", ",maxChars)
+      );
+      if(cut<900)cut=rest.lastIndexOf(" ",maxChars);
+      if(cut<700)cut=maxChars;
+      pieces.push(rest.slice(0,cut+1).trim());
+      rest=rest.slice(cut+1).trim();
+    }
+    if(rest)pieces.push(rest);
+
     setSpeaking(true);
     try{
-      const r=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});
-      const j=await r.json();
-      if(seq!==speechSeqRef.current) return;
-      if(!r.ok||!j.audio) throw new Error(j.error||"No se pudo generar la voz de LOLO");
+      for(const piece of pieces){
+        if(seq!==speechSeqRef.current)return;
 
-      if("speechSynthesis" in window) window.speechSynthesis.cancel();
-      audioRef.current?.pause();
+        const r=await fetch("/api/tts",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:piece})});
+        const j=await r.json();
+        if(seq!==speechSeqRef.current)return;
+        if(!r.ok||!j.audio)throw new Error(j.error||"No se pudo generar la voz de LOLO");
 
-      const audio=new Audio();
-      audio.preload="auto";
-      audio.playbackRate=1.1;
-      audio.volume=1;
-      audio.src=`data:${j.mime||"audio/mpeg"};base64,${j.audio}`;
-      audioRef.current=audio;
+        if("speechSynthesis" in window)window.speechSynthesis.cancel();
+        audioRef.current?.pause();
 
-      await new Promise<void>((resolve,reject)=>{
-        let settled=false;
-        const done=()=>{
-          if(settled)return;
-          settled=true;
-          if(seq===speechSeqRef.current){setSpeaking(false);audioRef.current=null}
-          resolve();
-        };
-        const fail=()=>{
-          if(settled)return;
-          settled=true;
-          if(seq===speechSeqRef.current){setSpeaking(false);audioRef.current=null}
-          reject(new Error("La voz IA no pudo reproducirse."));
-        };
-        audio.onended=done;
-        audio.onerror=fail;
-        const begin=()=>{
-          if(seq!==speechSeqRef.current){done();return}
-          audio.play().catch(fail);
-        };
-        if(audio.readyState>=3) begin();
-        else audio.addEventListener("canplay",begin,{once:true});
-        audio.load();
-      });
+        const binary=atob(j.audio);
+        const bytes=new Uint8Array(binary.length);
+        for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+        const url=URL.createObjectURL(new Blob([bytes],{type:j.mime||"audio/mpeg"}));
+
+        const audio=new Audio();
+        audio.preload="auto";
+        audio.playbackRate=1.03;
+        audio.volume=1;
+        audio.src=url;
+        audioRef.current=audio;
+
+        await new Promise<void>((resolve,reject)=>{
+          let settled=false;
+          const cleanup=()=>{try{URL.revokeObjectURL(url)}catch{}};
+          const done=()=>{
+            if(settled)return;
+            settled=true;
+            cleanup();
+            if(seq===speechSeqRef.current)audioRef.current=null;
+            resolve();
+          };
+          const fail=()=>{
+            if(settled)return;
+            settled=true;
+            cleanup();
+            if(seq===speechSeqRef.current)audioRef.current=null;
+            reject(new Error("La voz IA no pudo reproducirse."));
+          };
+          audio.onended=done;
+          audio.onerror=fail;
+          const begin=()=>{
+            if(seq!==speechSeqRef.current){done();return}
+            audio.play().catch(fail);
+          };
+          if(audio.readyState>=3)begin();
+          else audio.addEventListener("canplay",begin,{once:true});
+          audio.load();
+        });
+      }
+      if(seq===speechSeqRef.current)setSpeaking(false);
     }catch(e:any){
       if(seq===speechSeqRef.current){
         setSpeaking(false);
