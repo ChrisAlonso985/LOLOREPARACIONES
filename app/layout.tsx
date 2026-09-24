@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LOLO – Profe IA de Reparación",
-  description: "Profesor IA con voz, visión y diagnóstico guiado.",
+  title: "LOLO – Reparación de celulares con IA",
+  description: "Asistente y profesor IA para diagnóstico y reparación de celulares.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/icon.svg", apple: "/icon.svg" },
 };
