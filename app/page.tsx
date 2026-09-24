@@ -866,10 +866,13 @@ export default function Page() {
 
   return <main className="app">
     <header>
-      <div>
-        <div className="logo">L<span>O</span>LO</div>
-        <div className="muted small">Tu profe IA de reparación</div>
-        <div className="creatorCredit">Creado por <b>Christian Alonso</b></div>
+      <div className="headerBrand">
+        <img className="headerBrandIcon" src="/icon.svg" alt="LOLO"/>
+        <div className="headerBrandCopy">
+          <div className="logo">LOLO</div>
+          <div className="muted small">Reparación de celulares con IA</div>
+          <div className="creatorCredit">Creado por <b>Christian Alonso</b></div>
+        </div>
       </div>
       <div className="status"><span className={"dot "+(busy?"":"on")}></span>{busy?"Procesando…":"Listo"}</div>
     </header>
@@ -883,6 +886,9 @@ export default function Page() {
     </div>}
 
     <section className={"section "+(tab==="home"?"active":"")}>
+      <div className="panel brandShowcase">
+        <img src="/logo-lolo.svg" alt="LOLO - Reparación de celulares con IA"/>
+      </div>
       {!hasAccess&&<div className="panel trialWelcome">
         <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Hacé <b>una consulta real gratis</b> y recibí la respuesta de LOLO. Para seguir conversando después, elegís un plan.</p></div>
         <button className="btn primary" onClick={()=>nav("talk")} disabled={!trialAvailable}>{trialAvailable?"🤖 Hacer mi consulta gratis":"✓ Consulta gratis utilizada"}</button>
