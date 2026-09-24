@@ -467,3 +467,25 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .liveSessionBar span{border:1px solid #255d7b;background:#0b2638;border-radius:999px;padding:5px 8px}
 .liveSessionBar button{border:1px solid #2c8cba;background:#0b2b43;color:#d7f4ff;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:800}
 .liveSessionBar button:disabled{opacity:.45}
+
+/* LOLO 3D local gratuito v30 */
+.free3dCard{margin:14px 0 16px;border:1px solid #2386b7;background:radial-gradient(circle at 50% 18%,#123a56 0,#071a29 48%,#04101a 100%);border-radius:22px;padding:13px;box-shadow:0 18px 55px #0008,inset 0 0 0 1px #58dfff0c}
+.free3dHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.free3dHeader h3{margin:4px 0;font-size:19px}.free3dHeader p{margin:0;font-size:12px;line-height:1.4}
+.free3dBadge{flex:0 0 auto;font-size:9px;font-weight:950;letter-spacing:.6px;border:1px solid #2f98c7;background:#092b40;color:#aeeeff;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.free3dBadge.listening{border-color:#42e6a5;background:#0b382c;color:#d5fff0;box-shadow:0 0 18px #42e6a540}
+.free3dBadge.thinking{border-color:#ffd66d;background:#372b0e;color:#ffe8aa}
+.free3dBadge.speaking{border-color:#49d9ff;background:#0a3450;color:#e0f8ff;box-shadow:0 0 20px #3ed5ff44}
+.free3dStage{position:relative;height:360px;border:1px solid #1f688e;border-radius:18px;overflow:hidden;background:radial-gradient(circle at 50% 45%,#0b2f48 0,#05121c 58%,#02070c 100%)}
+.free3dStage:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 49.7%,#3ad7ff0d 50%,transparent 50.3%),linear-gradient(0deg,transparent 49.7%,#3ad7ff08 50%,transparent 50.3%);background-size:48px 48px;pointer-events:none}
+.free3dCanvas{position:absolute;inset:0;touch-action:pan-y}
+.free3dCanvas canvas{width:100%!important;height:100%!important;display:block}
+.free3dCaption{position:absolute;left:10px;right:10px;bottom:10px;min-height:36px;display:flex;align-items:center;justify-content:center;text-align:center;border:1px solid #235d7d;border-radius:12px;background:#03101bd9;color:#edfaff;font-size:12px;line-height:1.35;padding:8px 10px;backdrop-filter:blur(8px);pointer-events:none}
+.free3dCard.listening{border-color:#35c386}.free3dCard.thinking{border-color:#a98732}.free3dCard.speaking{border-color:#35bce9}
+.free3dNote{text-align:center;margin-top:9px;font-size:10px;color:#8fc8dd}
+@media(max-width:600px){
+  .free3dHeader{display:block}.free3dBadge{display:inline-block;margin-top:7px}
+  .free3dHeader h3{font-size:17px}
+  .free3dStage{height:300px}
+  .free3dCaption{font-size:11px}
+}
