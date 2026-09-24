@@ -16,8 +16,21 @@ export async function POST(req:Request){
     if(!token) return NextResponse.json({error:"Mercado Pago todavía no está vinculado en el servidor."},{status:503});
 
     const {plan,email}=await req.json();
-    const payerEmail=String(email||"").trim();
-    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(payerEmail)){
+    const payerEmail=String(email||"").trim().toLowerCase();
+    const at=payerEmail.indexOf("@");
+    const lastAt=payerEmail.lastIndexOf("@");
+    const local=at>0?payerEmail.slice(0,at):"";
+    const domain=at>0?payerEmail.slice(at+1):"";
+    const validEmail=
+      at>0 &&
+      at===lastAt &&
+      !/\s/.test(payerEmail) &&
+      local.length>0 &&
+      domain.includes(".") &&
+      !domain.startsWith(".") &&
+      !domain.endsWith(".") &&
+      !domain.includes("..");
+    if(!validEmail){
       return NextResponse.json({error:"Ingresá un correo válido."},{status:400});
     }
     if(plan!=="monthly"&&plan!=="lifetime"){
