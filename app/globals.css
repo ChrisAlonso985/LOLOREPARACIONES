@@ -507,3 +507,11 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .adminUser div{display:grid;gap:2px;min-width:0}.adminUser b{font-size:11px;overflow:hidden;text-overflow:ellipsis}.adminUser small{font-size:9px;color:#82a9bc}
 .adminUser>span{font-size:8px;font-weight:950;border-radius:999px;padding:5px 7px}
 .adminUser>span.ok{background:#0a432e;color:#a8ffd7;border:1px solid #2ac681}.adminUser>span.off{background:#3c2810;color:#ffd89a;border:1px solid #9e6b29}
+
+/* Prueba gratuita de una consulta v37 */
+.trialWelcome{display:flex;align-items:center;justify-content:space-between;gap:18px;border-color:#2e9bc7;background:linear-gradient(135deg,#08283d,#071926)}
+.trialWelcome h2{margin:7px 0 5px}.trialWelcome p{margin:0;color:#a9c9da;max-width:620px;line-height:1.45}.trialWelcome .btn{flex:0 0 auto}
+.trialPill{display:inline-block;font-size:9px;font-weight:950;letter-spacing:.8px;border:1px solid #44dcff;color:#dffaff;background:#0a3a55;border-radius:999px;padding:5px 8px}
+.trialBanner{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:1px solid #33c5ea;background:#073148;color:#dff9ff;border-radius:12px;padding:9px 11px;margin:8px 0 12px}.trialBanner span{font-size:11px;color:#aee7f5}
+.trialFinished{display:grid;gap:7px;border:1px solid #d39831;background:#38270c;color:#ffe7b0;border-radius:13px;padding:11px;margin-top:9px}.trialFinished span{font-size:11px;line-height:1.4}.trialFinished .btn{justify-self:start}
+@media(max-width:650px){.trialWelcome{display:grid}.trialWelcome .btn{width:100%}}
