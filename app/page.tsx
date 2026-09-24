@@ -24,13 +24,50 @@ type VisionResult = {
 };
 
 const COURSE = [
-  ["Diagnóstico previo","Descartá cable/cargador, suciedad, corrosión y daño mecánico antes de cambiar piezas."],
-  ["Desconectar batería","Antes de aplicar calor o soldar, desconectá la batería."],
-  ["Preparar y proteger","Sujetá la placa, protegé flex/plásticos y usá flux de forma controlada."],
-  ["Retirar el conector","No hagas palanca hasta que toda la soldadura esté realmente fundida."],
-  ["Limpiar pads","Retirá exceso de soldadura con control e inspeccioná pads y pistas."],
-  ["Colocar y soldar","Alineá el repuesto, soldá anclajes/contactos y revisá puentes."],
-  ["Comprobación final","Inspección, control de cortos y prueba de carga/datos según el equipo."]
+  ["Diagnóstico general","Cómo recibir un equipo, identificar el síntoma y descartar lo simple antes de abrirlo."],
+  ["Herramientas y seguridad","Tester, fuente, estación, cautín, flux, alcohol isopropílico, protección ESD y batería."],
+  ["Uso del tester","Voltaje, continuidad, resistencia, diodo y cómo interpretar mediciones sin adivinar."],
+  ["No enciende","Secuencia de diagnóstico: batería, consumo, botón power, líneas principales y placa."],
+  ["No carga","Cable/cargador, pin de carga, VBUS, subplaca, flex, batería y circuito de carga."],
+  ["Cambio de pin de carga","Diagnóstico, retiro, limpieza, colocación, soldadura y prueba final."],
+  ["Cambio de módulo sin marco","Desarme, separación, limpieza de adhesivo, prueba previa, alineación y pegado."],
+  ["Cambio de módulo con marco","Desarme completo, transferencia de placa/batería/cámaras/flex, cierre y pruebas."],
+  ["Pantalla sin imagen","Diferenciar módulo, backlight, flex, conector, alimentación y placa."],
+  ["Táctil no funciona","Diferenciar vidrio/táctil, módulo, conector, flex, software y línea de placa."],
+  ["Buzzer / altavoz","Diagnóstico del parlante externo, contactos, módulo, pista y etapa de audio."],
+  ["Auricular de llamada","Diagnóstico de auricular, malla, contactos, flex, sensor y circuito de audio."],
+  ["Micrófono","Pruebas de grabación/llamada, obstrucción, flex/subplaca y línea de micrófono."],
+  ["Botón power y volumen","Diferenciar botón mecánico, flex, switch, continuidad y falla de placa."],
+  ["Antena y señal","SIM, conectores coaxiales, antena, contactos, subplaca y diagnóstico RF sin adivinar."],
+  ["SIM no detectada","Bandeja, lector, contactos, líneas, software y diagnóstico de placa."],
+  ["Wi‑Fi y Bluetooth","Descartar software, antenas/conectores y luego circuito de placa."],
+  ["Cámaras","Diferenciar cámara dañada, flex/conector, alimentación, software y placa."],
+  ["Vibrador","Prueba de motor/vibrador, contactos, flex y circuito de control."],
+  ["Huella y sensores","Huella, proximidad, luz, flex y compatibilidad luego de cambiar módulo."],
+  ["Batería","Estado físico, voltaje, conector, consumo y criterios de reemplazo seguro."],
+  ["Flex y conectores","Cómo revisar, limpiar, medir y reemplazar flex sin dañar conectores FPC."],
+  ["Sulfatación y humedad","Inspección, limpieza segura, corrosión, continuidad y recuperación por etapas."],
+  ["Soldadura y resoldado","Preparación, flux, soldadura, malla, cautín/aire y control de puentes."],
+  ["Diagnóstico final","Prueba completa: carga, audio, señal, cámaras, sensores, botones, Wi‑Fi y cierre."]
+] as const;
+
+const REPAIR_TOPICS = [
+  {icon:"📱",title:"Cambio de módulo sin marco",prompt:"Quiero aprender a cambiar un módulo sin marco. Guiame desde el diagnóstico y prueba del repuesto hasta la separación, limpieza, alineación, pegado y prueba final."},
+  {icon:"🧩",title:"Cambio de módulo con marco",prompt:"Quiero aprender a cambiar un módulo con marco. Guiame con desarme completo, transferencia de componentes, tornillos, flex, batería, cámaras y pruebas finales."},
+  {icon:"🔊",title:"Buzzer / altavoz",prompt:"Quiero diagnosticar un celular sin sonido en el buzzer o altavoz. Ayudame a diferenciar parlante, contactos, módulo y circuito de audio paso a paso."},
+  {icon:"☎️",title:"Auricular de llamada",prompt:"Quiero diagnosticar un auricular de llamada que no se escucha o se escucha bajo. Guiame paso a paso."},
+  {icon:"🎙️",title:"Micrófono",prompt:"Quiero diagnosticar un micrófono que no graba o no se escucha en llamadas. Guiame para diferenciar suciedad, flex, subplaca y placa."},
+  {icon:"🔘",title:"Botón power / volumen",prompt:"Quiero diagnosticar un botón power o volumen que no responde. Enseñame a diferenciar botón, flex, switch, continuidad y línea de placa."},
+  {icon:"📶",title:"Antena / señal",prompt:"Quiero diagnosticar un celular sin señal o con señal débil. Guiame para revisar SIM, antena, coaxiales, conectores, contactos y placa sin adivinar."},
+  {icon:"💳",title:"SIM no detectada",prompt:"Quiero diagnosticar un celular que no detecta SIM. Guiame desde bandeja y lector hasta líneas y placa."},
+  {icon:"📡",title:"Wi‑Fi / Bluetooth",prompt:"Quiero diagnosticar Wi‑Fi o Bluetooth que no funciona. Guiame para separar software, antena y falla de placa."},
+  {icon:"📷",title:"Cámaras",prompt:"Quiero diagnosticar una cámara que no abre, da error o se ve negra. Guiame paso a paso."},
+  {icon:"📳",title:"Vibrador",prompt:"Quiero diagnosticar un vibrador que no funciona. Enseñame cómo revisar motor, contactos, flex y circuito."},
+  {icon:"🖐️",title:"Huella y sensores",prompt:"Quiero diagnosticar huella, proximidad o sensores que dejaron de funcionar. Guiame según el modelo y el trabajo realizado."},
+  {icon:"⚡",title:"No enciende",prompt:"Tengo un celular que no enciende. Quiero hacer diagnóstico profesional paso a paso sin cambiar piezas al azar."},
+  {icon:"🔌",title:"No carga",prompt:"Tengo un celular que no carga. Quiero diagnosticar desde cargador y pin hasta subplaca, flex, batería y circuito de carga."},
+  {icon:"🖥️",title:"Sin imagen / sin táctil",prompt:"Quiero diagnosticar un celular que enciende pero no da imagen o no responde el táctil. Guiame para separar módulo, flex, conector y placa."},
+  {icon:"🔋",title:"Batería",prompt:"Quiero aprender a diagnosticar batería, conector y consumo de forma segura."},
 ] as const;
 
 const QUIZ = [
@@ -790,7 +827,7 @@ export default function Page() {
         <div className="grid">
           <button className="card" onClick={()=>nav("plate")}><b>📷 Analizar tu placa</b><span className="muted small">Visión IA + marcas automáticas</span></button>
           <button className="card" onClick={()=>nav("talk")}><b>🎤 Hablar con LOLO</b><span className="muted small">Chat + micrófono + voz</span></button>
-          <button className="card workshopCard" onClick={()=>nav("learn")}><b>📘 Aprender con LOLO</b><span className="muted small">Clases conversadas, paso a paso</span></button>
+          <button className="card workshopCard" onClick={()=>nav("learn")}><b>📘 Aprender con LOLO</b><span className="muted small">Módulos, audio, señal, botones, tester, soldadura y diagnóstico</span></button>
           <button className="card" onClick={()=>nav("settings")}><b>💳 Planes LOLO</b><span className="muted small">$12.000 mensual o $120.000 permanente</span></button>
         </div>
       </div>
@@ -840,7 +877,7 @@ export default function Page() {
         </label>
 
         <div className="quickPrompts">
-          {["Mi celular no carga","Mi celular no enciende","Quiero aprender a usar el tester","Quiero cambiar un pin de carga"].map(q=>
+          {["Mi celular no carga","Mi celular no enciende","Quiero cambiar un módulo","No tengo sonido","No tengo señal","No funciona el botón power"].map(q=>
             <button className="quickChip" key={q} onClick={()=>void sendChat(q)} disabled={busy}>{q}</button>
           )}
         </div>
@@ -867,7 +904,7 @@ export default function Page() {
 
     <section className={"section "+(tab==="plate"&&hasAccess?"active":"")}>
       <div className="panel"><h2>Tu placa + visión IA</h2>
-        <p className="muted">Sacá una foto enfocada o subí una imagen guardada de la subplaca completa y del pin de carga. Cuanta más zona alrededor se vea, mejor puede seguir pistas y test points.</p>
+        <p className="muted">Sacá una foto enfocada de la zona que estás diagnosticando. Para mediciones eléctricas, LOLO puede ayudarte a ubicar puntos seguros cuando la imagen permite confirmarlos. Para módulos, botones, audio, antena y otros componentes, usá la foto junto con el chat para avanzar paso a paso.</p>
         <div className="uploadActions">
           <label className="btn primary">📷 Sacar foto<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <label className="btn">🖼️ Subir imagen<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
@@ -955,6 +992,22 @@ export default function Page() {
       <div className="panel">
         <h2>Aprender con LOLO</h2>
         <p className="muted">Elegí un tema. LOLO te lo explica conversando y adapta la explicación según lo que vos le preguntes.</p>
+
+        <div className="repairTopicSection">
+          <div className="repairTopicHead">
+            <div><span>DIAGNÓSTICO Y REPARACIÓN</span><h3>¿Qué querés aprender o diagnosticar?</h3></div>
+            <small>LOLO empieza por diagnóstico y recién después propone reemplazar una pieza.</small>
+          </div>
+          <div className="repairTopicGrid">
+            {REPAIR_TOPICS.map(topic=><button className="repairTopicCard" key={topic.title} onClick={()=>{setTab("talk");void sendChat(topic.prompt)}}>
+              <span className="repairTopicIcon">{topic.icon}</span>
+              <b>{topic.title}</b>
+              <small>Aprender / diagnosticar</small>
+            </button>)}
+          </div>
+        </div>
+
+        <h3 className="learningPathTitle">Ruta completa de aprendizaje</h3>
         <div className="learnList">
           {COURSE.map((s,i)=><div className="learnCard" key={i}>
             <div><b>{i+1}. {s[0]}</b><span>{s[1]}</span></div>
