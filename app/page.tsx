@@ -16,11 +16,17 @@ const isFastGreeting = (value:string) => {
 type ChatMessage = { role: "user" | "assistant"; content: string };
 type Marker = { x:number; y:number; label:string; evidence?:string };
 type Caution = { x:number; y:number; radius:number; label:string };
+type VisualFinding = {
+  x:number; y:number; w:number; h:number;
+  label:string; evidence:string; confidence:number;
+};
 type VisionResult = {
-  can_mark:boolean; need_better_photo:boolean; confidence:number;
-  connector_type:"usb-c"|"micro-usb"|"unknown"; image_quality:"good"|"usable"|"poor";
-  summary:string; explanation:string; safety_warning:string; follow_up_question:string;
-  expected_reading:string; black_probe:Marker|null; red_probe:Marker|null; cautions:Caution[];
+  can_mark:boolean; can_measure:boolean; need_better_photo:boolean; confidence:number;
+  connector_type:"usb-c"|"micro-usb"|"lightning"|"unknown"; image_quality:"good"|"usable"|"poor";
+  analysis_type:string; summary:string; diagnosis:string; explanation:string;
+  suggested_action:string; safety_warning:string; follow_up_question:string;
+  required_next_view:string; expected_reading:string;
+  black_probe:Marker|null; red_probe:Marker|null; findings:VisualFinding[]; cautions:Caution[];
 };
 
 const COURSE = [
@@ -168,6 +174,8 @@ export default function Page() {
   const [micError,setMicError]=useState("");
   const [image,setImage]=useState("");
   const [deviceModel,setDeviceModel]=useState("");
+  const [visionTask,setVisionTask]=useState("diagnose");
+  const [symptom,setSymptom]=useState("");
   const [connector,setConnector]=useState("auto");
   const [measurement,setMeasurement]=useState("voltage");
   const [vision,setVision]=useState<VisionResult|null>(null);
@@ -742,13 +750,16 @@ export default function Page() {
     if(!image||busy)return;setBusy(true);setVisionError("");setVision(null);
     try{
       const r=await fetch("/api/vision",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-        imageDataUrl:image,deviceModel,connectorHint:connector,measurement
+        imageDataUrl:image,
+        deviceModel,
+        task:visionTask,
+        symptom,
+        connectorHint:visionTask==="charging"?connector:"auto",
+        measurement:visionTask==="measure"?measurement:"none"
       })});
       const j=await r.json();if(!r.ok)throw new Error(j.error||"Error");
       setVision(j);
-      const spoken=j.can_mark
-        ? `${j.explanation} ${j.safety_warning} ${j.expected_reading} ${j.follow_up_question}`
-        : `${j.summary} ${j.safety_warning} ${j.follow_up_question}`;
+      const spoken=`${j.summary} ${j.diagnosis||""} ${j.explanation||""} ${j.safety_warning||""} ${j.follow_up_question||""}`;
       speak(spoken);
     }catch(e:any){setVisionError(e?.message||"No se pudo analizar la imagen.")}
     finally{setBusy(false)}
@@ -783,6 +794,12 @@ export default function Page() {
   const cautionStyle=(c:Caution)=>({
     left:imageBox.left+c.x*imageBox.width,top:imageBox.top+c.y*imageBox.height,
     width:Math.max(45,c.radius*2*imageBox.width),height:Math.max(45,c.radius*2*imageBox.width)
+  });
+  const findingStyle=(f:VisualFinding)=>({
+    left:imageBox.left+f.x*imageBox.width,
+    top:imageBox.top+f.y*imageBox.height,
+    width:Math.max(34,f.w*imageBox.width),
+    height:Math.max(34,f.h*imageBox.height)
   });
 
   const runWorkshopStep=async(i:number)=>{
