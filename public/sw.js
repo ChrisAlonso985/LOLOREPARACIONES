@@ -1,7 +1,7 @@
-const CACHE='lolo-real-v45';
+const CACHE='lolo-real-v46';
 self.addEventListener('install',e=>{
   self.skipWaiting();
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/icon.svg','/logo-lolo.svg'])));
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/icon.svg','/icon-192.svg?v=2','/icon-512.svg?v=2','/logo-lolo.svg'])));
 });
 self.addEventListener('activate',e=>e.waitUntil(
   caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
