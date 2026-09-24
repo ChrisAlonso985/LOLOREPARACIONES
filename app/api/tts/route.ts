@@ -1,5 +1,6 @@
 import OpenAI from "openai";
-import { NextResponse } from "next/server";\nimport { requirePaidAccess } from "@/app/lib/security";
+import { NextResponse } from "next/server";
+import { requirePaidAccess } from "@/app/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -13,7 +14,9 @@ const rememberTts = (key:string,value:{audio:string;mime:string}) => {
   ttsCache.set(key,value);
 };
 
-export async function POST(req: Request) {\n  const gate=await requirePaidAccess();\n  if(gate.response)return gate.response;
+export async function POST(req: Request) {
+  const gate=await requirePaidAccess();
+  if(gate.response)return gate.response;
   try {
     const { text } = await req.json();
     if (!text || typeof text !== "string") {
