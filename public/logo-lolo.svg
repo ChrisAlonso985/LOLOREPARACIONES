@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+<title id="title">LOLO</title><desc id="desc">Reparación de celulares con IA</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0c376b"/><stop offset=".46" stop-color="#071d3b"/><stop offset="1" stop-color="#020916"/></linearGradient>
+  <radialGradient id="halo"><stop stop-color="#0db9ff" stop-opacity=".24"/><stop offset="1" stop-color="#0db9ff" stop-opacity="0"/></radialGradient>
+  <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".42" stop-color="#edf5fc"/><stop offset="1" stop-color="#8eaed0"/></linearGradient>
+  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#68f5ff"/><stop offset=".48" stop-color="#16c7ff"/><stop offset="1" stop-color="#2479ff"/></linearGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#000" flood-opacity=".58"/></filter>
+</defs>
+<rect x="8" y="8" width="1008" height="1008" rx="205" fill="url(#bg)" stroke="#2dafff" stroke-width="8"/>
+<ellipse cx="520" cy="350" rx="410" ry="300" fill="url(#halo)"/>
+<rect x="34" y="34" width="956" height="956" rx="184" fill="none" stroke="#72ecff" stroke-opacity=".14" stroke-width="4"/>
+
+<g filter="url(#shadow)">
+  <g transform="translate(332 96) rotate(-6 176 244)">
+    <rect x="0" y="0" width="352" height="488" rx="58" fill="#c2def4" stroke="#66ceff" stroke-width="12"/>
+    <rect x="20" y="24" width="312" height="440" rx="44" fill="#030a14"/>
+    <rect x="115" y="31" width="122" height="24" rx="12" fill="#081a2c"/>
+    <circle cx="281" cy="44" r="8" fill="#1ac9ff"/>
+    <g stroke="#18cbff" stroke-width="8" fill="none" stroke-linecap="round" filter="url(#glow)">
+      <path d="M61 124h60l40 40h50"/><path d="M57 190h70l38 36h86"/><path d="M67 271h64l36-36h76"/>
+      <path d="M247 122v54l-34 34"/><path d="M286 164v84l-36 36"/><path d="M86 340h68l34-32h76"/>
+    </g>
+    <g fill="#9be7ff"><circle cx="61" cy="124" r="10"/><circle cx="57" cy="190" r="10"/><circle cx="67" cy="271" r="10"/><circle cx="86" cy="340" r="10"/><circle cx="247" cy="122" r="10"/><circle cx="286" cy="164" r="10"/></g>
+    <rect x="136" y="180" width="128" height="128" rx="24" fill="#073765" stroke="#61ebff" stroke-width="10" filter="url(#glow)"/>
+    <text x="200" y="270" text-anchor="middle" font-family="Arial,sans-serif" font-size="76" font-weight="900" fill="#fff">AI</text>
+    <rect x="48" y="365" width="108" height="70" rx="12" fill="#1b2e42" stroke="#5b7287" stroke-width="3"/>
+    <rect x="182" y="356" width="104" height="82" rx="12" fill="#182a3e" stroke="#5b7287" stroke-width="3"/>
+    <circle cx="62" cy="78" r="25" fill="#09131f" stroke="#8fb0c9" stroke-width="5"/>
+    <circle cx="118" cy="78" r="25" fill="#09131f" stroke="#8fb0c9" stroke-width="5"/>
+    <circle cx="62" cy="78" r="12" fill="#147dd2"/><circle cx="118" cy="78" r="12" fill="#147dd2"/>
+  </g>
+
+  <path d="M700 205c42-22 92-20 134 2l-56 56 8 42 42 8 56-56c16 46 10 96-18 134-28 38-72 58-118 58L565 715l-80-58 191-258c-10-27-10-56 0-84 6-18 14-34 24-46z"
+        fill="url(#metal)" stroke="#c9efff" stroke-width="6"/>
+  <path d="M795 510l40-18 108 210-24 14z" fill="#b8d8ed"/>
+  <rect x="808" y="680" width="88" height="170" rx="30" transform="rotate(-26 852 765)" fill="#0b2847" stroke="#30bfff" stroke-width="8"/>
+  <path d="M836 677l-48-94" stroke="url(#metal)" stroke-width="22" stroke-linecap="round"/>
+
+  <path d="M132 533C260 379 425 350 591 388c104 24 206 84 305 187" fill="none" stroke="url(#cyan)" stroke-width="30" stroke-linecap="round" filter="url(#glow)" opacity=".92"/>
+  <path d="M130 534c123 124 296 176 474 136 118-26 221-98 296-176" fill="none" stroke="#41eaff" stroke-width="10" stroke-linecap="round" opacity=".92"/>
+</g>
+
+<text x="512" y="820" text-anchor="middle" font-family="Arial,sans-serif" font-size="220" font-weight="900" letter-spacing="-14" fill="url(#metal)" stroke="#e5f9ff" stroke-width="3">LOLO</text>
+<text x="512" y="905" text-anchor="middle" font-family="Arial,sans-serif" font-size="46" font-weight="800" fill="#f3f8fd">Reparación de celulares con <tspan fill="#3bdcff">IA</tspan></text>
+<path d="M256 935h512" stroke="#21baff" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+</svg>
