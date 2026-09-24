@@ -1,7 +1,7 @@
 {
-  "name": "LOLO – Profe IA de Reparación",
+  "name": "LOLO – Reparación de celulares con IA",
   "short_name": "LOLO",
-  "description": "Profesor IA para reparación de celulares y notebooks.",
+  "description": "Asistente y profesor IA para diagnóstico y reparación de celulares.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
