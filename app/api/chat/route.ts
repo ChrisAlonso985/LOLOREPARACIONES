@@ -1,5 +1,6 @@
 import OpenAI from "openai";
-import { NextResponse } from "next/server";\nimport { requirePaidAccess } from "@/app/lib/security";
+import { NextResponse } from "next/server";
+import { requirePaidAccess } from "@/app/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -31,7 +32,9 @@ REGLAS TÉCNICAS:
 OBJETIVO:
 El alumno debe sentir que está hablando con LOLO, su profesor IA. Guiá, preguntá, esperá su respuesta y continuá desde ahí.`;
 
-export async function POST(req: Request) {\n  const gate=await requirePaidAccess();\n  if(gate.response)return gate.response;
+export async function POST(req: Request) {
+  const gate=await requirePaidAccess();
+  if(gate.response)return gate.response;
   try {
     const { messages } = await req.json();
     const token = process.env.OPENAI_API_KEY;
