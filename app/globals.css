@@ -551,3 +551,19 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .learningPathTitle{margin:18px 0 10px}
 @media(max-width:850px){.repairTopicGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:620px){.repairTopicGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.repairTopicHead{display:block}.repairTopicHead small{display:block;text-align:left;margin-top:5px}.repairTopicCard{min-height:105px}}
+
+/* Visión IA general v41 */
+.visionTaskPanel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.visionTaskPanel .visionSymptom{grid-column:1/-1}
+.visionTaskPanel textarea{min-height:82px;resize:vertical}
+.findingBox{position:absolute;z-index:8;border:2px solid #42d7ff;background:#20bfe71c;border-radius:10px;box-shadow:0 0 0 2px #001018aa,0 0 18px #20caff55;pointer-events:none}
+.findingBox>span{position:absolute;left:-9px;top:-10px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#18b9e6;color:#fff;font-size:10px;font-weight:950;border:2px solid #d8f8ff}
+.findingBox>b{position:absolute;left:7px;bottom:5px;max-width:calc(100% - 12px);background:#02121ce8;color:#e8fbff;border-radius:6px;padding:3px 5px;font-size:8px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.visionResultHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.visionResultHead span{font-size:9px;color:#74cfe9;border:1px solid #236a87;border-radius:999px;padding:4px 7px}
+.visionFindings{display:grid;gap:7px;margin:12px 0;padding:10px;border:1px solid #1d5c79;border-radius:13px;background:#051b28}
+.visionFindings>div{display:flex;align-items:flex-start;gap:8px}
+.visionFindings>div>span{flex:0 0 22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#0c88b0;color:white;font-size:9px;font-weight:900}
+.visionFindings p{margin:0;display:grid;gap:2px}
+.visionFindings small{color:#91bdcf;font-size:9px;line-height:1.35}
+@media(max-width:620px){.visionTaskPanel{grid-template-columns:1fr}.visionTaskPanel .visionSymptom{grid-column:auto}}
