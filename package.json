@@ -15,13 +15,16 @@
     "openai": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "three": "latest"
+    "three": "latest",
+    "pg": "latest",
+    "bcryptjs": "latest"
   },
   "devDependencies": {
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "typescript": "latest",
-    "@types/three": "latest"
+    "@types/three": "latest",
+    "@types/pg": "latest"
   }
 }
