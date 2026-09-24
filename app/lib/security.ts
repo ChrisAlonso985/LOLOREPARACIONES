@@ -88,9 +88,29 @@ export async function registerUser(emailInput:string,password:string){
 export async function loginUser(emailInput:string,password:string){
   await ensureSchema();
   const email=normalizeEmail(emailInput);
-  const r=await query("SELECT id,email,password_hash,role FROM users WHERE email=$1 LIMIT 1",[email]);
-  if(!r.rowCount||!await bcrypt.compare(password,r.rows[0].password_hash)) throw new Error("Correo o contraseña incorrectos.");
+  const adminEmail=normalizeEmail(process.env.LOLO_ADMIN_EMAIL||"");
+  let r=await query("SELECT id,email,password_hash,role FROM users WHERE email=$1 LIMIT 1",[email]);
+
+  if(!r.rowCount){
+    if(email===adminEmail){
+      if(password.length<8) throw new Error("La contraseña debe tener al menos 8 caracteres.");
+      const id=randomUUID();
+      const hash=await bcrypt.hash(password,12);
+      await query("INSERT INTO users(id,email,password_hash,role) VALUES($1,$2,$3,'admin')",[id,email,hash]);
+      await createSession(id);
+      return {id,email,role:"admin"} as LoloUser;
+    }
+    throw new Error("No existe una cuenta con ese correo. Elegí Crear cuenta.");
+  }
+
   const row=r.rows[0];
+  if(!await bcrypt.compare(password,row.password_hash)) throw new Error("Contraseña incorrecta.");
+
+  if(email===adminEmail&&row.role!=="admin"){
+    await query("UPDATE users SET role='admin' WHERE id=$1",[row.id]);
+    row.role="admin";
+  }
+
   await createSession(row.id);
   return {id:row.id,email:row.email,role:row.role} as LoloUser;
 }
