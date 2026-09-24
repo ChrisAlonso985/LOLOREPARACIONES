@@ -45,6 +45,12 @@ export async function ensureSchema(){
         );
         CREATE INDEX IF NOT EXISTS payments_user_idx ON payments(user_id,created_at DESC);
         CREATE INDEX IF NOT EXISTS payments_provider_ref_idx ON payments(provider_ref);
+
+        CREATE TABLE IF NOT EXISTS guest_trials(
+          visitor_hash TEXT PRIMARY KEY,
+          used_at TIMESTAMPTZ,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
       `);
     })().catch(e=>{g.loloSchema=undefined;throw e});
   }
@@ -223,4 +229,64 @@ export async function requirePaidAccess(){
   const access=await getAccessForUser(user,true);
   if(!access.active)return {user,access,response:NextResponse.json({error:"Necesitás un plan activo para usar LOLO.",code:"PAYMENT_REQUIRED"},{status:402})};
   return {user,access,response:null};
+}
+
+
+const TRIAL_COOKIE="lolo_trial";
+
+async function getOrCreateTrialToken(){
+  const jar=await cookies();
+  let token=jar.get(TRIAL_COOKIE)?.value;
+  if(!token){
+    token=randomBytes(32).toString("hex");
+    jar.set(TRIAL_COOKIE,token,{
+      httpOnly:true,
+      secure:process.env.NODE_ENV==="production",
+      sameSite:"lax",
+      path:"/",
+      maxAge:60*60*24*365
+    });
+  }
+  return token;
+}
+
+export async function getFreeTrialStatus(){
+  await ensureSchema();
+  const jar=await cookies();
+  const token=jar.get(TRIAL_COOKIE)?.value;
+  if(!token) return {available:true,used:false};
+  const visitorHash=hashToken(token);
+  const r=await query("SELECT used_at FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
+  const used=Boolean(r.rowCount&&r.rows[0]?.used_at);
+  return {available:!used,used};
+}
+
+async function consumeFreeTrial(){
+  await ensureSchema();
+  const token=await getOrCreateTrialToken();
+  const visitorHash=hashToken(token);
+  await query("INSERT INTO guest_trials(visitor_hash) VALUES($1) ON CONFLICT(visitor_hash) DO NOTHING",[visitorHash]);
+  const r=await query("UPDATE guest_trials SET used_at=NOW() WHERE visitor_hash=$1 AND used_at IS NULL RETURNING visitor_hash",[visitorHash]);
+  return r.rowCount===1;
+}
+
+export async function requireChatAccess(){
+  const user=await getCurrentUser();
+  if(user){
+    const access=await getAccessForUser(user,true);
+    if(access.active) return {user,access,trial:false,response:null};
+  }
+
+  const granted=await consumeFreeTrial();
+  if(granted) return {user,access:null,trial:true,response:null};
+
+  return {
+    user,
+    access:null,
+    trial:false,
+    response:NextResponse.json({
+      error:"Ya usaste tu consulta gratis. Elegí un plan para seguir hablando con LOLO.",
+      code:"TRIAL_USED"
+    },{status:402})
+  };
 }
