@@ -498,7 +498,7 @@ export default function Page() {
   });
 
   const speak=async(text:string)=>{
-    setCaption(text.slice(0,190)+(text.length>190?"…":""));
+    setCaption("LOLO está preparando la respuesta…");
     stopVoice();
     const seq=++speechSeqRef.current;
 
@@ -593,7 +593,7 @@ export default function Page() {
   };
 
   const playFastGreeting=async()=>{
-    setCaption(FAST_GREETING_REPLY);
+    setCaption("LOLO está respondiendo…");
     stopVoice();
     const seq=++speechSeqRef.current;
 
@@ -627,9 +627,13 @@ export default function Page() {
     const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
     messagesRef.current=next;setMessages(next);setInput("");
     if(isFastGreeting(q)&&hasAccess){
-      const answered=[...next,{role:"assistant",content:FAST_GREETING_REPLY} as ChatMessage];
-      messagesRef.current=answered;setMessages(answered);
+      setBusy(true);
       await playFastGreeting();
+      const answered=[...next,{role:"assistant",content:FAST_GREETING_REPLY} as ChatMessage];
+      messagesRef.current=answered;
+      setMessages(answered);
+      setCaption(FAST_GREETING_REPLY);
+      setBusy(false);
       if(fromVoice&&conversationMode&&hasAccess) window.setTimeout(()=>void startMic(),450);
       return;
     }
@@ -652,10 +656,12 @@ export default function Page() {
         setTrialAvailable(false);
         setTrialUsed(true);
       }
-      const answered=[...next,{role:"assistant",content:ans} as ChatMessage];
-      messagesRef.current=answered;setMessages(answered);
       setBusy(false);
       await speak(ans);
+      const answered=[...next,{role:"assistant",content:ans} as ChatMessage];
+      messagesRef.current=answered;
+      setMessages(answered);
+      setCaption(ans);
       if(fromVoice&&conversationMode&&hasAccess) window.setTimeout(()=>void startMic(),450);
     }catch(e:any){
       const ans="No pude conectar con la IA en este momento. "+(e?.message||"");
