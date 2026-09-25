@@ -927,10 +927,19 @@ export default function Page() {
         {!hasAccess&&trialUsed&&<div className="trialBanner trialBannerUsed"><b>✓ Ya probaste LOLO</b><span>Para seguir usando la IA, creá tu cuenta y elegí un plan.</span></div>}
         {micError&&<div className="notice">{micError}</div>}
 
-        <FreeLolo3D
-          mode={recording?"listening":busy?"thinking":speaking?"speaking":"idle"}
-          caption={caption}
-        />
+        {hasAccess
+          ? <FreeLolo3D
+              mode={recording?"listening":busy?"thinking":speaking?"speaking":"idle"}
+              caption={caption}
+            />
+          : <div className="guestLoloTutor">
+              <LoloAvatar mode={busy?"thinking":speaking?"speaking":"idle"} stage/>
+              <div>
+                <span className="trialPill">PRUEBA SIN CUENTA</span>
+                <h3>Preguntale a LOLO</h3>
+                <p>Escribí abajo una consulta real de reparación. LOLO te responde gratis una vez.</p>
+              </div>
+            </div>}
 
         <button className={"bigMic "+(recording?"on":"")} onClick={()=>{if(hasAccess)void startMic();else setMicError("La prueba gratis es por texto. Hacé tu primera consulta escribiéndole a LOLO; después podés crear tu cuenta para usar voz y todas las funciones.")}} disabled={busy}>
           <span>{recording?"■":"🎤"}</span>
