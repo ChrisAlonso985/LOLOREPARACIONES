@@ -581,3 +581,10 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .visionFindings p{margin:0;display:grid;gap:2px}
 .visionFindings small{color:#91bdcf;font-size:9px;line-height:1.35}
 @media(max-width:620px){.visionTaskPanel{grid-template-columns:1fr}.visionTaskPanel .visionSymptom{grid-column:auto}}
+
+/* Prueba gratis liviana: evita bloquear navegación por WebGL */
+.guestLoloTutor{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;margin:14px 0;padding:14px;border:1px solid #227ba5;border-radius:18px;background:linear-gradient(145deg,#09273c,#061521)}
+.guestLoloTutor .loloAvatar{width:145px;height:110px}
+.guestLoloTutor h3{margin:7px 0 5px;font-size:20px}
+.guestLoloTutor p{margin:0;color:#9fc1d2;font-size:12px;line-height:1.45}
+@media(max-width:600px){.guestLoloTutor{grid-template-columns:105px minmax(0,1fr);padding:11px;gap:10px}.guestLoloTutor .loloAvatar{width:100px;height:90px}.guestLoloTutor h3{font-size:17px}}
