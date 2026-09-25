@@ -11,12 +11,12 @@ export default function AccountPanel({account,onAccountChange}:{account:AccountS
   async function pay(plan:"monthly"|"lifetime"){setError("");setPaymentBusy(plan);try{const r=await fetch("/api/payments/create",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({plan})});const j=await r.json();if(!r.ok)throw new Error(j.error||"No pude iniciar Mercado Pago.");if(!j.url)throw new Error("Mercado Pago no devolvió el enlace.");window.location.href=j.url}catch(e:any){setError(e?.message||"No pude iniciar el pago.");setPaymentBusy(null)}}
   if(account===null)return <div className="panel accountPanel"><h2>Mi cuenta LOLO</h2><p className="muted">Verificando tu cuenta…</p></div>;
   if(!account.authenticated)return <div className="panel accountPanel authPanel">
-    <div className="accountHead"><div><h2>Ingresá a LOLO</h2><p className="muted">Para usar la IA necesitás una cuenta y un plan activo.</p></div><span className="paymentState pending">🔒 Protegido</span></div>
+    <div className="accountHead"><div><h2>Creá tu cuenta LOLO</h2><p className="muted">La prueba gratis no necesita cuenta. Registrate recién cuando quieras seguir usando LOLO después de probarla.</p></div><span className="paymentState pending">CUENTA</span></div>
     <div className="authTabs"><button className={mode==="login"?"on":""} onClick={()=>{setMode("login");setError("")}}>Ya tengo cuenta</button><button className={mode==="register"?"on":""} onClick={()=>{setMode("register");setError("")}}>Crear cuenta</button></div>
     <div className="field"><label>Correo</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" placeholder="alumno@email.com"/></div>
     <div className="field"><label>Contraseña</label><input type="password" value={password} onChange={e=>setPassword(e.target.value)} autoComplete={mode==="login"?"current-password":"new-password"} placeholder="Mínimo 8 caracteres"/></div>
     {error&&<div className="notice">{error}</div>}<button className="btn primary authMainBtn" onClick={()=>void authSubmit()} disabled={busy}>{busy?"Procesando…":mode==="login"?"Ingresar":"Crear cuenta"}</button>
-    <div className="tip warn"><b>Sin pago no se consume IA.</b> Hablar con LOLO, analizar placas y las funciones inteligentes quedan bloqueadas hasta que Mercado Pago confirme el acceso.</div>
+    <div className="tip good"><b>Primero probás, después decidís.</b> Una vez creada tu cuenta, podés elegir un plan para seguir conversando, usar voz, visión IA y las demás funciones.</div>
   </div>;
   return <div className="panel accountPanel">
     <div className="accountHead"><div><h2>Mi cuenta LOLO</h2><p className="muted">{account.user?.email}</p></div><span className={"paymentState "+(account.access.active?"ready":"pending")}>{account.access.active?"✓ "+account.access.label:"Sin plan activo"}</span></div>
