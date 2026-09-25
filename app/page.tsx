@@ -656,7 +656,7 @@ export default function Page() {
       messagesRef.current=answered;setMessages(answered);
       setBusy(false);
       await speak(ans);
-      if(fromVoice&&conversationMode) window.setTimeout(()=>void startMic(),450);
+      if(fromVoice&&conversationMode&&hasAccess) window.setTimeout(()=>void startMic(),450);
     }catch(e:any){
       const ans="No pude conectar con la IA en este momento. "+(e?.message||"");
       const failed=[...next,{role:"assistant",content:ans} as ChatMessage];
@@ -971,7 +971,7 @@ export default function Page() {
           {busy&&<div className="msg bot thinkingMsg"><span></span><span></span><span></span></div>}
         </div>
         <div className="composer">
-          <button className={"circle "+(recording?"on":"")} onClick={()=>void startMic()} title="Hablar">{recording?"■":"🎤"}</button>
+          <button className={"circle "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy||(!hasAccess&&trialUsed)} title="Hablar">{recording?"■":"🎤"}</button>
           <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")void sendChat()}} placeholder={!hasAccess?"Escribí tu pregunta gratis para LOLO":"También podés escribirle a LOLO"}/>
           <label className="circle photoButton" style={{display:"grid",placeItems:"center"}} title="Sacar foto">📷<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <label className="circle galleryButton" style={{display:"grid",placeItems:"center"}} title="Subir imagen">🖼️<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
