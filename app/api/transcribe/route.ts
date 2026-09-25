@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { requirePaidAccess } from "@/app/lib/security";
+import { requireVoiceInputAccess } from "@/app/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -14,7 +14,7 @@ const extensionFor=(mime:string)=>{
 };
 
 export async function POST(req: Request) {
-  const gate=await requirePaidAccess();
+  const gate=await requireVoiceInputAccess();
   if(gate.response)return gate.response;
   try {
     const token = process.env.OPENAI_API_KEY;
