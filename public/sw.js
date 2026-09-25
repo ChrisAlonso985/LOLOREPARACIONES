@@ -1,4 +1,4 @@
-const CACHE='lolo-real-v46';
+const CACHE='lolo-real-v47';
 self.addEventListener('install',e=>{
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/','/manifest.webmanifest','/icon.svg','/icon-192.svg?v=2','/icon-512.svg?v=2','/logo-lolo.svg'])));
