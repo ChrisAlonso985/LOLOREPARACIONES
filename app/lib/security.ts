@@ -261,6 +261,63 @@ export async function getFreeTrialStatus(){
   return {available:!used,used};
 }
 
+export async function requireVoiceInputAccess(){
+  const user=await getCurrentUser();
+  if(user){
+    const access=await getAccessForUser(user,true);
+    if(access.active)return {user,access,trial:false,response:null};
+  }
+
+  await ensureSchema();
+  const token=await getOrCreateTrialToken();
+  const visitorHash=hashToken(token);
+  await query("INSERT INTO guest_trials(visitor_hash) VALUES($1) ON CONFLICT(visitor_hash) DO NOTHING",[visitorHash]);
+  const r=await query("SELECT used_at FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
+  const available=Boolean(r.rowCount&&!r.rows[0]?.used_at);
+  if(available)return {user,access:null,trial:true,response:null};
+
+  return {
+    user,
+    access:null,
+    trial:false,
+    response:NextResponse.json({
+      error:"Ya usaste tu prueba gratis. Creá tu cuenta y elegí un plan para seguir hablando con LOLO.",
+      code:"TRIAL_USED"
+    },{status:402})
+  };
+}
+
+export async function requireVoiceOutputAccess(){
+  const user=await getCurrentUser();
+  if(user){
+    const access=await getAccessForUser(user,true);
+    if(access.active)return {user,access,trial:false,response:null};
+  }
+
+  await ensureSchema();
+  await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS voice_output_used_at TIMESTAMPTZ");
+  const jar=await cookies();
+  const token=jar.get(TRIAL_COOKIE)?.value;
+  if(token){
+    const visitorHash=hashToken(token);
+    const r=await query(
+      "UPDATE guest_trials SET voice_output_used_at=NOW() WHERE visitor_hash=$1 AND used_at IS NOT NULL AND voice_output_used_at IS NULL AND used_at > NOW() - INTERVAL '10 minutes' RETURNING visitor_hash",
+      [visitorHash]
+    );
+    if(r.rowCount===1)return {user,access:null,trial:true,response:null};
+  }
+
+  return {
+    user,
+    access:null,
+    trial:false,
+    response:NextResponse.json({
+      error:"La respuesta hablada gratuita ya fue utilizada. Creá tu cuenta para seguir usando la voz de LOLO.",
+      code:"TRIAL_VOICE_USED"
+    },{status:402})
+  };
+}
+
 async function consumeFreeTrial(){
   await ensureSchema();
   const token=await getOrCreateTrialToken();
