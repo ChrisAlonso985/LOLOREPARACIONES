@@ -588,3 +588,19 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .guestLoloTutor h3{margin:7px 0 5px;font-size:20px}
 .guestLoloTutor p{margin:0;color:#9fc1d2;font-size:12px;line-height:1.45}
 @media(max-width:600px){.guestLoloTutor{grid-template-columns:105px minmax(0,1fr);padding:11px;gap:10px}.guestLoloTutor .loloAvatar{width:100px;height:90px}.guestLoloTutor h3{font-size:17px}}
+
+
+/* Contacto talleres presenciales v54 */
+.workshopContactCard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;border-color:#2c9d72;background:linear-gradient(135deg,#082b25,#061a1d);box-shadow:0 10px 30px #0004}
+.workshopContactIcon{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;font-size:29px;background:#0d3d32;border:1px solid #35b985;box-shadow:inset 0 0 20px #35d99a18}
+.workshopContactEyebrow{font-size:8px;font-weight:950;letter-spacing:.9px;color:#70e8b8}
+.workshopContactCopy h3{margin:3px 0 5px;font-size:17px}
+.workshopContactCopy p{margin:0;color:#9bc8bb;font-size:11px;line-height:1.5}
+.workshopContactPhone{margin-top:7px;font-size:11px;color:#d9fff1}
+.workshopContactPhone b{color:#7af0bd}
+.whatsappBtn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;white-space:nowrap;background:linear-gradient(180deg,#25d366,#159447)!important;border-color:#38df7a!important}
+.creatorFooter a{color:#78e9b7;text-decoration:none;font-weight:800}
+@media(max-width:650px){
+  .workshopContactCard{grid-template-columns:58px 1fr}
+  .whatsappBtn{grid-column:1/-1;width:100%}
+}
