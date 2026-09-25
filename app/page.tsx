@@ -510,10 +510,11 @@ export default function Page() {
     const clean=String(text||"").replace(/\s+/g," ").trim();
     if(!clean)return;
 
-    // Generamos la voz IA en bloques completos para evitar cortes en respuestas largas.
+    // La prueba gratis usa una sola generación de voz; los planes completos mantienen bloques largos.
+    const speechText=hasAccess?clean:clean.slice(0,3400);
     const pieces:string[]=[];
-    let rest=clean;
-    const maxChars=2200;
+    let rest=speechText;
+    const maxChars=hasAccess?2200:3400;
     while(rest.length>maxChars){
       let cut=Math.max(
         rest.lastIndexOf(". ",maxChars),
@@ -625,11 +626,11 @@ export default function Page() {
     if(!hasAccess&&trialUsed){setTab("settings");return}
     const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
     messagesRef.current=next;setMessages(next);setInput("");
-    if(isFastGreeting(q)){
+    if(isFastGreeting(q)&&hasAccess){
       const answered=[...next,{role:"assistant",content:FAST_GREETING_REPLY} as ChatMessage];
       messagesRef.current=answered;setMessages(answered);
       await playFastGreeting();
-      if(fromVoice&&conversationMode) window.setTimeout(()=>void startMic(),450);
+      if(fromVoice&&conversationMode&&hasAccess) window.setTimeout(()=>void startMic(),450);
       return;
     }
     setBusy(true);
@@ -925,7 +926,7 @@ export default function Page() {
           <span className={"talkState "+(recording?"listen":speaking?"speak":busy?"think":"ready")}>{recording?"Te escucho":speaking?"Te respondo":busy?"Pensando":"Listo para hablar"}</span>
         </div>
 
-        {!hasAccess&&!trialUsed&&<div className="trialBanner"><b>🎁 Probá LOLO gratis, sin cuenta</b><span>Escribí una pregunta real. LOLO te responde una vez y recién después te ofrece crear tu cuenta.</span></div>}
+        {!hasAccess&&!trialUsed&&<div className="trialBanner"><b>🎁 Probá LOLO gratis, sin cuenta</b><span>Tocá el micrófono, hacé una consulta real y LOLO te responde hablando. Después elegís si querés crear tu cuenta.</span></div>}
         {!hasAccess&&trialUsed&&<div className="trialBanner trialBannerUsed"><b>✓ Ya probaste LOLO</b><span>Para seguir usando la IA, creá tu cuenta y elegí un plan.</span></div>}
         {micError&&<div className="notice">{micError}</div>}
 
@@ -939,20 +940,22 @@ export default function Page() {
               <div>
                 <span className="trialPill">PRUEBA SIN CUENTA</span>
                 <h3>Preguntale a LOLO</h3>
-                <p>Escribí abajo una consulta real de reparación. LOLO te responde gratis una vez.</p>
+                <p>Tocá el micrófono, hablale como a un profe y LOLO te responde con su voz gratis una vez.</p>
               </div>
             </div>}
 
-        <button className={"bigMic "+(recording?"on":"")} onClick={()=>{if(hasAccess)void startMic();else setMicError("La prueba gratis es por texto. Hacé tu primera consulta escribiéndole a LOLO; después podés crear tu cuenta para usar voz y todas las funciones.")}} disabled={busy}>
+        <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy||(!hasAccess&&trialUsed)}>
           <span>{recording?"■":"🎤"}</span>
           <b>{recording?"Terminar ahora":"Hablar con LOLO"}</b>
-          <small>{recording?"Podés tocar para cortar antes":"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
+          <small>{recording?"Podés tocar para cortar antes":!hasAccess?"Tu primera consulta hablada es gratis":"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
         </button>
 
-        <label className="conversationToggle">
-          <input type="checkbox" checked={conversationMode} onChange={e=>setConversationMode(e.target.checked)}/>
-          <span><b>Conversación continua</b><small>{conversationMode?"Después de responder, LOLO vuelve a escucharte.":"LOLO espera que vuelvas a tocar el micrófono."}</small></span>
-        </label>
+        {hasAccess
+          ? <label className="conversationToggle">
+              <input type="checkbox" checked={conversationMode} onChange={e=>setConversationMode(e.target.checked)}/>
+              <span><b>Conversación continua</b><small>{conversationMode?"Después de responder, LOLO vuelve a escucharte.":"LOLO espera que vuelvas a tocar el micrófono."}</small></span>
+            </label>
+          : <div className="talkHint voiceTrialHint"><b>🎤 La prueba incluye voz.</b> Hacés una pregunta hablada y LOLO te contesta hablando. Para seguir conversando, creás tu cuenta.</div>}
 
         <div className="quickPrompts">
           {["Mi celular no carga","Mi celular no enciende","Quiero cambiar un módulo","No tengo sonido","No tengo señal","No funciona el botón power"].map(q=>
@@ -976,7 +979,7 @@ export default function Page() {
         </div>
         {!hasAccess&&trialUsed
           ? <div className="trialFinished"><b>✓ Ya probaste LOLO gratis</b><span>¿Querés seguir? Creá tu cuenta. Después vas a poder elegir el plan que prefieras para usar voz, visión IA, clases y consultas sin el límite de la prueba.</span><button className="btn primary" onClick={()=>setTab("settings")}>Crear cuenta para continuar</button></div>
-          : <div className="talkHint">{hasAccess?"Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.":"No necesitás registrarte para probar. Tu primera consulta por texto es gratis."}</div>}
+          : <div className="talkHint">{hasAccess?"Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.":"No necesitás registrarte. Podés probar a LOLO hablando o escribiendo una vez gratis."}</div>}
       </div>
     </section>
 
