@@ -920,6 +920,22 @@ export default function Page() {
           {isInstalled?"✓ LOLO instalada":"⬇ Instalar aplicación"}
         </button>
       </div>
+
+      <div className="panel workshopContactCard">
+        <div className="workshopContactIcon">🛠️</div>
+        <div className="workshopContactCopy">
+          <span className="workshopContactEyebrow">TALLERES PRESENCIALES</span>
+          <h3>¿Querés aprender reparación conmigo?</h3>
+          <p>Capacitate con <b>Christian Alonso</b> en talleres prácticos de reparación de celulares, tablets y notebooks. Desde cero, práctica real y grupos reducidos.</p>
+          <div className="workshopContactPhone">WhatsApp: <b>3624-624885</b></div>
+        </div>
+        <a
+          className="btn whatsappBtn"
+          href="https://wa.me/5493624624885?text=Hola%20Christian%2C%20vengo%20desde%20la%20app%20LOLO%20y%20quiero%20informaci%C3%B3n%20sobre%20tus%20talleres%20de%20reparaci%C3%B3n."
+          target="_blank"
+          rel="noreferrer"
+        >💬 Consultar por WhatsApp</a>
+      </div>
     </section>
 
     <section className={"section "+(tab==="talk"?"active":"")}>
@@ -1214,6 +1230,7 @@ export default function Page() {
     <div className="creatorFooter">
       <span>LOLO · Tu profe IA de reparación</span>
       <b>Creado por Christian Alonso</b>
+      <a href="https://wa.me/5493624624885?text=Hola%20Christian%2C%20vengo%20desde%20la%20app%20LOLO%20y%20quiero%20informaci%C3%B3n%20sobre%20tus%20talleres%20de%20reparaci%C3%B3n." target="_blank" rel="noreferrer">WhatsApp 3624-624885</a>
     </div>
 
     {installHelp&&<div className="installOverlay" onClick={()=>setInstallHelp(false)}>
