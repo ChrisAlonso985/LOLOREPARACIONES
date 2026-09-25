@@ -212,7 +212,7 @@ export default function Page() {
   const micAudioCtxRef=useRef<AudioContext|null>(null);
   const chatRef=useRef<HTMLDivElement|null>(null);
   const [account,setAccount]=useState<AccountSnapshot|null>(null);
-  const [trialAvailable,setTrialAvailable]=useState(false);
+  const [trialAvailable,setTrialAvailable]=useState(true);
   const [trialUsed,setTrialUsed]=useState(false);
 
   useEffect(()=>{
@@ -226,14 +226,12 @@ export default function Page() {
         const j=await r.json();
         if(!alive)return;
         setAccount(j);
-        if(!j?.authenticated||!j?.access?.active)setTab("settings");
       }catch{
         if(!alive)return;
         setAccount({
           authenticated:false,
           access:{active:false,plan:null,status:"unpaid",label:"Sin acceso activo"}
         });
-        setTab("settings");
       }finally{
         window.clearTimeout(timeout);
       }
@@ -256,7 +254,7 @@ export default function Page() {
         setTrialAvailable(Boolean(j?.available));
         setTrialUsed(Boolean(j?.used));
       })
-      .catch(()=>{if(alive){setTrialAvailable(false);setTrialUsed(true)}});
+      .catch(()=>{if(alive){setTrialAvailable(true);setTrialUsed(false)}});
     return()=>{alive=false};
   },[]);
 
@@ -359,9 +357,7 @@ export default function Page() {
   },[image,vision]);
 
   const hasAccess=Boolean(account?.authenticated&&account?.access?.active);
-  const canTalk=hasAccess||trialAvailable;
   const nav=(id:string)=>{
-    if(id==="talk"&&!canTalk){setTab("settings");return}
     const protectedTabs=["plate","learn","workshop"];
     if(protectedTabs.includes(id)&&!hasAccess){setTab("settings");return}
     setTab(id);
@@ -624,7 +620,7 @@ export default function Page() {
 
   const sendChat=async(text=input,fromVoice=false)=>{
     const q=text.trim();if(!q||busy)return;
-    if(!hasAccess&&!trialAvailable){setTrialUsed(true);setTab("settings");return}
+    if(!hasAccess&&trialUsed){setTab("settings");return}
     const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
     messagesRef.current=next;setMessages(next);setInput("");
     if(isFastGreeting(q)){
@@ -891,7 +887,7 @@ export default function Page() {
       </div>
       {!hasAccess&&<div className="panel trialWelcome">
         <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Hacé <b>una consulta real gratis</b> y recibí la respuesta de LOLO. Para seguir conversando después, elegís un plan.</p></div>
-        <button className="btn primary" onClick={()=>nav("talk")} disabled={!trialAvailable}>{trialAvailable?"🤖 Hacer mi consulta gratis":"✓ Consulta gratis utilizada"}</button>
+        <button className="btn primary" onClick={()=>nav(trialUsed?"settings":"talk")}>{trialUsed?"Crear cuenta para continuar":"🤖 Probar LOLO gratis"}</button>
       </div>}
       <div className="panel"><h2>LOLO completo</h2>
         <div className="grid">
@@ -917,7 +913,7 @@ export default function Page() {
       </div>
     </section>
 
-    <section className={"section "+(tab==="talk"&&canTalk?"active":"")}>
+    <section className={"section "+(tab==="talk"?"active":"")}>
       <div className="panel interactiveTutor">
         <div className="interactiveTitle">
           <div>
@@ -927,7 +923,8 @@ export default function Page() {
           <span className={"talkState "+(recording?"listen":speaking?"speak":busy?"think":"ready")}>{recording?"Te escucho":speaking?"Te respondo":busy?"Pensando":"Listo para hablar"}</span>
         </div>
 
-        {!hasAccess&&<div className="trialBanner"><b>🎁 Tu consulta gratis</b><span>Escribí una pregunta. LOLO te responde una vez sin pagar.</span></div>}
+        {!hasAccess&&!trialUsed&&<div className="trialBanner"><b>🎁 Probá LOLO gratis, sin cuenta</b><span>Escribí una pregunta real. LOLO te responde una vez y recién después te ofrece crear tu cuenta.</span></div>}
+        {!hasAccess&&trialUsed&&<div className="trialBanner trialBannerUsed"><b>✓ Ya probaste LOLO</b><span>Para seguir usando la IA, creá tu cuenta y elegí un plan.</span></div>}
         {micError&&<div className="notice">{micError}</div>}
 
         <FreeLolo3D
@@ -935,7 +932,7 @@ export default function Page() {
           caption={caption}
         />
 
-        <button className={"bigMic "+(recording?"on":"")} onClick={()=>{if(hasAccess)void startMic();else setMicError("La prueba gratis es por texto. Para hablar por voz, activá un plan.")}} disabled={busy}>
+        <button className={"bigMic "+(recording?"on":"")} onClick={()=>{if(hasAccess)void startMic();else setMicError("La prueba gratis es por texto. Hacé tu primera consulta escribiéndole a LOLO; después podés crear tu cuenta para usar voz y todas las funciones.")}} disabled={busy}>
           <span>{recording?"■":"🎤"}</span>
           <b>{recording?"Terminar ahora":"Hablar con LOLO"}</b>
           <small>{recording?"Podés tocar para cortar antes":"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
@@ -967,8 +964,8 @@ export default function Page() {
           <button className="circle" onClick={()=>void sendChat()} disabled={busy}>➤</button>
         </div>
         {!hasAccess&&trialUsed
-          ? <div className="trialFinished"><b>✓ Ya probaste a LOLO</b><span>Para hacer otra pregunta, usar voz, analizar placas y acceder a las clases, activá un plan.</span><button className="btn primary" onClick={()=>setTab("settings")}>Ver planes LOLO</button></div>
-          : <div className="talkHint">{hasAccess?"Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.":"Tu primera consulta por texto es gratis. Después elegís si querés continuar con LOLO."}</div>}
+          ? <div className="trialFinished"><b>✓ Ya probaste LOLO gratis</b><span>¿Querés seguir? Creá tu cuenta. Después vas a poder elegir el plan que prefieras para usar voz, visión IA, clases y consultas sin el límite de la prueba.</span><button className="btn primary" onClick={()=>setTab("settings")}>Crear cuenta para continuar</button></div>
+          : <div className="talkHint">{hasAccess?"Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.":"No necesitás registrarte para probar. Tu primera consulta por texto es gratis."}</div>}
       </div>
     </section>
 
