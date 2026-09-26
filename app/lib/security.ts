@@ -233,6 +233,23 @@ export async function requirePaidAccess(){
 
 
 const TRIAL_COOKIE="lolo_trial";
+const FREE_TRIAL_QUESTIONS=3;
+
+export function isTrialGreeting(text:string){
+  const normalized=String(text||"")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9\s]/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+  return new Set([
+    "hola","holaa","holaaa","holi","buenas","buen dia","buenos dias",
+    "buenas tardes","buenas noches","hey","hello","que tal","como estas",
+    "hola lolo","buenas lolo"
+  ]).has(normalized);
+}
 
 async function getOrCreateTrialToken(){
   const jar=await cookies();
@@ -250,15 +267,23 @@ async function getOrCreateTrialToken(){
   return token;
 }
 
-export async function getFreeTrialStatus(){
+async function ensureTrialCounterColumns(){
   await ensureSchema();
+  await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS question_count INTEGER NOT NULL DEFAULT 0");
+  await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS voice_output_count INTEGER NOT NULL DEFAULT 0");
+  await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS last_trial_chat_at TIMESTAMPTZ");
+}
+
+export async function getFreeTrialStatus(){
+  await ensureTrialCounterColumns();
   const jar=await cookies();
   const token=jar.get(TRIAL_COOKIE)?.value;
-  if(!token) return {available:true,used:false};
+  if(!token) return {available:true,used:false,remaining:FREE_TRIAL_QUESTIONS,limit:FREE_TRIAL_QUESTIONS};
   const visitorHash=hashToken(token);
-  const r=await query("SELECT used_at FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
-  const used=Boolean(r.rowCount&&r.rows[0]?.used_at);
-  return {available:!used,used};
+  const r=await query("SELECT question_count FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
+  const count=r.rowCount?Number(r.rows[0]?.question_count||0):0;
+  const remaining=Math.max(0,FREE_TRIAL_QUESTIONS-count);
+  return {available:remaining>0,used:remaining===0,remaining,limit:FREE_TRIAL_QUESTIONS};
 }
 
 export async function requireVoiceInputAccess(){
@@ -268,21 +293,22 @@ export async function requireVoiceInputAccess(){
     if(access.active)return {user,access,trial:false,response:null};
   }
 
-  await ensureSchema();
+  await ensureTrialCounterColumns();
   const token=await getOrCreateTrialToken();
   const visitorHash=hashToken(token);
   await query("INSERT INTO guest_trials(visitor_hash) VALUES($1) ON CONFLICT(visitor_hash) DO NOTHING",[visitorHash]);
-  const r=await query("SELECT used_at FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
-  const available=Boolean(r.rowCount&&!r.rows[0]?.used_at);
-  if(available)return {user,access:null,trial:true,response:null};
+  const r=await query("SELECT question_count FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
+  const count=Number(r.rows[0]?.question_count||0);
+  if(count<FREE_TRIAL_QUESTIONS)return {user,access:null,trial:true,response:null};
 
   return {
     user,
     access:null,
     trial:false,
     response:NextResponse.json({
-      error:"Ya usaste tu prueba gratis. Creá tu cuenta y elegí un plan para seguir hablando con LOLO.",
-      code:"TRIAL_USED"
+      error:"Ya usaste tus 3 consultas gratis. Creá tu cuenta y elegí un plan para seguir hablando con LOLO.",
+      code:"TRIAL_USED",
+      trialRemaining:0
     },{status:402})
   };
 }
@@ -294,14 +320,13 @@ export async function requireVoiceOutputAccess(){
     if(access.active)return {user,access,trial:false,response:null};
   }
 
-  await ensureSchema();
-  await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS voice_output_used_at TIMESTAMPTZ");
+  await ensureTrialCounterColumns();
   const jar=await cookies();
   const token=jar.get(TRIAL_COOKIE)?.value;
   if(token){
     const visitorHash=hashToken(token);
     const r=await query(
-      "UPDATE guest_trials SET voice_output_used_at=NOW() WHERE visitor_hash=$1 AND used_at IS NOT NULL AND voice_output_used_at IS NULL AND used_at > NOW() - INTERVAL '10 minutes' RETURNING visitor_hash",
+      "UPDATE guest_trials SET voice_output_count=voice_output_count+1 WHERE visitor_hash=$1 AND voice_output_count<question_count AND last_trial_chat_at > NOW() - INTERVAL '10 minutes' RETURNING visitor_hash",
       [visitorHash]
     );
     if(r.rowCount===1)return {user,access:null,trial:true,response:null};
@@ -312,38 +337,61 @@ export async function requireVoiceOutputAccess(){
     access:null,
     trial:false,
     response:NextResponse.json({
-      error:"La respuesta hablada gratuita ya fue utilizada. Creá tu cuenta para seguir usando la voz de LOLO.",
+      error:"La respuesta hablada gratuita no está disponible para esta interacción.",
       code:"TRIAL_VOICE_USED"
     },{status:402})
   };
 }
 
-async function consumeFreeTrial(){
-  await ensureSchema();
+async function consumeFreeTrial(latestText:string){
+  await ensureTrialCounterColumns();
   const token=await getOrCreateTrialToken();
   const visitorHash=hashToken(token);
   await query("INSERT INTO guest_trials(visitor_hash) VALUES($1) ON CONFLICT(visitor_hash) DO NOTHING",[visitorHash]);
-  const r=await query("UPDATE guest_trials SET used_at=NOW() WHERE visitor_hash=$1 AND used_at IS NULL RETURNING visitor_hash",[visitorHash]);
-  return r.rowCount===1;
+
+  if(isTrialGreeting(latestText)){
+    const s=await query("SELECT question_count FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
+    const count=Number(s.rows[0]?.question_count||0);
+    return {granted:true,counted:false,remaining:Math.max(0,FREE_TRIAL_QUESTIONS-count)};
+  }
+
+  const r=await query(
+    "UPDATE guest_trials SET question_count=question_count+1,last_trial_chat_at=NOW(),used_at=COALESCE(used_at,NOW()) WHERE visitor_hash=$1 AND question_count<$2 RETURNING question_count",
+    [visitorHash,FREE_TRIAL_QUESTIONS]
+  );
+  if(r.rowCount!==1)return {granted:false,counted:false,remaining:0};
+  const count=Number(r.rows[0]?.question_count||0);
+  return {granted:true,counted:true,remaining:Math.max(0,FREE_TRIAL_QUESTIONS-count)};
 }
 
-export async function requireChatAccess(){
+export async function requireChatAccess(latestText=""){
   const user=await getCurrentUser();
   if(user){
     const access=await getAccessForUser(user,true);
-    if(access.active) return {user,access,trial:false,response:null};
+    if(access.active) return {user,access,trial:false,trialRemaining:null,trialCounted:false,response:null};
   }
 
-  const granted=await consumeFreeTrial();
-  if(granted) return {user,access:null,trial:true,response:null};
+  const result=await consumeFreeTrial(latestText);
+  if(result.granted) return {
+    user,
+    access:null,
+    trial:true,
+    trialRemaining:result.remaining,
+    trialCounted:result.counted,
+    response:null
+  };
 
   return {
     user,
     access:null,
     trial:false,
+    trialRemaining:0,
+    trialCounted:false,
     response:NextResponse.json({
-      error:"Ya usaste tu consulta gratis. Elegí un plan para seguir hablando con LOLO.",
-      code:"TRIAL_USED"
+      error:"Ya usaste tus 3 consultas gratis. Elegí un plan para seguir hablando con LOLO.",
+      code:"TRIAL_USED",
+      trialRemaining:0
     },{status:402})
   };
 }
+
