@@ -216,6 +216,7 @@ export default function Page() {
   const [account,setAccount]=useState<AccountSnapshot|null>(null);
   const [trialAvailable,setTrialAvailable]=useState(true);
   const [trialUsed,setTrialUsed]=useState(false);
+  const [trialRemaining,setTrialRemaining]=useState(3);
 
   useEffect(()=>{
     let alive=true;
@@ -255,8 +256,9 @@ export default function Page() {
         if(!alive)return;
         setTrialAvailable(Boolean(j?.available));
         setTrialUsed(Boolean(j?.used));
+        setTrialRemaining(Number.isFinite(Number(j?.remaining))?Math.max(0,Number(j.remaining)):j?.used?0:3);
       })
-      .catch(()=>{if(alive){setTrialAvailable(true);setTrialUsed(false)}});
+      .catch(()=>{if(alive){setTrialAvailable(true);setTrialUsed(false);setTrialRemaining(3)}});
     return()=>{alive=false};
   },[]);
 
@@ -626,9 +628,10 @@ export default function Page() {
     if(!hasAccess&&trialUsed){setTab("settings");return}
     const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
     messagesRef.current=next;setMessages(next);setInput("");
-    if(isFastGreeting(q)&&hasAccess){
+    if(isFastGreeting(q)){
       setBusy(true);
-      await playFastGreeting();
+      if(hasAccess) await playFastGreeting();
+      else await browserSpeak(FAST_GREETING_REPLY);
       const answered=[...next,{role:"assistant",content:FAST_GREETING_REPLY} as ChatMessage];
       messagesRef.current=answered;
       setMessages(answered);
@@ -646,6 +649,7 @@ export default function Page() {
         if(j?.code==="TRIAL_USED"){
           setTrialAvailable(false);
           setTrialUsed(true);
+          setTrialRemaining(0);
           setTab("settings");
           return;
         }
@@ -653,8 +657,10 @@ export default function Page() {
       }
       const ans=j.text||"No pude responder.";
       if(j.trial){
-        setTrialAvailable(false);
-        setTrialUsed(true);
+        const remaining=Number.isFinite(Number(j?.trialRemaining))?Math.max(0,Number(j.trialRemaining)):Math.max(0,trialRemaining-1);
+        setTrialRemaining(remaining);
+        setTrialAvailable(remaining>0);
+        setTrialUsed(remaining<=0);
       }
       setBusy(false);
       await speak(ans);
@@ -895,7 +901,7 @@ export default function Page() {
         <img src="/logo-lolo.svg" alt="LOLO - Reparación de celulares con IA"/>
       </div>
       {!hasAccess&&<div className="panel trialWelcome">
-        <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Hacé <b>una consulta real gratis</b> y recibí la respuesta de LOLO. Para seguir conversando después, elegís un plan.</p></div>
+        <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Hacé <b>hasta 3 consultas reales gratis</b> y recibí las respuestas de LOLO. Los saludos como “hola” no descuentan consultas.</p></div>
         <button className="btn primary" onClick={()=>nav(trialUsed?"settings":"talk")}>{trialUsed?"Crear cuenta para continuar":"🤖 Probar LOLO gratis"}</button>
       </div>}
       <div className="panel"><h2>LOLO completo</h2>
@@ -948,7 +954,7 @@ export default function Page() {
           <span className={"talkState "+(recording?"listen":speaking?"speak":busy?"think":"ready")}>{recording?"Te escucho":speaking?"Te respondo":busy?"Pensando":"Listo para hablar"}</span>
         </div>
 
-        {!hasAccess&&!trialUsed&&<div className="trialBanner"><b>🎁 Probá LOLO gratis, sin cuenta</b><span>Tocá el micrófono, hacé una consulta real y LOLO te responde hablando. Después elegís si querés crear tu cuenta.</span></div>}
+        {!hasAccess&&!trialUsed&&<div className="trialBanner"><b>🎁 Probá LOLO gratis, sin cuenta</b><span>Tocá el micrófono y probá LOLO. Tenés hasta 3 consultas reales gratis; los saludos no descuentan.</span></div>}
         {!hasAccess&&trialUsed&&<div className="trialBanner trialBannerUsed"><b>✓ Ya probaste LOLO</b><span>Para seguir usando la IA, creá tu cuenta y elegí un plan.</span></div>}
         {micError&&<div className="notice">{micError}</div>}
 
@@ -962,14 +968,14 @@ export default function Page() {
               <div>
                 <span className="trialPill">PRUEBA SIN CUENTA</span>
                 <h3>Preguntale a LOLO</h3>
-                <p>Tocá el micrófono, hablale como a un profe y LOLO te responde con su voz gratis una vez.</p>
+                <p>Hablale como a un profe. Tenés hasta 3 preguntas gratis y LOLO te responde con su voz.</p>
               </div>
             </div>}
 
         <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy||(!hasAccess&&trialUsed)}>
           <span>{recording?"■":"🎤"}</span>
           <b>{recording?"Terminar ahora":"Hablar con LOLO"}</b>
-          <small>{recording?"Podés tocar para cortar antes":!hasAccess?"Tu primera consulta hablada es gratis":"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
+          <small>{recording?"Podés tocar para cortar antes":!hasAccess?`${trialRemaining} ${trialRemaining===1?"consulta gratis restante":"consultas gratis restantes"}`:"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
         </button>
 
         {hasAccess
@@ -977,7 +983,7 @@ export default function Page() {
               <input type="checkbox" checked={conversationMode} onChange={e=>setConversationMode(e.target.checked)}/>
               <span><b>Conversación continua</b><small>{conversationMode?"Después de responder, LOLO vuelve a escucharte.":"LOLO espera que vuelvas a tocar el micrófono."}</small></span>
             </label>
-          : <div className="talkHint voiceTrialHint"><b>🎤 La prueba incluye voz.</b> Hacés una pregunta hablada y LOLO te contesta hablando. Para seguir conversando, creás tu cuenta.</div>}
+          : <div className="talkHint voiceTrialHint"><b>🎤 La prueba incluye voz.</b> Podés hacer hasta 3 consultas reales. Decir “hola” o saludar no descuenta.</div>}
 
         <div className="quickPrompts">
           {["Mi celular no carga","Mi celular no enciende","Quiero cambiar un módulo","No tengo sonido","No tengo señal","No funciona el botón power"].map(q=>
@@ -1000,8 +1006,8 @@ export default function Page() {
           <button className="circle" onClick={()=>void sendChat()} disabled={busy}>➤</button>
         </div>
         {!hasAccess&&trialUsed
-          ? <div className="trialFinished"><b>✓ Ya probaste LOLO gratis</b><span>¿Querés seguir? Creá tu cuenta. Después vas a poder elegir el plan que prefieras para usar voz, visión IA, clases y consultas sin el límite de la prueba.</span><button className="btn primary" onClick={()=>setTab("settings")}>Crear cuenta para continuar</button></div>
-          : <div className="talkHint">{hasAccess?"Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.":"No necesitás registrarte. Podés probar a LOLO hablando o escribiendo una vez gratis."}</div>}
+          ? <div className="trialFinished"><b>✓ Usaste tus 3 consultas gratis</b><span>¿Querés seguir? Creá tu cuenta. Después vas a poder elegir el plan que prefieras para usar voz, visión IA, clases y consultas sin el límite de la prueba.</span><button className="btn primary" onClick={()=>setTab("settings")}>Crear cuenta para continuar</button></div>
+          : <div className="talkHint">{hasAccess?"Si LOLO necesita ver la placa, te va a pedir una foto. La podés sacar o subir desde acá.":"No necesitás registrarte. Podés probar a LOLO hablando o escribiendo hasta 3 veces gratis; los saludos no descuentan."}</div>}
       </div>
     </section>
 
