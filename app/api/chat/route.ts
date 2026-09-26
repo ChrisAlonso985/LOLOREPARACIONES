@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { requireChatAccess } from "@/app/lib/security";
+import { requireChatAccess,isTrialGreeting } from "@/app/lib/security";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -43,10 +43,21 @@ OBJETIVO:
 El alumno debe sentir que está hablando con LOLO, su profesor IA. Guiá, preguntá, esperá su respuesta y continuá desde ahí.`;
 
 export async function POST(req: Request) {
-  const gate=await requireChatAccess();
-  if(gate.response)return gate.response;
   try {
     const { messages } = await req.json();
+    const list=Array.isArray(messages)?messages:[];
+    const latestUser=[...list].reverse().find((m:any)=>m?.role==="user");
+    const latestText=String(latestUser?.content||"");
+    const gate=await requireChatAccess(latestText);
+    if(gate.response)return gate.response;
+    if(gate.trial&&isTrialGreeting(latestText)){
+      return NextResponse.json({
+        text:"¡Hola! Soy LOLO. Contame qué equipo tenés y qué falla hace, y lo vemos juntos paso a paso.",
+        trial:true,
+        trialRemaining:gate.trialRemaining,
+        trialCounted:false
+      });
+    }
     const token = process.env.OPENAI_API_KEY;
     if (!token) {
       return NextResponse.json({ error: "LOLO todavía no tiene OPENAI_API_KEY configurada en Railway." }, { status: 503 });
@@ -54,7 +65,7 @@ export async function POST(req: Request) {
     const client = new OpenAI({ apiKey: token });
     const input = [
       { role: "system", content: SYSTEM },
-      ...(Array.isArray(messages) ? messages.slice(-10) : []),
+      ...list.slice(-10),
     ] as any;
 
     const response = await client.responses.create({
@@ -63,7 +74,7 @@ export async function POST(req: Request) {
       max_output_tokens: 300,
     } as any);
 
-    return NextResponse.json({ text: response.output_text || "No pude generar una respuesta.", trial: gate.trial });
+    return NextResponse.json({ text: response.output_text || "No pude generar una respuesta.", trial: gate.trial, trialRemaining: gate.trialRemaining, trialCounted: gate.trialCounted });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ error: error?.message || "Error de chat" }, { status: 500 });
