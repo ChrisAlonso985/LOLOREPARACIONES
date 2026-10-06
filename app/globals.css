@@ -610,3 +610,31 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .shareLoloIcon{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;font-size:28px;background:#0b463e;border:1px solid #34b69c}
 .shareLoloCopy>span{font-size:8px;font-weight:950;letter-spacing:.9px;color:#75e7cf}.shareLoloCopy h3{margin:3px 0 5px}.shareLoloCopy p{margin:0;color:#9bcfc4;font-size:11px;line-height:1.45}.shareLoloCopy small{display:block;margin-top:6px;color:#bff7e8;font-size:10px}
 @media(max-width:650px){.shareLoloCard{grid-template-columns:58px 1fr}.shareLoloCard>.btn{grid-column:1/-1;width:100%}}
+
+
+/* LOLO humano animado v62 */
+.humanLoloCard{border:1px solid #245b82;border-radius:22px;padding:14px;background:linear-gradient(145deg,#071827,#0a2238);box-shadow:0 16px 40px #0008;overflow:hidden}
+.humanLoloTop{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.humanLoloTop h3{margin:3px 0 2px;font-size:18px}.humanLoloTop p{margin:0;font-size:10px}.humanLoloBadge{font-size:9px;font-weight:900;border:1px solid #2d7192;border-radius:999px;padding:6px 8px;background:#06121c;white-space:nowrap}.humanLoloBadge.listening{color:#65e7ff}.humanLoloBadge.thinking{color:#aab8ff}.humanLoloBadge.speaking{color:#72f0bd}.humanLoloBadge.idle{color:#a9c8d8}
+.humanLoloStage{position:relative;min-height:360px;border-radius:19px;overflow:hidden;background:radial-gradient(circle at 50% 35%,#0b4b7044,#03101a 68%);display:grid;place-items:center;isolation:isolate}
+.humanLoloImage{width:100%;height:100%;min-height:360px;object-fit:cover;display:block;transform:scale(1.02);transition:filter .25s ease,transform .25s ease;will-change:transform,filter}
+.humanLoloStage.idle .humanLoloImage{animation:loloIdle 4s ease-in-out infinite}
+.humanLoloStage.listening .humanLoloImage{animation:loloListen 1.4s ease-in-out infinite;filter:saturate(1.08) brightness(1.03)}
+.humanLoloStage.thinking .humanLoloImage{animation:loloThink 2.2s ease-in-out infinite;filter:saturate(.9) brightness(.96)}
+.humanLoloStage.speaking .humanLoloImage{animation:loloSpeak .8s ease-in-out infinite;filter:saturate(1.1) brightness(1.04)}
+.humanLoloGlow{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle at 50% 40%,#33c8ff12,transparent 45%);box-shadow:inset 0 0 45px #23c7ff18}
+.humanLoloStage.listening .humanLoloGlow{animation:loloGlow 1s ease-in-out infinite}.humanLoloStage.thinking .humanLoloGlow{animation:loloSpinGlow 2.6s linear infinite}.humanLoloStage.speaking .humanLoloGlow{animation:loloGlow .55s ease-in-out infinite}
+.humanLoloCaption{position:absolute;z-index:5;left:12px;right:12px;bottom:12px;padding:10px 12px;border-radius:13px;background:#03101ce8;border:1px solid #2b789b;color:#e9fbff;font-size:11px;line-height:1.4;backdrop-filter:blur(7px)}
+.humanListenPulse{position:absolute;z-index:4;right:12%;top:18%;width:52px;height:52px;border-radius:50%;border:2px solid #5ae6ff88;box-shadow:0 0 0 0 #42dfff55;animation:listenPulse 1.25s ease-out infinite}
+.humanThinking{position:absolute;z-index:4;right:12%;top:16%;display:flex;gap:6px}.humanThinking i{width:9px;height:9px;border-radius:50%;background:#8bb6ff;animation:thinkDot 1s ease-in-out infinite}.humanThinking i:nth-child(2){animation-delay:.15s}.humanThinking i:nth-child(3){animation-delay:.3s}
+.humanVoiceBars{position:absolute;z-index:4;right:13%;top:28%;height:42px;display:flex;align-items:center;gap:4px;padding:7px 9px;border-radius:14px;background:#04131ccc;border:1px solid #2dcda788}.humanVoiceBars i{width:4px;height:14px;border-radius:4px;background:#72f0bd;animation:voiceBar .55s ease-in-out infinite}.humanVoiceBars i:nth-child(2){animation-delay:.08s}.humanVoiceBars i:nth-child(3){animation-delay:.16s}.humanVoiceBars i:nth-child(4){animation-delay:.24s}.humanVoiceBars i:nth-child(5){animation-delay:.32s}
+@keyframes loloIdle{0%,100%{transform:scale(1.02) translateY(0)}50%{transform:scale(1.025) translateY(-4px)}}
+@keyframes loloListen{0%,100%{transform:scale(1.025) rotate(0deg)}50%{transform:scale(1.045) rotate(-.8deg)}}
+@keyframes loloThink{0%,100%{transform:scale(1.02) translateX(0)}50%{transform:scale(1.03) translateX(3px)}}
+@keyframes loloSpeak{0%,100%{transform:scale(1.025) translateY(0)}50%{transform:scale(1.045) translateY(-3px)}}
+@keyframes loloGlow{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes loloSpinGlow{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(40deg)}}
+@keyframes listenPulse{0%{box-shadow:0 0 0 0 #42dfff55;opacity:1}100%{box-shadow:0 0 0 22px #42dfff00;opacity:.35}}
+@keyframes thinkDot{0%,100%{transform:translateY(0);opacity:.45}50%{transform:translateY(-6px);opacity:1}}
+@keyframes voiceBar{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1.8)}}
+@media(max-width:620px){.humanLoloTop{align-items:center}.humanLoloTop h3{font-size:16px}.humanLoloStage,.humanLoloImage{min-height:300px}.humanLoloCaption{font-size:10px}.humanVoiceBars{right:8%;top:24%}.humanListenPulse{right:8%;top:16%}}
