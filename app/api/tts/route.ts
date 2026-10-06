@@ -46,6 +46,9 @@ export async function POST(req: Request) {
     return NextResponse.json(payload,{headers:{"X-LOLO-TTS-Cache":"MISS"}});
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ error: error?.message || "Error de voz" }, { status: 500 });
+    if(error?.status===401||/expired_secret_key|token_invalidated|api key has expired|api key has been invalidated/i.test(String(error?.message||""))){
+      return NextResponse.json({error:"LOLO necesita que el administrador actualice la clave OPENAI_API_KEY en Railway.",code:"OPENAI_KEY_INVALID"},{status:503});
+    }
+    return NextResponse.json({ error: "No pude generar la voz. Probá nuevamente." }, { status: 500 });
   }
 }
