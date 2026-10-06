@@ -832,21 +832,21 @@ export default function Page() {
           const rms=Math.sqrt(sum/data.length);
           const now=Date.now();
           const elapsed=now-startedAt;
-          if(elapsed<550){
+          if(elapsed<700){
             noiseFloor=(noiseFloor*noiseSamples+rms)/(noiseSamples+1);
             noiseSamples++;
           }
-          const threshold=Math.max(.012,noiseFloor*2.15);
+          const threshold=Math.max(.010,noiseFloor*1.80);
           if(rms>threshold){heardVoice=true;lastVoice=now}
-          if(heardVoice&&now-lastVoice>950&&elapsed>1200){rec.stop();return}
-          if(!heardVoice&&elapsed>5500){rec.stop();return}
-          if(elapsed>12000){rec.stop();return}
+          if(heardVoice&&now-lastVoice>1650&&elapsed>1500){rec.stop();return}
+          if(!heardVoice&&elapsed>7000){rec.stop();return}
+          if(elapsed>18000){rec.stop();return}
           micRafRef.current=requestAnimationFrame(monitor);
         };
         micRafRef.current=requestAnimationFrame(monitor);
       }else{
         heardVoice=true;
-        window.setTimeout(()=>{if(rec.state==="recording")rec.stop()},15000);
+        window.setTimeout(()=>{if(rec.state==="recording")rec.stop()},18000);
       }
     }catch{
       cleanupMicMonitor();
