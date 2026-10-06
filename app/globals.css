@@ -604,3 +604,9 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
   .workshopContactCard{grid-template-columns:58px 1fr}
   .whatsappBtn{grid-column:1/-1;width:100%}
 }
+
+/* Rendimiento percibido + compartir v56 */
+.shareLoloCard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;border-color:#2a8f78;background:linear-gradient(135deg,#082d28,#061c22)}
+.shareLoloIcon{width:58px;height:58px;border-radius:17px;display:grid;place-items:center;font-size:28px;background:#0b463e;border:1px solid #34b69c}
+.shareLoloCopy>span{font-size:8px;font-weight:950;letter-spacing:.9px;color:#75e7cf}.shareLoloCopy h3{margin:3px 0 5px}.shareLoloCopy p{margin:0;color:#9bcfc4;font-size:11px;line-height:1.45}.shareLoloCopy small{display:block;margin-top:6px;color:#bff7e8;font-size:10px}
+@media(max-width:650px){.shareLoloCard{grid-template-columns:58px 1fr}.shareLoloCard>.btn{grid-column:1/-1;width:100%}}
