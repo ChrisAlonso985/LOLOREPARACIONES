@@ -79,9 +79,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "LOLO todavía no tiene OPENAI_API_KEY configurada en Railway." }, { status: 503 });
     }
     const client = new OpenAI({ apiKey: token });
+
+    // Solo conservar contexto cuando el último mensaje realmente parece una continuación.
+    // Una pregunta nueva debe responderse por sí sola para evitar arrastrar diagnósticos viejos.
+    const normalized=latestText.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+    const continuation=/^(si|no|dale|ok|bueno|seguimos|continuemos|y ahora|ahora|despues|y despues|me dio|mide|medi|marca|tengo|probe|hice|ya|entonces|que hago ahora|que sigue)\b|\b(v|volt|volts|ohm|ohms|ma|amp|amper|continuidad|diodo)\b/.test(normalized);
+    const conversationalContext=continuation?list.slice(-6):[latestUser].filter(Boolean);
     const input = [
       { role: "system", content: SYSTEM },
-      ...list.slice(-6),
+      ...conversationalContext,
     ] as any;
 
     const response = await client.responses.create({
