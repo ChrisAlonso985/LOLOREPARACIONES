@@ -778,7 +778,10 @@ export default function Page() {
           await sendChat(text,true);
         }catch(e:any){
           setBusy(false);
-          setMicError(e?.message||"No pude procesar tu voz. Tocá el micrófono y probá de nuevo.");
+          const msg=e?.message||"No pude procesar tu voz. Tocá el micrófono y probá de nuevo.";
+          setMicError(msg);
+          setCaption(msg);
+          void browserSpeak(msg);
         }
       };
 
