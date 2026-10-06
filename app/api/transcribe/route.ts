@@ -53,6 +53,9 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("LOLO transcription error",error);
     const msg=String(error?.message||"");
+    if(error?.status===401||/expired_secret_key|token_invalidated|api key has expired|api key has been invalidated/i.test(msg)){
+      return NextResponse.json({error:"LOLO necesita que el administrador renueve la clave de OpenAI en Railway para entender audios.",code:"OPENAI_KEY_INVALID"},{status:503});
+    }
     const invalid=/corrupt|unsupported|audio file|format/i.test(msg);
     if(invalid){
       return NextResponse.json({
