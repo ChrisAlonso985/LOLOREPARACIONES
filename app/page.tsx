@@ -192,6 +192,7 @@ export default function Page() {
   const [installPrompt,setInstallPrompt]=useState<any>(null);
   const [installHelp,setInstallHelp]=useState(false);
   const [isInstalled,setIsInstalled]=useState(false);
+  const [shareNotice,setShareNotice]=useState("");
   const imageRef=useRef<HTMLImageElement|null>(null);
   const stageRef=useRef<HTMLDivElement|null>(null);
   const [imageBox,setImageBox]=useState({left:0,top:0,width:0,height:0});
@@ -367,6 +368,32 @@ export default function Page() {
     setTab(id);
   };
 
+  const shareLolo=async()=>{
+    const url=window.location.origin;
+    const shareData={
+      title:"LOLO · Tu profe IA de reparación",
+      text:"Probá LOLO gratis: tu profe IA para aprender reparación de celulares. Tenés hasta 3 consultas gratis sin cuenta.",
+      url
+    };
+    try{
+      if(navigator.share){
+        await navigator.share(shareData);
+        setShareNotice("LOLO listo para compartir.");
+      }else{
+        await navigator.clipboard.writeText(shareData.text+" "+url);
+        setShareNotice("Link copiado. Pegalo en WhatsApp, Facebook o Instagram.");
+      }
+    }catch(e:any){
+      if(e?.name!=="AbortError"){
+        try{
+          await navigator.clipboard.writeText(shareData.text+" "+url);
+          setShareNotice("Link copiado.");
+        }catch{}
+      }
+    }
+    window.setTimeout(()=>setShareNotice(""),2600);
+  };
+
   const installLolo=async()=>{
     if(isInstalled)return;
     if(installPrompt){
@@ -470,7 +497,7 @@ export default function Page() {
       utteranceRef.current=u;
       u.voice=voice;
       u.lang=voice.lang||"es-AR";
-      u.rate=1.04;
+      u.rate=1.16;
       u.pitch=.94;
       u.volume=1;
 
@@ -552,7 +579,7 @@ export default function Page() {
 
         const audio=new Audio();
         audio.preload="auto";
-        audio.playbackRate=1.03;
+        audio.playbackRate=1.16;
         audio.volume=1;
         audio.src=url;
         audioRef.current=audio;
@@ -608,7 +635,7 @@ export default function Page() {
     if(!prepared){await speak(FAST_GREETING_REPLY);return}
 
     const audio=prepared.cloneNode(true) as HTMLAudioElement;
-    audio.playbackRate=1.1;
+    audio.playbackRate=1.16;
     audio.volume=1;
     audioRef.current=audio;
     setSpeaking(true);
@@ -662,13 +689,18 @@ export default function Page() {
         setTrialAvailable(remaining>0);
         setTrialUsed(remaining<=0);
       }
-      setBusy(false);
-      await speak(ans);
       const answered=[...next,{role:"assistant",content:ans} as ChatMessage];
       messagesRef.current=answered;
       setMessages(answered);
       setCaption(ans);
-      if(fromVoice&&conversationMode&&hasAccess) window.setTimeout(()=>void startMic(),450);
+      setBusy(false);
+
+      // Mostramos el texto apenas llega. La voz se genera/reproduce en paralelo.
+      void speak(ans).then(()=>{
+        if(fromVoice&&conversationMode&&hasAccess){
+          window.setTimeout(()=>void startMic(),300);
+        }
+      });
     }catch(e:any){
       const ans="No pude conectar con la IA en este momento. "+(e?.message||"");
       const failed=[...next,{role:"assistant",content:ans} as ChatMessage];
@@ -925,6 +957,17 @@ export default function Page() {
         <button className={"btn primary installLoloBtn "+(isInstalled?"installed":"")} onClick={()=>void installLolo()} disabled={isInstalled}>
           {isInstalled?"✓ LOLO instalada":"⬇ Instalar aplicación"}
         </button>
+      </div>
+
+      <div className="panel shareLoloCard">
+        <div className="shareLoloIcon">🚀</div>
+        <div className="shareLoloCopy">
+          <span>COMPARTIR LOLO</span>
+          <h3>Ayudá a otro técnico a probar la IA</h3>
+          <p>Mandale LOLO por WhatsApp, Facebook o cualquier app. Entra y tiene hasta 3 consultas gratis sin crear cuenta.</p>
+          {shareNotice&&<small>{shareNotice}</small>}
+        </div>
+        <button className="btn primary" onClick={()=>void shareLolo()}>📤 Compartir LOLO</button>
       </div>
 
       <div className="panel workshopContactCard">
