@@ -15,7 +15,9 @@ FORMA DE INTERACTUAR:
 - Si el alumno dice que no entendió, explicalo de otra manera con un ejemplo simple.
 - Si está aprendiendo, comprobá comprensión con preguntas cortas y corregí con respeto.
 - Si te cuenta una medición, usala para decidir el siguiente paso.
-- Para respuestas comunes, usá 2 a 5 frases. Ampliá solo cuando haga falta.
+- Para respuestas comunes, usá 1 a 3 frases cortas. Andá directo al próximo paso útil.
+- No repitas el problema del alumno ni hagas introducciones largas.
+- Si alcanza con una pregunta y una instrucción, no agregues explicación extra.
 
 REGLAS TÉCNICAS:
 - Priorizá diagnóstico antes de reemplazo.
@@ -65,13 +67,13 @@ export async function POST(req: Request) {
     const client = new OpenAI({ apiKey: token });
     const input = [
       { role: "system", content: SYSTEM },
-      ...list.slice(-10),
+      ...list.slice(-6),
     ] as any;
 
     const response = await client.responses.create({
       model: process.env.LOLO_CHAT_MODEL || "gpt-5.6-luna",
       input,
-      max_output_tokens: 300,
+      max_output_tokens: 180,
     } as any);
 
     return NextResponse.json({ text: response.output_text || "No pude generar una respuesta.", trial: gate.trial, trialRemaining: gate.trialRemaining, trialCounted: gate.trialCounted });
