@@ -79,6 +79,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ text: response.output_text || "No pude generar una respuesta.", trial: gate.trial, trialRemaining: gate.trialRemaining, trialCounted: gate.trialCounted });
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ error: error?.message || "Error de chat" }, { status: 500 });
+    if(error?.status===401||/expired_secret_key|token_invalidated|api key has expired|api key has been invalidated/i.test(String(error?.message||""))){
+      return NextResponse.json({error:"LOLO necesita que el administrador actualice la clave OPENAI_API_KEY en Railway.",code:"OPENAI_KEY_INVALID"},{status:503});
+    }
+    return NextResponse.json({ error: "No pude generar la respuesta. Probá nuevamente." }, { status: 500 });
   }
 }
