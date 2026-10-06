@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       file: cleanFile,
       model: process.env.LOLO_TRANSCRIBE_MODEL || "gpt-4o-transcribe",
       language: "es",
-      prompt: "Español argentino. Contexto: reparación de celulares y notebooks, multímetro, tester, VBUS, GND, pin de carga, soldadura, placa, subplaca."
+      prompt: "Transcribí literalmente español argentino del nordeste (NEA), especialmente habla cotidiana de Chaco/Resistencia/Barranqueras. Puede haber ritmo regional, seseo, aspiración o pérdida de algunas s finales y pronunciación informal: interpretalo con naturalidad, sin corregir el acento. MUY IMPORTANTE: no inventes palabras técnicas si no se escuchan; si la persona dice hola, transcribí hola. Contexto posible de taller: celular, teléfono, módulo, módulo con marco, módulo sin marco, placa, placa principal, subplaca, flex, conector FPC, pin o puerto de carga, batería, buzzer/buzer/parlante, auricular, micrófono, antena, coaxial, SIM, cámara, vibrador, sensor, power, volumen, tester, multímetro, continuidad, resistencia, voltaje, diodo, fuente regulable, VBUS, GND, soldadura, cautín, estación de aire, flux, estaño, malla, pad, pista, componente SMD, BIOS, notebook. Marcas y modelos pueden incluir Samsung, Motorola, Xiaomi, Redmi, iPhone, TCL, Nokia y similares."
     });
 
     return NextResponse.json({ text: result.text });
