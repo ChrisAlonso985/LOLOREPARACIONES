@@ -472,10 +472,12 @@ export default function Page() {
     setSpeaking(true);
     let index=0;
     let finished=false;
+    let watchdog:number|null=null;
 
     const finish=()=>{
       if(finished)return;
       finished=true;
+      if(watchdog!==null){window.clearTimeout(watchdog);watchdog=null}
       utteranceRef.current=null;
       if(speechGapTimerRef.current!==null){
         window.clearTimeout(speechGapTimerRef.current);
@@ -519,6 +521,11 @@ export default function Page() {
       synth.speak(u);
     };
 
+    // Un motor de voz trabado no debe bloquear la conversación indefinidamente.
+    watchdog=window.setTimeout(()=>{
+      if(seq===speechSeqRef.current)synth.cancel();
+      finish();
+    },Math.min(30000,Math.max(9000,clean.length*90)));
     speakNext();
   });
 
@@ -612,9 +619,17 @@ export default function Page() {
     }catch(e:any){
       if(seq===speechSeqRef.current){
         setSpeaking(false);
-        setMicError("La voz IA no pudo reproducirse. Tocá Probar voz o volvé a intentar.");
+        setMicError("La voz IA no está disponible; intentando hablar con la voz del teléfono.");
+        await browserSpeak(clean);
       }
     }
+  };
+
+  const replayLastAnswer=()=>{
+    const last=[...messagesRef.current].reverse().find(m=>m.role==="assistant");
+    if(!last)return;
+    if(last.content===FAST_GREETING_REPLY){void playFastGreeting();return}
+    void speak(last.content);
   };
 
   const playFastGreeting=async()=>{
@@ -1026,14 +1041,14 @@ export default function Page() {
           : <div className="talkHint voiceTrialHint"><b>🎤 La prueba incluye voz.</b> Podés hacer hasta 3 consultas reales. Decir “hola” o saludar no descuenta.</div>}
 
         <div className="quickPrompts">
-          {["Mi celular no carga","Mi celular no enciende","Quiero cambiar un módulo","No tengo sonido","No tengo señal","No funciona el botón power"].map(q=>
+          {["Hola LOLO","Mi celular no carga","Mi celular no enciende","Quiero cambiar un módulo","No tengo sonido","No tengo señal","No funciona el botón power"].map(q=>
             <button className="quickChip" key={q} onClick={()=>void sendChat(q)} disabled={busy}>{q}</button>
           )}
         </div>
       </div>
 
       <div className="panel">
-        <div className="chatHeader"><b>Conversación con LOLO</b><span className="muted small">{messages.length} mensajes</span></div>
+        <div className="chatHeader"><b>Conversación con LOLO</b><button className="btn" onClick={replayLastAnswer} disabled={busy}>🔊 Escuchar respuesta</button></div>
         <div className="chat tutorChat" ref={chatRef}>
           {messages.map((m,i)=><div key={i} className={"msg "+(m.role==="assistant"?"bot":"user")}>{m.content}</div>)}
           {busy&&<div className="msg bot thinkingMsg"><span></span><span></span><span></span></div>}
