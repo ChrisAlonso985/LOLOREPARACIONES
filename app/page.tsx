@@ -497,7 +497,7 @@ export default function Page() {
       utteranceRef.current=u;
       u.voice=voice;
       u.lang=voice.lang||"es-AR";
-      u.rate=1.16;
+      u.rate=1.28;
       u.pitch=.94;
       u.volume=1;
 
@@ -579,7 +579,7 @@ export default function Page() {
 
         const audio=new Audio();
         audio.preload="auto";
-        audio.playbackRate=1.16;
+        audio.playbackRate=1.28;
         audio.volume=1;
         audio.src=url;
         audioRef.current=audio;
@@ -635,7 +635,7 @@ export default function Page() {
     if(!prepared){await speak(FAST_GREETING_REPLY);return}
 
     const audio=prepared.cloneNode(true) as HTMLAudioElement;
-    audio.playbackRate=1.16;
+    audio.playbackRate=1.28;
     audio.volume=1;
     audioRef.current=audio;
     setSpeaking(true);
