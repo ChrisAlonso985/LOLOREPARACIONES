@@ -675,7 +675,7 @@ export default function Page() {
       setBusy(false);
       setMicError("");
       void playFastGreeting().finally(()=>{
-        if(fromVoice&&conversationMode&&hasAccess)window.setTimeout(()=>void startMic(),300);
+        if(fromVoice&&conversationMode&&!trialUsed)window.setTimeout(()=>void startMic(),300);
       });
       return;
     }
@@ -709,7 +709,7 @@ export default function Page() {
 
       // Mostramos el texto apenas llega. La voz se genera/reproduce en paralelo.
       void speak(ans).then(()=>{
-        if(fromVoice&&conversationMode&&hasAccess){
+        if(fromVoice&&conversationMode&&!trialUsed){
           window.setTimeout(()=>void startMic(),300);
         }
       });
@@ -1029,16 +1029,15 @@ export default function Page() {
 
         <button className={"bigMic "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy||(!hasAccess&&trialUsed)}>
           <span>{recording?"■":"🎤"}</span>
-          <b>{recording?"Terminar ahora":"Hablar con LOLO"}</b>
+          <b>{recording?"Terminar ahora":"🎤 Tocá y hablá con LOLO"}</b>
           <small>{recording?"Podés tocar para cortar antes":!hasAccess?`${trialRemaining} ${trialRemaining===1?"consulta gratis restante":"consultas gratis restantes"}`:"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
         </button>
 
-        {hasAccess
-          ? <label className="conversationToggle">
-              <input type="checkbox" checked={conversationMode} onChange={e=>setConversationMode(e.target.checked)}/>
-              <span><b>Conversación continua</b><small>{conversationMode?"Después de responder, LOLO vuelve a escucharte.":"LOLO espera que vuelvas a tocar el micrófono."}</small></span>
-            </label>
-          : <div className="talkHint voiceTrialHint"><b>🎤 La prueba incluye voz.</b> Podés hacer hasta 3 consultas reales. Decir “hola” o saludar no descuenta.</div>}
+        <label className="conversationToggle">
+          <input type="checkbox" checked={conversationMode} onChange={e=>setConversationMode(e.target.checked)}/>
+          <span><b>Conversación continua por voz</b><small>{conversationMode?"Hablás, LOLO responde y vuelve a escucharte solo.":"LOLO espera que vuelvas a tocar el micrófono."}</small></span>
+        </label>
+        {!hasAccess&&<div className="talkHint voiceTrialHint"><b>🎤 La prueba es por voz.</b> Tenés hasta 3 consultas reales gratis. Los saludos no descuentan.</div>}
 
         <div className="quickPrompts">
           {["Hola LOLO","Mi celular no carga","Mi celular no enciende","Quiero cambiar un módulo","No tengo sonido","No tengo señal","No funciona el botón power"].map(q=>
@@ -1055,7 +1054,7 @@ export default function Page() {
         </div>
         <div className="composer">
           <button className={"circle "+(recording?"on":"")} onClick={()=>void startMic()} disabled={busy||(!hasAccess&&trialUsed)} title="Hablar">{recording?"■":"🎤"}</button>
-          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")void sendChat()}} placeholder={!hasAccess?"Escribí tu pregunta gratis para LOLO":"También podés escribirle a LOLO"}/>
+          <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")void sendChat()}} placeholder="Opcional: también podés escribir" />
           <label className="circle photoButton" style={{display:"grid",placeItems:"center"}} title="Sacar foto">📷<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <label className="circle galleryButton" style={{display:"grid",placeItems:"center"}} title="Subir imagen">🖼️<input hidden type="file" accept="image/*" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
           <button className="circle" onClick={()=>void sendChat()} disabled={busy}>➤</button>
