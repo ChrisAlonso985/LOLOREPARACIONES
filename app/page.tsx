@@ -440,12 +440,8 @@ export default function Page() {
     const spanish=voices.find(v=>v.lang.toLowerCase().startsWith("es"));
     const voice=selected||male||spanish||voices[0];
 
-    if(!voice){
-      setMicError("El teléfono todavía no cargó una voz. Tocá Probar voz de nuevo.");
-      resolve();
-      return;
-    }
-
+    // Algunos navegadores Android tardan en cargar las voces. Usamos la voz
+    // predeterminada si todavía no aparece una voz española.
     const seq=speechSeqRef.current;
     const clean=String(text||"").replace(/\s+/g," ").trim();
 
@@ -495,8 +491,8 @@ export default function Page() {
 
       const u=new SpeechSynthesisUtterance(chunks[index++]);
       utteranceRef.current=u;
-      u.voice=voice;
-      u.lang=voice.lang||"es-AR";
+      if(voice)u.voice=voice;
+      u.lang=voice?.lang||"es-AR";
       u.rate=1.28;
       u.pitch=.94;
       u.volume=1;
@@ -622,7 +618,6 @@ export default function Page() {
   };
 
   const playFastGreeting=async()=>{
-    setCaption("LOLO está respondiendo…");
     stopVoice();
     const seq=++speechSeqRef.current;
 
@@ -631,8 +626,9 @@ export default function Page() {
       return;
     }
 
-    const prepared=greetingAudioRef.current;
-    if(!prepared){await speak(FAST_GREETING_REPLY);return}
+    const prepared=voiceMode==="ai"?greetingAudioRef.current:null;
+    // En el saludo no esperamos a que una API remota genere el audio.
+    if(!prepared){await browserSpeak(FAST_GREETING_REPLY);return}
 
     const audio=prepared.cloneNode(true) as HTMLAudioElement;
     audio.playbackRate=1.28;
@@ -656,15 +652,16 @@ export default function Page() {
     const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
     messagesRef.current=next;setMessages(next);setInput("");
     if(isFastGreeting(q)){
-      setBusy(true);
-      if(hasAccess) await playFastGreeting();
-      else await browserSpeak(FAST_GREETING_REPLY);
+      // Responder en pantalla de inmediato; nunca bloquear esperando el audio.
       const answered=[...next,{role:"assistant",content:FAST_GREETING_REPLY} as ChatMessage];
       messagesRef.current=answered;
       setMessages(answered);
       setCaption(FAST_GREETING_REPLY);
       setBusy(false);
-      if(fromVoice&&conversationMode&&hasAccess) window.setTimeout(()=>void startMic(),450);
+      setMicError("");
+      void playFastGreeting().finally(()=>{
+        if(fromVoice&&conversationMode&&hasAccess)window.setTimeout(()=>void startMic(),300);
+      });
       return;
     }
     setBusy(true);
