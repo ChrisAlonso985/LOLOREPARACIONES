@@ -229,6 +229,7 @@ export default function Page() {
   const [trialAvailable,setTrialAvailable]=useState(true);
   const [trialUsed,setTrialUsed]=useState(false);
   const [trialRemaining,setTrialRemaining]=useState(3);
+  const [visionTrialRemaining,setVisionTrialRemaining]=useState(1);
 
   useEffect(()=>{
     let alive=true;
@@ -269,8 +270,9 @@ export default function Page() {
         setTrialAvailable(Boolean(j?.available));
         setTrialUsed(Boolean(j?.used));
         setTrialRemaining(Number.isFinite(Number(j?.remaining))?Math.max(0,Number(j.remaining)):j?.used?0:3);
+        setVisionTrialRemaining(Number.isFinite(Number(j?.visionRemaining))?Math.max(0,Number(j.visionRemaining)):j?.paid?0:1);
       })
-      .catch(()=>{if(alive){setTrialAvailable(true);setTrialUsed(false);setTrialRemaining(3)}});
+      .catch(()=>{if(alive){setTrialAvailable(true);setTrialUsed(false);setTrialRemaining(3);setVisionTrialRemaining(1)}});
     return()=>{alive=false};
   },[]);
 
@@ -374,8 +376,9 @@ export default function Page() {
 
   const hasAccess=Boolean(account?.authenticated&&account?.access?.active);
   const nav=(id:string)=>{
-    const protectedTabs=["plate","learn","workshop"];
+    const protectedTabs=["learn","workshop"];
     if(protectedTabs.includes(id)&&!hasAccess){setTab("settings");return}
+    if(id==="plate"&&!hasAccess&&visionTrialRemaining<=0){setTab("settings");return}
     setTab(id);
   };
 
@@ -383,7 +386,7 @@ export default function Page() {
     const url=window.location.origin;
     const shareData={
       title:"LOLO · Tu profe IA de reparación",
-      text:"Probá LOLO gratis: tu profe IA para aprender reparación de celulares. Tenés hasta 3 consultas gratis sin cuenta.",
+      text:"Probá LOLO gratis: 3 consultas por voz o texto + 1 diagnóstico por foto, sin cuenta.",
       url
     };
     try{
@@ -880,7 +883,15 @@ export default function Page() {
         connectorHint:visionTask==="charging"?connector:"auto",
         measurement:visionTask==="measure"?measurement:"none"
       })});
-      const j=await r.json();if(!r.ok)throw new Error(j.error||"Error");
+      const j=await r.json();
+      if(!r.ok){
+        if(j?.code==="VISION_TRIAL_USED"){
+          setVisionTrialRemaining(0);
+          setTab("settings");
+        }
+        throw new Error(j.error||"Error");
+      }
+      if(!hasAccess)setVisionTrialRemaining(0);
       setVision(j);
       const spoken=`${j.summary} ${j.diagnosis||""} ${j.explanation||""} ${j.safety_warning||""} ${j.follow_up_question||""}`;
       speak(spoken);
@@ -973,7 +984,7 @@ export default function Page() {
         <img src="/logo-lolo.svg" alt="LOLO - Reparación de celulares con IA"/>
       </div>
       {!hasAccess&&<div className="panel trialWelcome">
-        <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Hacé <b>hasta 3 consultas reales gratis</b> y recibí las respuestas de LOLO. Los saludos como “hola” no descuentan consultas.</p></div>
+        <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Incluye <b>3 consultas por voz o texto + 1 diagnóstico por foto</b>. Los saludos como “hola” no descuentan consultas.</p></div>
         <button className="btn primary" onClick={()=>nav(trialUsed?"settings":"talk")}>{trialUsed?"Crear cuenta para continuar":"🤖 Probar LOLO gratis"}</button>
       </div>}
       <div className="panel"><h2>LOLO completo</h2>
@@ -1090,7 +1101,7 @@ export default function Page() {
       </div>
     </section>
 
-    <section className={"section "+(tab==="plate"&&hasAccess?"active":"")}>
+    <section className={"section "+(tab==="plate"&&(hasAccess||visionTrialRemaining>0)?"active":"")}>
       <div className="panel"><h2>Tu placa + visión IA</h2>
         <p className="muted">Sacá una foto enfocada de la zona que querés revisar. LOLO puede analizar módulos, conectores, flex, botones, audio, antena, batería, soldadura, corrosión y otras fallas visibles. Si el diagnóstico necesita mediciones o una vista distinta, te va a pedir el siguiente paso sin inventar.</p>
         <div className="uploadActions">
