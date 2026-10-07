@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const AVATAR_URL="https://vtubeme.com/media/free/cc0/super-sup/super-sup.vrm";
+const AVATAR_URL="https://raw.githubusercontent.com/madjin/vrm-samples/master/vroid/beta/Sakurada_Fumiriya.vrm";
 
 export async function GET(){
   try{
