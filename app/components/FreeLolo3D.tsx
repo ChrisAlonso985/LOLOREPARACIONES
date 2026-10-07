@@ -23,7 +23,7 @@ export default function FreeLolo3D({mode,caption}:{mode:Mode;caption:string}){
     camera.lookAt(0,1.32,0);
 
     const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,powerPreference:"high-performance"});
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
     renderer.outputColorSpace=THREE.SRGBColorSpace;
     renderer.setClearColor(0x000000,0);
     renderer.shadowMap.enabled=false;
@@ -126,8 +126,8 @@ export default function FreeLolo3D({mode,caption}:{mode:Mode;caption:string}){
         const vrm=gltf.userData.vrm as VRM|undefined;
         if(!vrm){setLoadState("error");return}
 
-        VRMUtils.removeUnnecessaryVertices(gltf.scene);
-        VRMUtils.removeUnnecessaryJoints(gltf.scene);
+        // Evitamos optimizaciones pesadas en tiempo de carga; en celulares lentos
+        // pueden demorar varios segundos y no son necesarias para mostrar LOLO.
         VRMUtils.rotateVRM0(vrm);
 
         vrm.scene.traverse(obj=>{obj.frustumCulled=false});
