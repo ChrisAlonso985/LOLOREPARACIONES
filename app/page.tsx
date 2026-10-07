@@ -961,7 +961,7 @@ export default function Page() {
       <div className="status"><span className={"dot "+(busy?"":"on")}></span>{busy?"Procesando…":"Listo"}</div>
     </header>
 
-    {tab!=="talk"&&<div className={"hero tutorHero "+(speaking?"speaking ":"")+(recording?"listening ":"")+(busy?"thinking ":"")}>
+    {tab!=="talk"&&tab!=="home"&&<div className={"hero tutorHero "+(speaking?"speaking ":"")+(recording?"listening ":"")+(busy?"thinking ":"")}>
       <LoloAvatar mode={recording?"listening":busy?"thinking":speaking?"speaking":(tab==="plate"&&vision?.can_mark)?"pointing":"idle"}/>
       <div className="heroWords">
         <div className="caption">{caption}</div>
@@ -970,6 +970,13 @@ export default function Page() {
     </div>}
 
     <section className={"section "+(tab==="home"?"active":"")}>
+      <div className="homeLoloIntro">
+        <FreeLolo3D
+          mode={recording?"listening":busy?"thinking":speaking?"speaking":"idle"}
+          caption={caption}
+        />
+        <button className="btn primary homeTalkNow" onClick={()=>nav("talk")}>🎤 Hablar con LOLO</button>
+      </div>
       <div className="panel brandShowcase">
         <img src="/logo-lolo.svg" alt="LOLO - Reparación de celulares con IA"/>
       </div>
