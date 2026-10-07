@@ -645,3 +645,7 @@ nav{position:fixed;bottom:0;left:0;right:0;background:#06111ef5;border-top:1px s
 .loloHuman3DCanvas canvas{display:block;width:100%!important;height:100%!important;touch-action:pan-y}
 .humanLoloStage.threeD .humanLoloCaption{z-index:5}
 @media(max-width:620px){.humanLoloStage.threeD{min-height:340px}}
+
+/* VRM real v64 */
+.vrmLoading,.vrmError{position:absolute;z-index:4;left:50%;top:48%;transform:translate(-50%,-50%);padding:9px 12px;border-radius:12px;background:#04131ddd;border:1px solid #2c7695;color:#dff8ff;font-size:11px;text-align:center;backdrop-filter:blur(6px)}
+.vrmError{border-color:#8b4a5b;color:#ffdbe3}
