@@ -149,9 +149,6 @@ SEGURIDAD GENERAL:
 La salida debe respetar estrictamente el JSON schema.`;
 
 export async function POST(req:Request){
-  const gate=await requireVisionAccess();
-  if(gate.response)return gate.response;
-
   try{
     const {imageDataUrl,deviceModel,task,symptom,componentHint,connectorHint,measurement}=await req.json();
 
@@ -161,6 +158,9 @@ export async function POST(req:Request){
     if(imageDataUrl.length>7_500_000){
       return NextResponse.json({error:"La imagen es demasiado grande. Sacá una foto más liviana o dejá que la app la comprima."},{status:413});
     }
+
+    const gate=await requireVisionAccess();
+    if(gate.response)return gate.response;
 
     const normalizedTask=(TASKS as readonly string[]).includes(String(task))?String(task):"diagnose";
     const token=process.env.OPENAI_API_KEY;
