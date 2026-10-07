@@ -682,9 +682,7 @@ export default function Page() {
       setMessages(fresh);
       setCaption(resetReply);
       setMicError("");
-      void browserSpeak(resetReply).finally(()=>{
-        if(fromVoice&&conversationMode&&!trialUsed)window.setTimeout(()=>void startMic(),300);
-      });
+      void browserSpeak(resetReply);
       return;
     }
     const next=[...messagesRef.current,{role:"user",content:q} as ChatMessage];
@@ -700,9 +698,7 @@ export default function Page() {
       setCaption(FAST_GREETING_REPLY);
       setBusy(false);
       setMicError("");
-      void playFastGreeting().finally(()=>{
-        if(fromVoice&&conversationMode&&!trialUsed)window.setTimeout(()=>void startMic(),300);
-      });
+      void playFastGreeting();
       return;
     }
     setBusy(true);
@@ -734,11 +730,7 @@ export default function Page() {
       setBusy(false);
 
       // Mostramos el texto apenas llega. La voz se genera/reproduce en paralelo.
-      void speak(ans).then(()=>{
-        if(fromVoice&&conversationMode&&!trialUsed){
-          window.setTimeout(()=>void startMic(),300);
-        }
-      });
+      void speak(ans);
     }catch(e:any){
       const ans="No pude conectar con la IA en este momento. "+(e?.message||"");
       const failed=[...next,{role:"assistant",content:ans} as ChatMessage];
@@ -1069,10 +1061,7 @@ export default function Page() {
           <small>{recording?"Podés tocar para cortar antes":!hasAccess?`${trialRemaining} ${trialRemaining===1?"consulta gratis restante":"consultas gratis restantes"}`:"Tocá una vez, hablá y LOLO detecta cuando terminás"}</small>
         </button>
 
-        <label className="conversationToggle">
-          <input type="checkbox" checked={conversationMode} onChange={e=>setConversationMode(e.target.checked)}/>
-          <span><b>Conversación continua por voz</b><small>{conversationMode?"Hablás, LOLO responde y vuelve a escucharte solo.":"LOLO espera que vuelvas a tocar el micrófono."}</small></span>
-        </label>
+        <div className="talkHint"><b>🎤 Micrófono manual.</b> LOLO escucha una pregunta, responde y después espera a que vuelvas a tocar “Hablar con LOLO”.</div>
         {!hasAccess&&<div className="talkHint voiceTrialHint"><b>🎤 La prueba es por voz.</b> Tenés hasta 3 consultas reales gratis. Los saludos no descuentan.</div>}
 
         <div className="quickPrompts">
