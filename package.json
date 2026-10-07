@@ -17,7 +17,8 @@
     "react-dom": "latest",
     "three": "latest",
     "pg": "latest",
-    "bcryptjs": "latest"
+    "bcryptjs": "latest",
+    "@pixiv/three-vrm": "latest"
   },
   "devDependencies": {
     "@types/node": "latest",
