@@ -985,7 +985,7 @@ export default function Page() {
       </div>
       {!hasAccess&&<div className="panel trialWelcome">
         <div><span className="trialPill">PRUEBA GRATIS</span><h2>Probá LOLO antes de pagar</h2><p>Incluye <b>3 consultas por voz o texto + 1 diagnóstico por foto</b>. Los saludos como “hola” no descuentan consultas.</p></div>
-        <button className="btn primary" onClick={()=>nav(trialUsed?"settings":"talk")}>{trialUsed?"Crear cuenta para continuar":"🤖 Probar LOLO gratis"}</button>
+        <button className="btn primary" onClick={()=>nav(trialUsed?"settings":trialRemaining>0?"talk":"plate")}>{trialUsed?"Crear cuenta para continuar":trialRemaining>0?"🤖 Probar LOLO gratis":"📷 Usar diagnóstico gratis"}</button>
       </div>}
       <div className="panel"><h2>LOLO completo</h2>
         <div className="grid">
@@ -1103,6 +1103,7 @@ export default function Page() {
 
     <section className={"section "+(tab==="plate"&&(hasAccess||visionTrialRemaining>0)?"active":"")}>
       <div className="panel"><h2>Tu placa + visión IA</h2>
+        {!hasAccess&&<div className="trialBanner"><b>📷 Tu diagnóstico por foto gratis</b><span>Podés usar una vez la visión IA completa de LOLO antes de elegir un plan.</span></div>}
         <p className="muted">Sacá una foto enfocada de la zona que querés revisar. LOLO puede analizar módulos, conectores, flex, botones, audio, antena, batería, soldadura, corrosión y otras fallas visibles. Si el diagnóstico necesita mediciones o una vista distinta, te va a pedir el siguiente paso sin inventar.</p>
         <div className="uploadActions">
           <label className="btn primary">📷 Sacar foto<input hidden type="file" accept="image/*" capture="environment" onChange={e=>loadPhoto(e.target.files?.[0])}/></label>
