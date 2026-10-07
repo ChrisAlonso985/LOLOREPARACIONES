@@ -231,6 +231,40 @@ export async function requirePaidAccess(){
   return {user,access,response:null};
 }
 
+export async function requireVisionAccess(){
+  const user=await getCurrentUser();
+  if(user){
+    const access=await getAccessForUser(user,true);
+    if(access.active)return {user,access,trial:false,visionRemaining:null,response:null};
+  }
+
+  await ensureTrialCounterColumns();
+  const token=await getOrCreateTrialToken();
+  const visitorHash=hashToken(token);
+  await query("INSERT INTO guest_trials(visitor_hash) VALUES($1) ON CONFLICT(visitor_hash) DO NOTHING",[visitorHash]);
+
+  const r=await query(
+    "UPDATE guest_trials SET vision_count=vision_count+1,used_at=COALESCE(used_at,NOW()) WHERE visitor_hash=$1 AND vision_count<1 RETURNING vision_count",
+    [visitorHash]
+  );
+  if(r.rowCount===1){
+    const count=Number(r.rows[0]?.vision_count||0);
+    return {user,access:null,trial:true,visionRemaining:Math.max(0,1-count),response:null};
+  }
+
+  return {
+    user,
+    access:null,
+    trial:false,
+    visionRemaining:0,
+    response:NextResponse.json({
+      error:"Ya usaste tu diagnóstico gratis por foto. Elegí un plan para seguir usando la visión IA de LOLO.",
+      code:"VISION_TRIAL_USED",
+      visionRemaining:0
+    },{status:402})
+  };
+}
+
 
 const TRIAL_COOKIE="lolo_trial";
 const FREE_TRIAL_QUESTIONS=3;
@@ -272,18 +306,21 @@ async function ensureTrialCounterColumns(){
   await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS question_count INTEGER NOT NULL DEFAULT 0");
   await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS voice_output_count INTEGER NOT NULL DEFAULT 0");
   await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS last_trial_chat_at TIMESTAMPTZ");
+  await query("ALTER TABLE guest_trials ADD COLUMN IF NOT EXISTS vision_count INTEGER NOT NULL DEFAULT 0");
 }
 
 export async function getFreeTrialStatus(){
   await ensureTrialCounterColumns();
   const jar=await cookies();
   const token=jar.get(TRIAL_COOKIE)?.value;
-  if(!token) return {available:true,used:false,remaining:FREE_TRIAL_QUESTIONS,limit:FREE_TRIAL_QUESTIONS};
+  if(!token) return {available:true,used:false,remaining:FREE_TRIAL_QUESTIONS,limit:FREE_TRIAL_QUESTIONS,visionRemaining:1,visionLimit:1};
   const visitorHash=hashToken(token);
-  const r=await query("SELECT question_count FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
+  const r=await query("SELECT question_count,vision_count FROM guest_trials WHERE visitor_hash=$1 LIMIT 1",[visitorHash]);
   const count=r.rowCount?Number(r.rows[0]?.question_count||0):0;
+  const visionCount=r.rowCount?Number(r.rows[0]?.vision_count||0):0;
   const remaining=Math.max(0,FREE_TRIAL_QUESTIONS-count);
-  return {available:remaining>0,used:remaining===0,remaining,limit:FREE_TRIAL_QUESTIONS};
+  const visionRemaining=Math.max(0,1-visionCount);
+  return {available:remaining>0||visionRemaining>0,used:remaining===0&&visionRemaining===0,remaining,limit:FREE_TRIAL_QUESTIONS,visionRemaining,visionLimit:1};
 }
 
 export async function requireVoiceInputAccess(){
